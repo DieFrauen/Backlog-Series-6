@@ -62,6 +62,7 @@ function c26061001.eqtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g1=Duel.GetMatchingGroup(c26061001.union,tp,LOCATION_ONFIELD,0,c,c,tp,1):Filter(Card.IsFaceup,nil)
 	local g2=Duel.GetMatchingGroup(c26061001.union,tp,LOCATION_HAND+LOCATION_GRAVE,0,nil,c,tp,1)
 	local g=Duel.GetMatchingGroup(nil,tp,0,LOCATION_MZONE,nil)
+	g1:Sub(c:GetEquipGroup())
 	if chk==0 then
 		return #g1>0 or (#g2>0 and #g>0 and Duel.GetLocationCount(tp,LOCATION_SZONE)>0)
 	end
@@ -72,6 +73,7 @@ function c26061001.eqop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local g1=Duel.GetMatchingGroup(c26061001.union,tp,LOCATION_ONFIELD,0,c,c,tp,0)
 	local g2=Duel.GetMatchingGroup(aux.NecroValleyFilter(c26061001.union),tp,LOCATION_HAND+LOCATION_GRAVE,0,nil,c,tp,0)
+	g1:Sub(c:GetEquipGroup())
 	if c:IsFacedown() or not c:IsRelateToEffect(e) or (#g1==0 and #g2==0) then return end
 	local fm=0
 	if #g1==0 then fm=1 end

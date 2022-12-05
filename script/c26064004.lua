@@ -28,13 +28,13 @@ function c26064004.initial_effect(c)
 	c:RegisterEffect(e3)
 --leave field
 	local e4=Effect.CreateEffect(c)
-	e4:SetCategory(CATEGORY_DRAW)
+	e4:SetCategory(CATEGORY_DRAW+CATEGORY_SPECIAL_SUMMON)
 	e4:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e4:SetProperty(EFFECT_FLAG_DELAY)
 	e4:SetCode(EVENT_TO_GRAVE)
 	e4:SetCondition(c26064004.setcon1)
-	e4:SetTarget(c26064004.gytg)
-	e4:SetOperation(c26064004.gyop)
+	e4:SetTarget(c26064004.settg)
+	e4:SetOperation(c26064004.setop)
 	c:RegisterEffect(e4)
 	local e5=e4:Clone()
 	e5:SetCode(EVENT_LEAVE_FIELD)
@@ -99,51 +99,42 @@ function c26064004.drop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.ConfirmCards(1-tp,g)
 	end
 end
-function c26064004.gytg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return end
-	if chk==0 then return Duel.IsPlayerCanDraw(tp,1) end
+function c26064004.setfilter(c)
+	return c:IsSSetable() or (
+	c:IsType(TYPE_FLIP) and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_RITUAL,tp,false,true))
+end
+function c26064004.rescon(sg,e,tp,mg)
+	return Duel.IsPlayerCanDraw(tp,#sg)
+	and ((sg:FilterCount(Card.IsType,nil,TYPE_MONSTER)==#sg
+	and Duel.GetLocationCount(tp,LOCATION_MZONE)>=#sg)
+	or   (sg:FilterCount(Card.IsSSetable,nil)==#sg
+	and Duel.GetLocationCount(tp,LOCATION_SZONE)>=#sg))
+end
+function c26064004.settg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	local g=Duel.GetMatchingGroup(c26064004.ssetfilter,tp,LOCATION_HAND,0,nil)
+	if chk==0 or chk==2 then return aux.SelectUnselectGroup(g,e,tp,1,3,c26064004.rescon,0) end
 	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
 end
-function c26064004.msetfilter(c)
-	return c:IsMSetable(true,nil)
-end
-function c26064004.ssetfilter(c)
-	return c:IsSSetable() 
-end
-function c26064004.gyop(e,tp,eg,ep,ev,re,r,rp)
+function c26064004.setop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	local mf,sf=Duel.GetLocationCount(tp,LOCATION_MZONE),Duel.GetLocationCount(tp,LOCATION_SZONE)
-	local g1=Duel.GetMatchingGroup(c26064004.ssetfilter,tp,LOCATION_HAND,0,nil)
-	local g2=Duel.GetMatchingGroup(c26064004.msetfilter,tp,LOCATION_HAND,0,nil)
-	local drw,tc1,tc2=0,0,0
-	Duel.Hint(HINT_SELECTMSG,tp,527)
-	local sg1=g1:Select(tp,1,sf,nil)
-	local sg2=g2:Select(tp,1,mf,nil)
-	tc1=sg1:GetFirst()
-	while tc1 do
-		Duel.SSet(tp,tc1,tp,false)
-		drw=drw+1
-		tc1=sg1:GetNext()
+	local g=Duel.GetMatchingGroup(c26064004.ssetfilter,tp,LOCATION_HAND,0,nil)
+	local sg=aux.SelectUnselectGroup(g,e,tp,1,99,c26064004.rescon,1,tp,HINTMSG_SET,c26064004.rescon)
+	local drw=0
+	if not sg then return end
+	if #sg==#sg:Filter(Card.IsSSetable,nil) then
+		drw=Duel.SSet(tp,sg,tp,false)
+	elseif #sg==#sg:Filter(Card.IsType,nil,TYPE_MONSTER) then
+		local spsg=Group.CreateGroup()
+		for ec in aux.Next(sg) do
+			Duel.SpecialSummonStep(ec,SUMMON_TYPE_RITUAL,tp,tp,false,true,POS_FACEDOWN_DEFENSE)
+			spsg:AddCard(ec)
+		end
+		Duel.ConfirmCards(1-tp,spsg)
+		Duel.ShuffleSetCard(spsg)
+		Duel.SpecialSummonComplete()
+		drw=#spsg
 	end
-	tc2=sg2:GetFirst()
-	while tc2 do
-		Duel.MSet(tp,tc2,true,nil)
-		drw=drw+1
-		tc2=sg2:GetNext()
-	end
-	if drw>0 then
-		local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-		e1:SetCode(EVENT_CHAIN_END)
-		e1:SetProperty(EFFECT_FLAG_IMMEDIATELY_APPLY)
-		e1:SetCountLimit(1)
-		e1:SetLabel(drw)
-		e1:SetOperation(c26064004.reop)
-		e1:SetReset(RESET_PHASE+PHASE_END)
-		Duel.RegisterEffect(e1,tp,true)
-	end
-end
-function c26064004.reop(e,tp,eg,ep,ev,re,r,rp)
+	if drw==0 then return end
 	Duel.Hint(HINT_CARD,0,26064004)
-	Duel.Draw(tp,e:GetLabel(),REASON_EFFECT)
+	Duel.Draw(tp,drw,REASON_EFFECT)
 end

@@ -10,11 +10,11 @@ function c26064009.initial_effect(c)
 	--direct attack/hand damage/set
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_IGNORE_BATTLE_TARGET)
+	e2:SetCode(EFFECT_DIRECT_ATTACK)
 	e2:SetRange(LOCATION_SZONE)
 	e2:SetValue(1)
 	e2:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
-	e2:SetTarget(aux.TargetBoolFunction(Card.IsFaceup))
+	e2:SetTarget(aux.TargetBoolFunction(Card.IsType,TYPE_FLIP))
 	c:RegisterEffect(e2)
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
@@ -55,7 +55,7 @@ function c26064009.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	end
 end
 function c26064009.posfilter(c)
-	return c:IsDefensePos() and c:IsCanChangePosition()
+	return not c:IsAttackPos() and c:IsCanChangePosition() 
 end
 function c26064009.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26064009.posfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
@@ -74,15 +74,31 @@ function c26064009.rdcon(e,tp,eg,ep,ev,re,r,rp)
 	local ac=c26064009.check(Duel.GetAttacker(),tp)
 	return ac and ev>0
 end
+function c26064009.counterfilter(c)
+	return c:IsCode(26064007) and c:IsAbleToGrave() and c:GetCounter(0xb6)>0
+end
 function c26064009.rdop(e,tp,eg,ep,ev,re,r,rp)
 	local c=Duel.GetAttacker()
-	if not (c:IsFaceup() or c:IsCanTurnSet()) or Duel.GetAttackTarget() then return end
+	if ev==0 or not c:IsFaceup() or not c:IsType(TYPE_FLIP) or Duel.GetAttackTarget() then return end
+	Duel.Hint(HINT_CARD,tp,26064009)
 	Duel.ChangeBattleDamage(ep,0)
-	Duel.ChangePosition(c,POS_FACEDOWN_DEFENSE)
+	local val=c:GetLevel()
 	Duel.BreakEffect()
-	Duel.Draw(ep,1,REASON_EFFECT)
+	if Duel.IsCanRemoveCounter(tp,1,0,0xb6,1,REASON_EFFECT) then
+		local check=Duel.GetCounter(tp,1,0,0xb6)>val
+		local tc=Duel.GetFirstMatchingCard(c26064009.counterfilter,tp,LOCATION_FZONE,LOCATION_FZONE,nil)
+		local cc=tc:GetCounter(0xb6)
+		if tc and cc>0 and Duel.SelectYesNo(tp,aux.Stringid(26064009,3)) then
+			if cc>val or Duel.SelectYesNo(tp,aux.Stringid(26064009,4)) then
+				Duel.HintSelection(Group.FromCards(tc))
+				Duel.SendtoGrave(tc,REASON_EFFECT)
+				val=cc
+			end
+		end
+	end
+	val=Duel.Draw(ep,val,REASON_EFFECT)
 	local g=Duel.GetFieldGroup(ep,LOCATION_HAND,0)
-	local dg=g:Select(ep,1,1,nil)
+	local dg=g:RandomSelect(1-tp,val)
 	Duel.SendtoGrave(dg,REASON_EFFECT+REASON_DISCARD)
 end
 function c26064009.thcost(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -135,7 +151,7 @@ function c26064009.setop(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetCode(EFFECT_HAND_LIMIT)
 		e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 		e1:SetTargetRange(1,0)
-		e1:SetValue(3)
+		e1:SetValue(#g)
 		e1:SetReset(RESET_PHASE+PHASE_DRAW+RESET_OPPO_TURN)
 		Duel.RegisterEffect(e1,p)
 	end

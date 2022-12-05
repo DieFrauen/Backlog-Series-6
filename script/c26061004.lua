@@ -219,12 +219,9 @@ function c26061004.uqcond(e,c)
 end
 function c26061004.desreptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local ac,dc=Duel.GetAttacker(),Duel.GetAttackTarget()
-	local c,bc=e:GetHandler(),nil
-	if c==ac then bc=dc else bc=ac end
-	local g1=Duel.GetMatchingGroup(nil,tp,LOCATION_MZONE,0,nil)
-	if #g1~=1 or not g1:GetFirst()==(c or c:GetEquipTarget()) then return end
-	if chk==0 then return eg:IsContains(bc) and bc:IsReason(REASON_BATTLE) and not bc:IsImmuneToEffect(e) and bc:IsCanChangePosition() end
-	return bc~=c and (bc==ac or bc==dc) and Duel.SelectEffectYesNo(tp,e:GetHandler(),96)
+	local c=e:GetHandler()
+	if chk==0 then return ac and dc and dc:IsReason(REASON_BATTLE) and (ac==c or ac==c:GetEquipTarget()) and not dc:IsImmuneToEffect(e) and dc:IsCanChangePosition() end
+	return Duel.SelectEffectYesNo(tp,e:GetHandler(),96)
 end
 function c26061004.cuttg(c,e)
 	return c:IsFaceup()
@@ -232,6 +229,7 @@ function c26061004.cuttg(c,e)
 	and not c:IsImmuneToEffect(e)
 end
 function c26061004.desrepop(e,tp,eg,ep,ev,re,r,rp)
+	local tc=Duel.GetFirstTarget()
 	Duel.Hint(HINT_CARD,tp,26061004)
 	Duel.ChangePosition(Duel.GetAttackTarget(),POS_FACEUP_DEFENSE,0,POS_FACEUP_ATTACK,0)
 end

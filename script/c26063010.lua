@@ -67,12 +67,12 @@ function c26063010.gop(e,tp,eg,ep,ev,re,r,rp)
 	if e:GetLabel()==1 and Duel.IsExistingMatchingCard(c26063010.thfilter,tp,LOCATION_DECK,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(26063010,1)) then
 		tc=Duel.SelectMatchingCard(tp,c26063010.thfilter,tp,LOCATION_DECK,0,1,1,nil):GetFirst()
 		Duel.SendtoHand(tc,nil,REASON_EFFECT)
+		Duel.ConfirmCards(1-tp,tc)
 	else
 		local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
 		Duel.Draw(p,d,REASON_EFFECT)
 	end
 end
-
 function c26063010.dfilter(c)
 	return c:IsDiscardable() and c:IsType(TYPE_NORMAL)
 end

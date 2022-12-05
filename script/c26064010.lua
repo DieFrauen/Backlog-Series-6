@@ -109,7 +109,6 @@ function c26064010.setcon(e,tp,eg,ep,ev,re,r,rp)
 end
 function c26064010.settg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetMatchingGroup(c26064010.tdfilter,rp,LOCATION_SZONE,0,nil)
-	Duel.HintSelection(g)
 	if chk==0 then return true end
 	if chk==2 then return #g>0 end
 	Duel.SetTargetPlayer(rp)
@@ -118,5 +117,6 @@ end
 function c26064010.setop(e,tp,eg,ep,ev,re,r,rp)
 	local p=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER)
 	local g=Duel.GetMatchingGroup(c26064010.tdfilter,p,LOCATION_SZONE,0,nil)
+	Duel.HintSelection(g)
 	Duel.SendtoDeck(g,nil,2,REASON_EFFECT)
 end

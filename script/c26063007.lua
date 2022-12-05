@@ -40,26 +40,34 @@ function c26063007.xtg(e,tp,eg,ep,ev,re,r,rp,c)
 			local e1=Effect.CreateEffect(c)
 			e1:SetType(EFFECT_TYPE_SINGLE)
 			e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-			e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_STANDBY,2)
+			e1:SetReset(RESET_EVENT+RESETS_STANDARD)
 			e1:SetCode(EFFECT_CHANGE_CODE)
 			e1:SetValue(code)
 			c:RegisterEffect(e1)
-			c:CopyEffect(code,RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_STANDBY,2)
+			c:CopyEffect(code,RESET_EVENT+RESETS_STANDARD)
 			local e2=Effect.CreateEffect(c)
 			e2:SetType(EFFECT_TYPE_SINGLE)
 			e2:SetCode(EFFECT_ADD_TYPE)
 			e2:SetProperty(EFFECT_FLAG_SINGLE_RANGE+EFFECT_FLAG_CANNOT_DISABLE)
-			e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_STANDBY,2)
+			e2:SetReset(RESET_EVENT+RESETS_STANDARD)
 			e2:SetValue(TYPE_GEMINI)
 			e2:SetRange(LOCATION_MZONE)
 			c:RegisterEffect(e2)
+			local e3=Effect.CreateEffect(e:GetHandler())
+			e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+			e3:SetRange(LOCATION_MZONE)
+			e3:SetCode(EVENT_PHASE+PHASE_STANDBY)
+			e3:SetCountLimit(1)
+			e3:SetCondition(c26063007.flcon)
+			e3:SetOperation(c26063007.flop)
+			e3:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_STANDBY+RESET_SELF_TURN)
+			c:RegisterEffect(e3)
 			c:EnableGeminiState()
 			return true
 		end
 	end
 	return false
 end
-
 function c26063007.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=e:GetHandler():GetOverlayGroup():Filter(Card.IsType,nil,TYPE_GEMINI)
 	if chk==0 then return #g>0 end
@@ -89,4 +97,10 @@ function c26063007.operation(e,tp,eg,ep,ev,re,r,rp)
 		end
 		Duel.Overlay(c,Group.FromCards(tc))
 	end
+end
+function c26063007.flcon(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.GetTurnPlayer()==tp
+end
+function c26063007.flop(e,tp,eg,ep,ev,re,r,rp)
+	Duel.ChangePosition(e:GetHandler(),POS_FACEDOWN_DEFENSE)
 end

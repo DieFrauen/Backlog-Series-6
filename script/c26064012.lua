@@ -18,6 +18,7 @@ function c26064012.initial_effect(c)
 	c:RegisterEffect(e2)
 	--leave field
 	local e3=Effect.CreateEffect(c)
+	e3:SetCategory(CATEGORY_TODECK+CATEGORY_DRAW)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
 	e3:SetCode(EVENT_TO_GRAVE)
@@ -49,9 +50,10 @@ function c26064012.checkop2(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function c26064012.filter(c,e,tp)
+	local TRAP =TYPE_TRAP+TYPE_CONTINUOUS 
 	return
 		(c:IsType(TYPE_FLIP) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP+POS_FACEDOWN_DEFENSE) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0) or
-		(c:IsType(TYPE_TRAP) and c:IsSetCard(0x664) and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and c:IsSSetable()) or
+		(c:GetType()&TRAP ==TRAP and c:IsSetCard(0x664) and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and c:IsSSetable()) or
 		c:IsCode(26064007)
 end
 function c26064012.target(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -63,12 +65,13 @@ function c26064012.target(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c26064012.activate(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
+	local TRAP =TYPE_TRAP+TYPE_CONTINUOUS 
 	if tc and tc:IsRelateToEffect(e) then
 		if tc:IsType(TYPE_FLIP) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0
 			and tc:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP+POS_FACEDOWN_DEFENSE) then
 			Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP+POS_FACEDOWN_DEFENSE)
 			Duel.ConfirmCards(1-tp,tc)
-		elseif (tc:IsType(TYPE_TRAP) and Duel.GetLocationCount(tp,LOCATION_SZONE)>0) then
+		elseif (tc:GetType()&TRAP ==TRAP and Duel.GetLocationCount(tp,LOCATION_SZONE)>0) then
 			Duel.SSet(tp,tc,tp,false)
 			Duel.ConfirmCards(1-tp,tc)
 			local e1=Effect.CreateEffect(e:GetHandler())
@@ -86,7 +89,6 @@ function c26064012.activate(e,tp,eg,ep,ev,re,r,rp)
 		end
 	end
 end
-
 function c26064012.setcon(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	return c:IsPreviousPosition(POS_FACEDOWN) and c:IsPreviousLocation(LOCATION_ONFIELD) and re
@@ -98,11 +100,10 @@ function c26064012.settg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,g,#g,rp,1)
 end
 function c26064012.setop(e,tp,eg,ep,ev,re,r,rp)
-	local p=rp
-	local g1=Duel.GetMatchingGroup(nil,p,LOCATION_ONFIELD+LOCATION_HAND,0,nil)
-	Duel.SendtoDeck(g1,p,2,REASON_EFFECT)
-	local g1=Duel.GetMatchingGroup(nil,p,LOCATION_ONFIELD+LOCATION_HAND,0,nil)
-	local g2=Duel.GetMatchingGroup(nil,1-p,LOCATION_ONFIELD+LOCATION_HAND,0,nil)
-	local gv=g2-g1
-	if gv>0 then Duel.Draw(p,gv,REASON_EFFECT) end
+	local p=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER)
+	local g=Duel.GetMatchingGroup(nil,p,LOCATION_ONFIELD+LOCATION_HAND,0,nil)
+	local gc=#g
+	local gc=Duel.SendtoDeck(g,p,2,REASON_EFFECT)
+	if gc>5 then gc=5 end 
+	Duel.Draw(p,gc,REASON_EFFECT)
 end

@@ -17,11 +17,12 @@ function c26064003.initial_effect(c)
 	c:RegisterEffect(e2)
 --leave field
 	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(26064001,2))
+	e3:SetDescription(aux.Stringid(26064003,2))
 	e3:SetCategory(CATEGORY_DRAW)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e3:SetCode(EVENT_TO_GRAVE)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
+	e3:SetCountLimit(1,26064003)
 	e3:SetCondition(c26064003.setcon1)
 	e3:SetTarget(c26064003.settg)
 	e3:SetOperation(c26064003.setop)
@@ -52,9 +53,6 @@ end
 function c26064003.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local g=Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_DECK,0,nil,0x664)
-	if c:IsSummonType(SUMMON_TYPE_ADVANCE) then
-		g=Duel.GetMatchingGroup(nil,tp,LOCATION_DECK,0,nil,c)
-	end
 	if g:GetCount()>0 then 
 		Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26064003,1))
 		local sg=g:Select(tp,1,1,nil)
@@ -77,48 +75,32 @@ function c26064003.setcon2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	return c:IsPreviousPosition(POS_FACEUP) and not c:IsLocation(LOCATION_DECK)
 end
-function c26064003.setfilter(c)
-	return c:IsMSetable(true,nil) or c:IsSSetable()
+function c26064003.setfilter1(c,tp)
+	return  c:IsSSetable() and Duel.IsExistingMatchingCard(c26064003.setfilter2,tp,LOCATION_HAND,0,1,c)
+end
+function c26064003.setfilter2(c)
+	return c:IsMSetable(true,nil)
 end
 function c26064003.settg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26064003.setfilter,tp,LOCATION_HAND,0,1,nil,tp) end
-	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
+	if chk==0 then return Duel.IsExistingMatchingCard(c26064003.setfilter1,tp,LOCATION_HAND,0,1,nil,tp) end
+	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,2)
 end
 function c26064003.setop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	local cc=00
-	local g=Duel.GetMatchingGroup(c26064003.setfilter,tp,LOCATION_HAND,0,nil)
-	if g:GetCount()>0 then
-	local sg,tc,s1,s2=0,0
-		local ct=2
-		sg=g:Select(tp,1,2,nil)
-		tc=sg:GetFirst()
-		while tc do
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SET)
-			s1,s2=tc:IsMSetable(true,nil),tc:IsSSetable()
-			if (s1 and s2) or not s2 then
-				Duel.MSet(tp,tc,true,nil)
-				cc=cc+01
-			else
-				Duel.SSet(tp,tc,tp,false)
-				cc=cc+10
-			end
-			ct=ct-1
-			tc=sg:GetNext()
-		end
-		Duel.BreakEffect()
-	end
-	if cc==11 then
-		local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-		e1:SetProperty(EFFECT_FLAG_IMMEDIATELY_APPLY)
-		e1:SetCode(EVENT_CHAIN_END)
-		e1:SetCountLimit(1)
-		e1:SetLabel(1)
-		e1:SetOperation(c26064003.draw)
-		e1:SetReset(RESET_PHASE+PHASE_END)
-		Duel.RegisterEffect(e1,tp,true)
-	end
+	if not Duel.IsExistingMatchingCard(c26064003.setfilter1,tp,LOCATION_HAND,0,1,nil,tp) then return end
+	tc1=Duel.SelectMatchingCard(tp,c26064003.setfilter1,tp,LOCATION_HAND,0,1,1,nil,tp)
+	tc2=Duel.SelectMatchingCard(tp,c26064003.setfilter2,tp,LOCATION_HAND,0,1,1,tc1):GetFirst()
+	Duel.SSet(tp,tc1,tp,false)
+	Duel.MSet(tp,tc2,true,nil)
+	local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e1:SetProperty(EFFECT_FLAG_IMMEDIATELY_APPLY)
+	e1:SetCode(EVENT_CHAIN_END)
+	e1:SetCountLimit(1)
+	e1:SetLabel(2)
+	e1:SetOperation(c26064003.draw)
+	e1:SetReset(RESET_PHASE+PHASE_END)
+	Duel.RegisterEffect(e1,tp,true)
 end
 function c26064003.draw(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_CARD,tp,26064003)

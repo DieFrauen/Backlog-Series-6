@@ -32,6 +32,7 @@ function c26061011.initial_effect(c)
 	c:RegisterEffect(e3)
 	--maintain
 	local e4=Effect.CreateEffect(c)
+	e4:SetDescription(aux.Stringid(26061011,2))
 	e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e4:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
 	e4:SetCode(EVENT_PHASE+PHASE_END)

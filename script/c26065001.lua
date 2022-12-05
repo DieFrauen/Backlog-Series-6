@@ -52,7 +52,7 @@ function c26065001.condition(e,tp,eg,ep,ev,re,r,rp)
 	return rc:IsSetCard(0x665) and rc~=e:GetHandler()
 end
 function c26065001.thfilter(c)
-	return c:IsSetCard(0x665) and c:IsType(TYPE_MONSTER) and c:IsAbleToHand()
+	return c:IsSetCard(0x665) and c:IsType(TYPE_MONSTER) and c:IsAbleToHand() and not c:IsStatus(STATUS_BATTLE_DESTROYED)
 end
 function c26065001.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26065001.thfilter,tp,LOCATION_GRAVE+LOCATION_DECK+LOCATION_ONFIELD,0,1,nil) end
@@ -67,14 +67,15 @@ function c26065001.operation(e,tp,eg,ep,ev,re,r,rp)
 		Duel.ConfirmCards(1-tp,g)
 	end
 	--spirit
+	c:RegisterFlagEffect(FLAG_SPIRIT_RETURN,RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,0,1)
 	local e0=Effect.CreateEffect(c)
 	e0:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
 	e0:SetDescription(1104)
 	e0:SetCategory(CATEGORY_TOHAND)
 	e0:SetCode(EVENT_PHASE+PHASE_END)
-	e0:SetRange(LOCATION_MZONE)
+	e0:SetRange(LOCATION_ONFIELD)
 	e0:SetCountLimit(1)
-	e0:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+	e0:SetReset(RESET_EVENT+RESETS_STANDARD)
 	e0:SetCondition(Spirit.MandatoryReturnCondition)
 	e0:SetTarget(Spirit.MandatoryReturnTarget)
 	e0:SetOperation(Spirit.ReturnOperation)
@@ -85,6 +86,7 @@ function c26065001.operation(e,tp,eg,ep,ev,re,r,rp)
 	e0b:SetTarget(Spirit.OptionalReturnTarget)
 	c:RegisterEffect(e0b)
 end
+
 function c26065001.thcon(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsHasEffect(EFFECT_SPIRIT_DONOT_RETURN) then return false end

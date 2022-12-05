@@ -15,12 +15,14 @@ function c26065008.filter(c)
 	return c:IsSetCard(0x665) and not c:IsCode(26065008) and c:IsAbleToHand()
 end
 function c26065008.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26065008.filter,tp,LOCATION_DECK+LOCATION_ONFIELD,0,1,nil) end
+	local code=e:GetHandler():GetCode()
+	if chk==0 then return Duel.IsExistingMatchingCard(c26065008.filter,tp,LOCATION_DECK+LOCATION_ONFIELD,0,1,nil,code) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 end
 function c26065008.activate(e,tp,eg,ep,ev,re,r,rp)
+	local code=e:GetHandler():GetCode()
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local g=Duel.SelectMatchingCard(tp,c26065008.filter,tp,LOCATION_DECK+LOCATION_ONFIELD,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,c26065008.filter,tp,LOCATION_DECK+LOCATION_ONFIELD,0,1,1,nil,code)
 	if #g>0 then
 		Duel.SendtoHand(g,nil,REASON_EFFECT)
 		Duel.ConfirmCards(1-tp,g)

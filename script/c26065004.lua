@@ -31,10 +31,6 @@ function c26065004.matfilter(c,lc,sumtype,tp)
 	c:IsSummonCode(lc,sumtype,tp,26067017)
 end
 c26065004.listed_series={0x665}
-function c26065004.lkcon(e)
-	local c=e:GetHandler()
-	return c:IsStatus(STATUS_SPSUMMON_TURN) and c:IsSummonType(SUMMON_TYPE_LINK)
-end
 function c26065004.limit(e,c)
 	return c:IsFaceup() and c:IsType(TYPE_MONSTER)
 end

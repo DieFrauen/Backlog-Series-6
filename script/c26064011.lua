@@ -143,14 +143,25 @@ function c26064011.setcon(e,tp,eg,ep,ev,re,r,rp)
 	return re and c:IsPreviousPosition(POS_FACEUP) and not c:IsLocation(LOCATION_DECK)
 end
 function c26064011.settg(e,tp,eg,ep,ev,re,r,rp,chk)
-	local g=Duel.GetMatchingGroup(c26064011.tdfilter,rp,LOCATION_ONFIELD,0,nil)
+	local g1=Duel.GetMatchingGroup(c26064011.tdfilter,rp,LOCATION_ONFIELD,0,nil)
+	local g2=Duel.GetMatchingGroup(c26064011.tdfilter,rp,LOCATION_ONFIELD,0,nil)
+	local gc=math.abs(#g1-#g2)
 	if chk==0 then return true end
-	if chk==2 then return #g>0 end
+	if chk==2 then return gc~=0 end
 	Duel.SetTargetPlayer(rp)
-	Duel.SetOperationInfo(0,CATEGORY_TODECK,g,#g,rp,1)
+	Duel.SetOperationInfo(0,CATEGORY_TODECK,g,gc,rp,1)
 end
 function c26064011.setop(e,tp,eg,ep,ev,re,r,rp)
 	local p=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER)
-	local g=Duel.GetMatchingGroup(c26064011.tdfilter,p,LOCATION_ONFIELD,0,nil)
+	local g1=Duel.GetMatchingGroup(c26064011.tdfilter,p,LOCATION_ONFIELD,0,nil)
+	local g2=Duel.GetMatchingGroup(c26064011.tdfilter,p,LOCATION_HAND,0,nil)
+	local gv=#g1-#g2
+	local g=Group.CreateGroup()
+	if gv==0 then return
+	elseif gv>0 then
+		g=g1:Select(p,gv,gv,nil)
+	else
+		g=g2:Select(p,gv*-1,gv*-1,nil)
+	end
 	Duel.SendtoDeck(g,nil,2,REASON_EFFECT)
 end
