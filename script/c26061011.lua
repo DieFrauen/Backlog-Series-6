@@ -49,12 +49,9 @@ function c26061011.spfilter(c,e,tp)
 	return c:IsType(TYPE_MONSTER)
 	and c:CheckUniqueOnField(tp)
 	and c:IsCanBeSpecialSummoned(e,0,tp,true,true)
-	and Duel.IsExistingMatchingCard(c26061011.eqhfilter,tp,LOCATION_HAND+LOCATION_DECK,0,1,nil,c,tp,c:GetLocation())
 end
 function c26061011.eqhfilter(c,ec,tp)
 	return c:IsType(TYPE_UNION)
-	and (c:IsSetCard(0x661) or ec:IsSetCard(0x661))
-	and c:GetCode()~=ec:GetCode()
 	and c:CheckUniqueOnField(tp)
 	and c:CheckUnionTarget(ec)
 	and aux.CheckUnionEquip(c,ec)
@@ -66,16 +63,17 @@ function c26061011.sptg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chk==0 then
 		return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)==0
 		and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and #rg>0 end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK+LOCATION_HAND)
-	Duel.SetOperationInfo(0,CATEGORY_EQUIP,nil,1,tp,LOCATION_HAND+LOCATION_DECK)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)
+	Duel.SetOperationInfo(0,CATEGORY_EQUIP,nil,1,tp,LOCATION_HAND)
 end
 function c26061011.spop(e,tp,eg,ep,ev,re,r,rp)
-	local rg=Duel.GetMatchingGroup(c26061011.spfilter,tp,LOCATION_HAND+LOCATION_DECK,0,c,e,tp)
+	local rg=Duel.GetMatchingGroup(c26061011.spfilter,tp,LOCATION_DECK,0,c,e,tp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 	sg1=rg:Select(tp,1,1,nil):GetFirst()
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-	sg2=rg:FilterSelect(tp,c26061011.eqhfilter,1,1,nil,sg1,tp):GetFirst()
-	if Duel.SpecialSummon(sg1,0,tp,tp,true,true,POS_FACEUP) then
+	local rg2=Duel.GetMatchingGroup(c26061011.eqhfilter,tp,LOCATION_HAND,0,c,sg1,tp)
+	if Duel.SpecialSummon(sg1,0,tp,tp,true,true,POS_FACEUP) and #rg>0 and Duel.SelectYesNo(tp,aux.Stringid(26061011,3)) then
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
+		sg2=rg2:Select(tp,1,1,nil):GetFirst()
 		Duel.Equip(tp,sg2,sg1)
 		aux.SetUnionState(sg2)
 	end

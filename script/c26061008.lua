@@ -28,7 +28,7 @@ function c26061008.initial_effect(c)
 	e4:SetDescription(aux.Stringid(26061008,1))
 	e4:SetCategory(CATEGORY_RECOVER)
 	e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
-	e4:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_DAMAGE_STEP)
+	e4:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
 	e4:SetRange(LOCATION_FZONE)
 	e4:SetCode(EVENT_BATTLE_DAMAGE)
 	e4:SetTarget(c26061008.lptg)
@@ -55,7 +55,7 @@ function c26061008.rdcon(e,tp,eg,ep,ev,re,r,rp)
 	local val=1
 	local lpv=math.abs(Duel.GetLP(ep)-Duel.GetLP(1-ep))
 	local eqc=ac:GetEquipGroup():FilterCount(Card.IsType,nil,TYPE_UNION)+dc:GetEquipGroup():FilterCount(Card.IsType,nil,TYPE_UNION)+2
-	while ev<lpv and eqc>0 do
+	while (ev*val)<lpv and eqc>1 do
 		val=val*2
 		eqc=eqc-2
 	end

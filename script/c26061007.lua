@@ -1,4 +1,4 @@
---Fulmiknight Vault
+--Fulmiknight Celestial Vault
 function c26061007.initial_effect(c)
 	c:EnableCounterPermit(0x5)
 	c:SetCounterLimit(0x5,5)
@@ -36,18 +36,27 @@ function c26061007.initial_effect(c)
 	local e4b=e4:Clone()
 	e4b:SetCode(EVENT_DAMAGE)
 	c:RegisterEffect(e4b)
-	--search
+	--recover LIGHT Monsters
 	local e5=Effect.CreateEffect(c)
 	e5:SetDescription(aux.Stringid(26061007,1))
 	e5:SetCategory(CATEGORY_TOHAND)
 	e5:SetType(EFFECT_TYPE_IGNITION)
-	--e5:SetCountLimit(1)
-	--e5:SetCode(EVENT_PHASE+PHASE_END)
+	e5:SetCountLimit(1,0,EFFECT_COUNT_CODE_SINGLE)
 	e5:SetRange(LOCATION_FZONE)
-	e5:SetCondition(c26061007.thcond)
 	e5:SetTarget(c26061007.thtg)
 	e5:SetOperation(c26061007.thop)
 	c:RegisterEffect(e5)
+	--Activate "Fulmiknight Siege"
+	local e6=Effect.CreateEffect(c)
+	e6:SetDescription(aux.Stringid(26061007,2))
+	e6:SetType(EFFECT_TYPE_IGNITION)
+	e6:SetRange(LOCATION_FZONE)
+	e6:SetCountLimit(1,0,EFFECT_COUNT_CODE_SINGLE)
+	e6:SetCost(c26061007.tfcost)
+	e6:SetTarget(c26061007.tftg)
+	e6:SetOperation(c26061007.tfop)
+	c:RegisterEffect(e6)
+	
 	aux.GlobalCheck(c26061007,function()
 		c26061007[0]=nil
 		c26061007[1]=nil
@@ -78,15 +87,18 @@ function c26061007.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26061007.filter,tp,LOCATION_DECK+LOCATION_HAND,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
 end
+function c26061007.rescon1(sg,e,tp,mg)
+	return #sg:Filter(Card.IsLocation,nil,LOCATION_DECK)<2
+	and #sg:Filter(Card.IsLocation,nil,LOCATION_HAND)<2
+end
 function c26061007.activate(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-	local tc=Duel.SelectMatchingCard(tp,c26061007.filter,tp,LOCATION_DECK+LOCATION_HAND,0,1,1,nil):GetFirst()
-	if tc then
-		Duel.SendtoGrave(tc,REASON_EFFECT)
-		if not tc:IsPreviousLocation(LOCATION_HAND) then return end
-		local lpv=tc:GetAttack()+tc:GetDefense()
+	local g=Duel.GetMatchingGroup(c26061007.filter,tp,LOCATION_DECK+LOCATION_HAND,0,nil)
+	local tg=aux.SelectUnselectGroup(g,e,tp,1,2,c26061007.rescon1,1,tp,HINTMSG_TOGRAVE,c26061007.rescon1)
+	if #tg>0 then
+		Duel.SendtoGrave(tg,REASON_EFFECT)
+		local lpv=tg:GetSum(Card.GetBaseAttack)+tg:GetSum(Card.GetBaseDefense)
 		Duel.Recover(tp,lpv,REASON_EFFECT)
-		e:GetHandler():AddCounter(0x5,math.floor(lpv/1000),REASON_EFFECT)
 	end
 end
 function c26061007.leaveop(e,tp,eg,ep,ev,re,r,rp)
@@ -113,14 +125,13 @@ function c26061007.reop(e,tp,eg,ep,ev,re,r,rp)
 		v=v+1
 	end
 	if v==0 then return end
+	local cv=c:GetCounter(0x5)
 	c:AddCounter(0x5,v,REASON_EFFECT)
-	Duel.Recover(tp,v*1000,REASON_EFFECT)
+	local cv=c:GetCounter(0x5)-cv
+	Duel.Recover(tp,cv*1000,REASON_EFFECT)
 end
-function c26061007.thcond(e,tp,eg,ep,ev,re,r,rp,chk)
-	return e:GetHandler():IsCanRemoveCounter(tp,0x5,3,REASON_EFFECT)
-end
-function c26061007.thfilter(c)
-	return c:IsSetCard(0x661) and c:IsAbleToHand()
+function c26061007.thfilter(c,tp)
+	return c:IsSetCard(0x661) and c:IsMonster() and c:IsAbleToHand() and Duel.CheckLPCost(tp,c:GetBaseAttack()+c:GetBaseDefense())
 end
 function c26061007.rescon()
 	return function (sg,e,tp,mg)
@@ -131,7 +142,7 @@ function c26061007.rescon()
 end 
 function c26061007.thtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return c26061007.thfilter() end
-	local g=Duel.GetMatchingGroup(c26061007.thfilter,tp,LOCATION_GRAVE,0,nil)
+	local g=Duel.GetMatchingGroup(c26061007.thfilter,tp,LOCATION_GRAVE,0,nil,tp,lp)
 	if chk==0 then return #g>0 end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_GRAVE)
 	Duel.SetOperationInfo(0,CATEGORY_COUNTER,e:GetHandler(),3,0,0)
@@ -139,19 +150,39 @@ end
 function c26061007.thop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not c:IsRelateToEffect(e) then return end
-	if c:IsCanRemoveCounter(tp,0x5,3,REASON_EFFECT) then
-		c:RemoveCounter(tp,0x5,3,REASON_EFFECT)
-		Duel.BreakEffect()
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-		local g=Duel.GetMatchingGroup(aux.NecroValleyFilter(c26061007.thfilter),tp,LOCATION_GRAVE,0,nil)
-		--local rg=aux.SelectUnselectGroup(g,e,tp,2,2,c26061007.rescon(),1,tp,HINTMSG_REMOVE,c26061007.rescon(),nil,false)
-		local rg=g:Select(tp,1,1,nil)
-		if rg then
-			Duel.SendtoHand(rg,nil,REASON_EFFECT)
-			Duel.ConfirmCards(1-tp,rg)
-		end
+	Duel.BreakEffect()
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+	local g=Duel.GetMatchingGroup(aux.NecroValleyFilter(c26061007.thfilter),tp,LOCATION_GRAVE,0,nil,tp)
+	local sc=g:Select(tp,1,1,nil):GetFirst()
+	if sc then
+		Duel.PayLPCost(tp,sc:GetBaseAttack()+sc:GetBaseDefense())
+		Duel.SendtoHand(sc,nil,REASON_EFFECT)
+		Duel.ConfirmCards(1-tp,sc)
 	end
 end
+
+function c26061007.tfcost(e,tp,eg,ep,ev,re,r,rp,chk)
+	local c=e:GetHandler()
+	if chk==0 then return c:IsCanRemoveCounter(tp,0x5,5,REASON_COST) end
+	c:RemoveCounter(tp,0x5,5,REASON_COST)
+end
+function c26061007.tffilter(c,tp)
+	return c:IsCode(26061008) and c:GetActivateEffect():IsActivatable(tp,true,true)
+end
+function c26061007.tftg(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.IsExistingMatchingCard(c26061007.filter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil,tp) end
+end
+function c26061007.tfop(e,tp,eg,ep,ev,re,r,rp)
+	local tg=Duel.GetMatchingGroup(c26061007.tffilter,tp,LOCATION_DECK+LOCATION_GRAVE,0,nil,tp)
+	local tc=0
+	if #tg==tg:FilterCount(Card.IsLocation,nil,LOCATION_DECK) then
+		tc=tg:GetFirst()
+	else
+		tc=tg:Select(tp,1,1,nil):GetFirst()
+	end
+	Duel.ActivateFieldSpell(tc,e,tp,eg,ep,ev,re,r,rp)
+end
+
 function c26061007.checkop(e,tp,eg,ep,ev,re,r,rp)
 	c26061007[ep]=c26061007[ep]+ev
 end

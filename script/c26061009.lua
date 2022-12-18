@@ -20,20 +20,20 @@ function c26061009.initial_effect(c)
 	c:RegisterEffect(e4)
 end
 function c26061009.filter(c)
-	return (c:GetAttack()==0 or c:GetDefense()==0) and c:IsType(TYPE_MONSTER) and c:IsAttribute(ATTRIBUTE_LIGHT) and c:IsReleasable()
+	return (c:GetBaseAttack()==0 or c:GetBaseDefense()==0) and c:GetOriginalType()&TYPE_MONSTER ~=0 and c:IsAttribute(ATTRIBUTE_LIGHT) and c:IsReleasable()
 end
 function c26061009.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26061009.filter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil) and Duel.IsPlayerCanDraw(tp,2) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26061009.filter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil) and Duel.IsPlayerCanDraw(tp,2) end
 	Duel.SetOperationInfo(0,CATEGORY_RELEASE,nil,0,tp,1)
 	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,2)
 	Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,tp,0)
 end
 function c26061009.activate(e,tp,eg,ep,ev,re,r,rp,chk)
 	local lpv,dwv=0,0
-	if chk==0 then return Duel.IsExistingMatchingCard(c26061009.filter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil,atv,dfv) end
-	local g=Duel.SelectMatchingCard(tp,c26061009.filter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,2,nil)
+	if chk==0 then return Duel.IsExistingMatchingCard(c26061009.filter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil,atv,dfv) end
+	local g=Duel.SelectMatchingCard(tp,c26061009.filter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,2,nil)
 	Duel.SendtoGrave(g,REASON_EFFECT+REASON_RELEASE)
-	lpv=g:GetSum(Card.GetAttack)+g:GetSum(Card.GetDefense)
+	lpv=g:GetSum(Card.GetBaseAttack)+g:GetSum(Card.GetBaseDefense)
 	Duel.Draw(tp,2,REASON_EFFECT)
 	Duel.Recover(tp,lpv,REASON_EFFECT)
 	if lpv==5000 then
@@ -41,15 +41,22 @@ function c26061009.activate(e,tp,eg,ep,ev,re,r,rp,chk)
 		Duel.Draw(tp,1,REASON_EFFECT)
 	end
 end
+function c26061009.tbfilter(c,reas)
+	return c:IsAbleToRemoveAsCost() and c:GetOriginalCode()==26061009
+end
 function c26061009.lrcon(e,tp,eg,ep,ev,re,r,rp)
 	if tp~=ep then return false end
 	if Duel.GetLP(ep)>ev then return false end
 	if not (re and re:IsActivated()) then return false end
 	local rc=re:GetHandler()
-	return e:GetHandler():IsAbleToRemoveAsCost()
+	local g=Duel.GetMatchingGroup(c26061009.tbfilter,tp,LOCATION_GRAVE,0,nil,true)
+	g:Sub(g:Filter(Card.IsDisabled,nil))
+	return #g>0 and e:GetHandler()==g:GetFirst()
 end
 function c26061009.lrop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Remove(e:GetHandler(),POS_FACEUP,REASON_COST)
-	Duel.Recover(tp,ev*2,REASON_EFFECT)
+	local g=Duel.GetMatchingGroup(c26061009.tbfilter,tp,LOCATION_GRAVE,0,nil,false)
+	local sg=g:Select(tp,1,3,nil)
+	Duel.Remove(sg,POS_FACEUP,REASON_COST)
+	Duel.Recover(tp,ev*#sg,REASON_EFFECT)
 	Duel.PayLPCost(ep,ev)
 end
