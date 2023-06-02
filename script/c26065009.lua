@@ -38,7 +38,7 @@ function c26065009.filter1(c,e)
 		   (c:IsCode(26065001) and c26065001.cansstk) or
 		   (c:IsCode(26065002) and c26065002.cansstk) or
 		   (c:IsCode(26065003) and c26065003.cansstk)  or
-		   (c:IsCode(26067017) and c26067017.cansstk) )
+		   (c:IsCode(26068017) and c26068017.cansstk) )
 end
 function c26065009.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	e:SetLabel(1)
@@ -87,8 +87,8 @@ function c26065009.activate1(e,tp,eg,ep,ev,re,r,rp)
 			c26065003.spop(e,tp,eg,ep,ev,re,r,rp)
 			g:RemoveCard(tc)
 		end
-		if tc:GetOriginalCode()==26067017 then
-			c26067017.spop(e,tp,eg,ep,ev,re,r,rp)
+		if tc:GetOriginalCode()==26068017 then
+			c26068017.spop(e,tp,eg,ep,ev,re,r,rp)
 			g:RemoveCard(tc)
 		end
 		tc=false

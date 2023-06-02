@@ -28,7 +28,7 @@ function c26065004.matfilter(c,lc,sumtype,tp)
 	return c:IsSummonCode(lc,sumtype,tp,26065001) or
 	c:IsSummonCode(lc,sumtype,tp,26065002) or
 	c:IsSummonCode(lc,sumtype,tp,26065003) or
-	c:IsSummonCode(lc,sumtype,tp,26067017)
+	c:IsSummonCode(lc,sumtype,tp,26068017)
 end
 c26065004.listed_series={0x665}
 function c26065004.limit(e,c)
@@ -43,6 +43,7 @@ function c26065004.condition(e,tp,eg,ep,ev,re,r,rp)
 end
 function c26065004.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26065004.regfilter,tp,LOCATION_GRAVE,0,1,nil,e,rp) end
+	
 end
 function c26065004.operation(e,tp,eg,ep,ev,re,r,rp)
 	local g=Group.CreateGroup()
@@ -70,10 +71,10 @@ function c26065004.operation(e,tp,eg,ep,ev,re,r,rp)
 			if opt==1 then op=c26065003.spop end
 			if opt==2 then opt=-2 end
 		end
-		if tc:GetOriginalCode()==26067017 then
-			opt=Duel.SelectOption(tp,aux.Stringid(26067017,0),aux.Stringid(26067017,1),aux.Stringid(26065004,1))
-			if opt==0 then op=c26067017.thop end
-			if opt==1 then op=c26067017.spop end
+		if tc:GetOriginalCode()==26068017 then
+			opt=Duel.SelectOption(tp,aux.Stringid(26068017,0),aux.Stringid(26068017,1),aux.Stringid(26065004,1))
+			if opt==0 then op=c26068017.tgop end
+			if opt==1 then op=c26068017.spop end
 			if opt==2 then opt=-2 end
 		end
 		if opt~=-2 then

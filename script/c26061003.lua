@@ -261,6 +261,7 @@ function c26061003.uncond2(e,c)
 	return #g==1 and g:GetFirst()==e:GetHandler():GetEquipTarget()
 end
 function c26061003.efilter(e,te)
+	if not te then return end
 	local c,tc=e:GetHandler(),te:GetHandler()
 	return te:GetHandlerPlayer()~=e:GetHandlerPlayer() and te:IsActivated()
 end

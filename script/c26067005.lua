@@ -9,6 +9,7 @@ function c26067005.initial_effect(c)
 	e1:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
 	e1:SetCode(EVENT_TO_HAND)
 	e1:SetRange(LOCATION_HAND+LOCATION_MZONE)
+	e1:SetLabel(0)
 	e1:SetCountLimit(1,26067005)
 	e1:SetCondition(c26067005.decon)
 	e1:SetTarget(c26067005.detg)
@@ -16,9 +17,11 @@ function c26067005.initial_effect(c)
 	c:RegisterEffect(e1)
 	local e1a=e1:Clone()
 	e1a:SetCode(EVENT_TO_GRAVE)
+	e1a:SetLabel(1)
 	c:RegisterEffect(e1a)
 	local e1b=e1:Clone()
 	e1b:SetCode(EVENT_SPSUMMON_SUCCESS)
+	e1b:SetLabel(2)
 	c:RegisterEffect(e1b)
 	--when drawn effect
 	local e2=Effect.CreateEffect(c)
@@ -66,16 +69,22 @@ function c26067005.initial_effect(c)
 	e5:SetLabel(1)
 	c:RegisterEffect(e5b)
 end
-function c26067005.cfilter(c,e,tp)
+function c26067005.cfilter(c,e,tp,opp)
 	local lab=e:GetLabel()
-	return ((opp and lab==0) or (c:IsSummonPlayer(tp) and lab==1)) and c:IsPreviousLocation(LOCATION_DECK) and not c:IsReason(REASON_DRAW) 
+	return opp and
+	(
+	(lab==0 and not c:IsReason(REASON_DRAW)) or
+	lab==1 or
+	(c:IsSummonPlayer(tp) and lab==2)
+	)
+	and c:IsPreviousLocation(LOCATION_DECK)  
 end
 function c26067005.decon(e,tp,eg,ep,ev,re,r,rp)
 	local opp=rp~=tp
 	return eg:IsExists(c26067005.cfilter,1,nil,e,1-tp,opp) 
 end
 function c26067005.defilter(c) 
-	return not c:IsForbidden() and c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and c:IsAbleToDeck()
+	return not c:IsForbidden() and c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) --and c:IsAbleToDeck()
 end
 function c26067005.detg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.CheckPendulumZones(tp) end

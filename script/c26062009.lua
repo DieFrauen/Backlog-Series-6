@@ -1,4 +1,4 @@
---Blazon Field Marshal - Aurh
+--Blazon Field Marshal - Ouro
 function c26062009.initial_effect(c)
 	c:EnableReviveLimit()
 	Synchro.AddProcedure(c,nil,1,1,nil,2,99,nil,nil,nil,c26062009.matfilter)
@@ -55,7 +55,7 @@ function c26062009.auhr(e)
 	local tp=e:GetHandlerPlayer()
 	local g=Duel.GetMatchingGroup(nil,tp,LOCATION_MZONE,0,nil)
 	local val=Group.GetSum(g,Card.GetLevel)
-	if val>=13 then return val else return 0 end
+	if val>=13 then return val else return 13 end
 end
 function c26062009.regop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()

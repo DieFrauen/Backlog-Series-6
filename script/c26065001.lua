@@ -41,7 +41,7 @@ function c26065001.initial_effect(c)
 end
 
 function c26065001.pscon(e,se,sp,st)
-	return Duel.IsPlayerAffectedByEffect(sp,26067017) and (st&SUMMON_TYPE_PENDULUM)~=0 
+	return Duel.IsPlayerAffectedByEffect(sp,26067018) and (st&SUMMON_TYPE_PENDULUM)~=0 
 end
 function c26065001.synlimit(e,c)
 	if not c then return false end

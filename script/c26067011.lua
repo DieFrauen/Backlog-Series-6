@@ -40,7 +40,7 @@ function c26067011.activate(e,tp,eg,ep,ev,re,r,rp)
 	if #sg>0 and Duel.SendtoDeck(sc,1-tp,0,REASON_EFFECT)~=0 and sc:IsLocation(LOCATION_DECK) then
 		sc:ReverseInDeck()
 		sc:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD&~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
-		local g2=Duel.GetMatchingGroup(c26067003.d2filter,tp,LOCATION_DECK,0,1,e:GetHandler())
+		local g2=Duel.GetMatchingGroup(c26067011.d2filter,tp,LOCATION_DECK,0,1,e:GetHandler())
 		if #g2>0 and (Duel.CheckLocation(tp,LOCATION_PZONE,0) or Duel.CheckLocation(tp,LOCATION_PZONE,1)) and Duel.SelectYesNo(tp,aux.Stringid(26067011,1)) then
 			local sg=g2:Select(tp,1,1,nil)
 			local sc=sg:GetFirst()

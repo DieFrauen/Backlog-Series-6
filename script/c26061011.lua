@@ -47,7 +47,7 @@ function c26061011.spcost(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c26061011.spfilter(c,e,tp)
 	return c:IsType(TYPE_MONSTER)
-	and c:CheckUniqueOnField(tp)
+	and c:IsSetCard(0x661)
 	and c:IsCanBeSpecialSummoned(e,0,tp,true,true)
 end
 function c26061011.eqhfilter(c,ec,tp)

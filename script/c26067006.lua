@@ -46,7 +46,7 @@ function c26067006.initial_effect(c)
 	--Activate
 	local e6=Effect.CreateEffect(c)
 	e6:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e6:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
+	e6:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e6:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e6:SetProperty(EFFECT_FLAG_DELAY)
 	--e6:SetCountLimit(1,{26067006,1})
@@ -122,7 +122,7 @@ end
 function c26067006.spfilter(c,e,tp)
 	if c:IsLocation(LOCATION_EXTRA) and Duel.GetLocationCountFromEx(tp,tp,nil,c)==0 then return false end
 	return c:IsType(TYPE_PENDULUM) and (c:IsFaceup() or not c:IsLocation(LOCATION_EXTRA)) and c:IsSetCard(0x667) and
-	c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	c:IsCanBeSpecialSummoned(e,0,tp,false,false) and Duel.GetLocationCount(tp,LOCATION_MZONE,0)>0
 end
 function c26067006.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26067006.spfilter,tp,LOCATION_EXTRA+LOCATION_HAND+LOCATION_GRAVE,0,1,nil,e,tp) end

@@ -78,7 +78,7 @@ function c26067002.decost(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c26067002.detg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26067002.defilter,tp,LOCATION_HAND,0,1,nil) and not e:GetHandler():IsStatus(STATUS_CHAINING) end
-	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,tp,CATEGORY_TOHAND)
 end
 function c26067002.deop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()

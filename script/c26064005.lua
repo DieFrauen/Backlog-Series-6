@@ -9,12 +9,6 @@ function c26064005.initial_effect(c)
 	e1:SetTarget(c26064005.fliptg)
 	e1:SetOperation(c26064005.flipop)
 	c:RegisterEffect(e1)
---flip
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-	e2:SetCode(EVENT_FLIP_SUMMON_SUCCESS)
-	e2:SetOperation(c26064005.flip)
-	c:RegisterEffect(e2)
 --draw
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(26064005,2))

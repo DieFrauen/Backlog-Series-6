@@ -20,20 +20,29 @@ function c26061009.initial_effect(c)
 	c:RegisterEffect(e4)
 end
 function c26061009.filter(c)
-	return (c:GetBaseAttack()==0 or c:GetBaseDefense()==0) and c:GetOriginalType()&TYPE_MONSTER ~=0 and c:IsAttribute(ATTRIBUTE_LIGHT) and c:IsReleasable()
+	return c:IsSetCard(0x661) and c:IsAbleToGrave()
+end
+function c26061009.rescon1(sg,e,tp,mg)
+	return sg:IsExists(Card.IsSetCard,1,nil,0x661)
 end
 function c26061009.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26061009.filter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil) and Duel.IsPlayerCanDraw(tp,2) end
-	Duel.SetOperationInfo(0,CATEGORY_RELEASE,nil,0,tp,1)
+	if chk==0 then return Duel.IsExistingMatchingCard(c26061009.filter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,e:GetHandler()) and Duel.IsPlayerCanDraw(tp,2) end
+	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,0,tp,1)
 	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,2)
 	Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,tp,0)
 end
+function c26061009.eqfilter(c)
+	return c:IsAttribute(ATTRIBUTE_LIGHT) and c:IsSetCard(0x661)
+end
 function c26061009.activate(e,tp,eg,ep,ev,re,r,rp,chk)
+	local c=e:GetHandler()
 	local lpv,dwv=0,0
-	if chk==0 then return Duel.IsExistingMatchingCard(c26061009.filter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil,atv,dfv) end
-	local g=Duel.SelectMatchingCard(tp,c26061009.filter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,2,nil)
-	Duel.SendtoGrave(g,REASON_EFFECT+REASON_RELEASE)
-	lpv=g:GetSum(Card.GetBaseAttack)+g:GetSum(Card.GetBaseDefense)
+	if chk==0 then return Duel.IsExistingMatchingCard(c26061009.filter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,c) end
+	local g=Duel.GetMatchingGroup(Card.IsAbleToGrave,tp,LOCATION_HAND+LOCATION_ONFIELD,0,c)
+	local sg=aux.SelectUnselectGroup(g,e,tp,1,2,c26061009.rescon1,1,tp,HINTMSG_TOGRAVE)
+	Duel.SendtoGrave(sg,REASON_EFFECT)
+	local eqg=sg:Filter(c26061009.eqfilter,nil)
+	lpv=sg:GetSum(Card.GetBaseAttack)+sg:GetSum(Card.GetBaseDefense)
 	Duel.Draw(tp,2,REASON_EFFECT)
 	Duel.Recover(tp,lpv,REASON_EFFECT)
 	if lpv==5000 then

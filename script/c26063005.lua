@@ -68,7 +68,7 @@ function c26063005.initial_effect(c)
 	--summon eff
 	local e7=Effect.CreateEffect(c)
 	e7:SetDescription(aux.Stringid(26063005,1))
-	e7:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH+CATEGORY_TOGRAVE)
+	e7:SetCategory(CATEGORY_TOHAND+CATEGORY_LEAVE_GRAVE)
 	e7:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e7:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
 	e7:SetCode(EVENT_SUMMON_SUCCESS)

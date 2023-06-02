@@ -29,30 +29,47 @@ function c26067007.fusion(c,e,tp,m)
 		and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_FUSION,tp,false,false) and c:CheckFusionMaterial()
 end
 function c26067007.deop(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
 	local g=Duel.GetFieldGroup(tp,LOCATION_PZONE,LOCATION_PZONE)
 	local ct=Duel.Destroy(g,REASON_EFFECT)
 	local pg=Duel.GetMatchingGroup(c26067007.pcfilter,tp,LOCATION_EXTRA,0,nil)
 	local mg=Duel.GetMatchingGroup(c26067007.mfilter,tp,LOCATION_EXTRA,0,nil,e)
-	local cond1=Duel.CheckPendulumZones(tp) and #pg>=2
-	local cond2=Duel.IsExistingMatchingCard(c26067007.fusion,tp,LOCATION_EXTRA,0,1,nil,e,tp,mg)
-	if #pg>0 and (cond1 or cond2) and Duel.SelectYesNo(tp,aux.Stringid(26067007,0)) then
+	local cond1=Duel.CheckPendulumZones(tp) and #pg>0
+	local cond2=true
+	if Duel.SelectYesNo(tp,aux.Stringid(26067007,0)) then
 		local op=Duel.SelectEffect(tp,
 		{cond1,aux.Stringid(26067007,1)},
 		{cond2,aux.Stringid(26067007,2)})
 		if op==1 then
 			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
-			tc=pg:Select(tp,2,2,nil)
+			tc=pg:Select(tp,1,2,nil)
 			local pg=tc:GetFirst()
 			for pg in aux.Next(tc) do
 				Duel.MoveToField(pg,tp,tp,LOCATION_PZONE,POS_FACEUP,false)
 				pg:SetStatus(STATUS_EFFECT_ENABLED,true)
 			end
 		elseif op==2 then
-			local fc=Duel.SelectMatchingCard(tp,c26067007.fusion,tp,LOCATION_EXTRA,0,1,1,nil,e,tp,mg):GetFirst()
-			local mat=Duel.SelectFusionMaterial(tp,fc,mg)
-			fc:SetMaterial(mat)
-			Duel.SendtoGrave(mat,REASON_EFFECT+REASON_MATERIAL+REASON_FUSION)
-			Duel.SpecialSummon(fc,SUMMON_TYPE_FUSION,tp,tp,false,false,POS_FACEUP)
+			-- Extra Fusion Material
+			local e1=Effect.CreateEffect(c)
+			e1:SetType(EFFECT_TYPE_FIELD)
+			e1:SetCode(EFFECT_EXTRA_FUSION_MATERIAL)
+			e1:SetCountLimit(1)
+			e1:SetTargetRange(LOCATION_EXTRA,0)
+			e1:SetTarget(function(e,c) return c:IsFaceup() and c:IsAbleToGrave() end)
+			e1:SetValue(aux.TRUE)
+			e1:SetReset(RESET_PHASE+PHASE_END)
+			Duel.RegisterEffect(e1,tp)
+			aux.RegisterClientHint(c,0,tp,1,0,aux.Stringid(26067007,3))local hg=Duel.GetMatchingGroup(c26067007.thfilter,tp,LOCATION_DECK+LOCATION_GRAVE,0,nil)
+			if #hg>0 and Duel.SelectYesNo(tp,aux.Stringid(26067007,3)) then
+				Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+				local sg=hg:Select(tp,1,1,nil)
+				Duel.BreakEffect()
+				Duel.SendtoHand(sg,nil,REASON_EFFECT)
+				Duel.ConfirmCards(1-tp,sg)
+			end
 		end
 	end
+end
+function c26067007.thfilter(c)
+	return c:IsCode(CARD_POLYMERIZATION) and c:IsAbleToHand()
 end

@@ -243,7 +243,7 @@ function c26061004.rdcon(e,tp,eg,ep,ev,re,r,rp)
 	local dc=Duel.GetAttackTarget()
 	if c~=tc and c:GetEquipTarget()~=tc then return end
 	local g=Duel.GetMatchingGroup(nil,tp,LOCATION_MZONE,0,nil)
-	return tc and tc==g:GetFirst() and dc and not dc:IsImmuneToEffect(e)
+	return ep~=tp and tc and tc==g:GetFirst() and dc and not dc:IsImmuneToEffect(e)
 end
 function c26061004.rdop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
