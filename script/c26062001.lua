@@ -71,18 +71,6 @@ function c26062001.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
 	if chk==0 then return ft>0 and Duel.IsExistingMatchingCard(c26062001.filter,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_GRAVE)
-	--activate cost
-	local ch=Duel.GetCurrentChain()
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_ACTIVATE_COST)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetTargetRange(0,1)
-	e1:SetLabel(ch)
-	e1:SetCost(c26062001.costchk)
-	e1:SetOperation(c26062001.costop)
-	e1:SetReset(RESET_CHAIN)
-	Duel.RegisterEffect(e1,tp)
 end
 function c26062001.operation(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
@@ -101,18 +89,6 @@ function c26062001.grtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chk==0 then return Duel.IsExistingTarget(c26062001.grfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
 	Duel.SelectTarget(tp,c26062001.grfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
-	local ch=Duel.GetCurrentChain()
-	--activate cost
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_ACTIVATE_COST)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetTargetRange(0,1)
-	e1:SetLabel(ch)
-	e1:SetCost(c26062001.costchk)
-	e1:SetOperation(c26062001.costop)
-	e1:SetReset(RESET_CHAIN)
-	Duel.RegisterEffect(e1,tp)
 end
 function c26062001.grop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
@@ -134,13 +110,4 @@ function c26062001.grop(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetValue(1)
 		tc:RegisterEffect(e1)
 	end
-end
-function c26062001.costchk(e,te,tp)
-	local ch=e:GetLabel()
-	local op=te:GetHandlerPlayer()
-	return Duel.GetCurrentChain()==ch or (Duel.IsPlayerAffectedByEffect(op,26062010))
-end
-function c26062001.costop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_CARD,0,26062001)
-	Duel.Damage(tp,500,REASON_COST)
 end

@@ -30,7 +30,7 @@ function c26062006.initial_effect(c)
 	--lv up
 	local e5=Effect.CreateEffect(c)
 	e5:SetDescription(aux.Stringid(26062006,2))
-	e1:SetCategory(CATEGORY_LVCHANGE)
+	e5:SetCategory(CATEGORY_LVCHANGE)
 	e5:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e5:SetType(EFFECT_TYPE_QUICK_O)
 	e5:SetCode(EVENT_FREE_CHAIN)
@@ -42,7 +42,7 @@ function c26062006.initial_effect(c)
 	c:RegisterEffect(e5)
 end
 function c26062006.cfilter(c)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x662) and c:IsAbleToGraveAsCost()
+	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x662) and not c:IsType(TYPE_TUNER) and c:IsAbleToGraveAsCost()
 end
 function c26062006.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26062006.cfilter,tp,LOCATION_HAND,0,1,nil,tp) and Duel.IsExistingMatchingCard(c26062006.cfilter,tp,LOCATION_DECK,0,1,nil,tp) end

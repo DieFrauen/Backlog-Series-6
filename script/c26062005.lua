@@ -1,4 +1,4 @@
---Blazon Trooper - Purpure
+--Blazon - Szable the Standard
 function c26062005.initial_effect(c)
 	--special summon
 	local e1=Effect.CreateEffect(c)
@@ -12,7 +12,7 @@ function c26062005.initial_effect(c)
 	--summon eff
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(26062005,1))
-	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e2:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_SUMMON_SUCCESS)
@@ -80,18 +80,6 @@ end
 function c26062005.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26062005.filter,tp,LOCATION_DECK,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
-	--activate cost
-	local ch=Duel.GetCurrentChain()
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_ACTIVATE_COST)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetTargetRange(0,1)
-	e1:SetLabel(ch)
-	e1:SetCost(c26062005.costchk)
-	e1:SetOperation(c26062005.costop)
-	e1:SetReset(RESET_CHAIN)
-	Duel.RegisterEffect(e1,tp)
 end
 function c26062005.operation(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
@@ -109,18 +97,6 @@ function c26062005.grtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chk==0 then return Duel.IsExistingTarget(c26062005.grfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
 	Duel.SelectTarget(tp,c26062005.grfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
-	local ch=Duel.GetCurrentChain()
-	--activate cost
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_ACTIVATE_COST)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetTargetRange(0,1)
-	e1:SetLabel(ch)
-	e1:SetCost(c26062005.costchk)
-	e1:SetOperation(c26062005.costop)
-	e1:SetReset(RESET_CHAIN)
-	Duel.RegisterEffect(e1,tp)
 end
 function c26062005.grop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
@@ -142,13 +118,4 @@ function c26062005.grop(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetValue(1)
 		tc:RegisterEffect(e1)
 	end
-end
-function c26062005.costchk(e,te,tp)
-	local ch=e:GetLabel()
-	local op=te:GetHandlerPlayer()
-	return Duel.GetCurrentChain()==ch or (Duel.IsPlayerAffectedByEffect(op,26062010))
-end
-function c26062005.costop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_CARD,0,26062005)
-	Duel.Damage(tp,100,REASON_COST)
 end

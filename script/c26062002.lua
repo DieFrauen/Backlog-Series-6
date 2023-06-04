@@ -73,18 +73,6 @@ end
 function c26062002.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26062002.filter,tp,LOCATION_DECK,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
-	--activate cost
-	local ch=Duel.GetCurrentChain()
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_ACTIVATE_COST)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetTargetRange(0,1)
-	e1:SetLabel(ch)
-	e1:SetCost(c26062002.costchk)
-	e1:SetOperation(c26062002.costop)
-	e1:SetReset(RESET_CHAIN)
-	Duel.RegisterEffect(e1,tp)
 end
 function c26062002.operation(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
@@ -101,18 +89,6 @@ function c26062002.grtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chk==0 then return Duel.IsExistingTarget(c26062002.grfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
 	Duel.SelectTarget(tp,c26062002.grfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
-	local ch=Duel.GetCurrentChain()
-	--activate cost
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_ACTIVATE_COST)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetTargetRange(0,1)
-	e1:SetLabel(ch)
-	e1:SetCost(c26062002.costchk)
-	e1:SetOperation(c26062002.costop)
-	e1:SetReset(RESET_CHAIN)
-	Duel.RegisterEffect(e1,tp)
 end
 function c26062002.grop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
@@ -134,13 +110,4 @@ function c26062002.grop(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetValue(1)
 		tc:RegisterEffect(e1)
 	end
-end
-function c26062002.costchk(e,te,tp)
-	local ch=e:GetLabel()
-	local op=te:GetHandlerPlayer()
-	return Duel.GetCurrentChain()==ch or (Duel.IsPlayerAffectedByEffect(op,26062010))
-end
-function c26062002.costop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_CARD,0,26062002)
-	Duel.Damage(tp,400,REASON_COST)
 end

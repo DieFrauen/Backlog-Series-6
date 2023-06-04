@@ -36,17 +36,21 @@ end
 
 function c26064008.filter1(c,e,tp,eg,ep,ev,re,r,rp,tid)
 	return c:IsSetCard(0x664) and c:IsFaceup() and c:IsCanBeEffectTarget(e) and (
-	(c:IsCode(26064001) and c26064001.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064002) and c26064002.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064003) and c26064003.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064004) and c26064004.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064005) and c26064005.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064006) and c26064006.target(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064007) and c26064007.target(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064009) and c26064009.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064010) and c26064010.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064011) and c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064012) and c26064012.target(e,tp,eg,ep,ev,re,r,rp,0))) 
+	(c:GetOriginalCode()==(26064001) and c26064001.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064002) and c26064002.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064003) and c26064003.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064004) and c26064004.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064005) and c26064005.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064006) and c26064006.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064009) and c26064009.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064010) and c26064010.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064011) and c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064012) and c26064012.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064904) and c26064904.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064905) and c26064905.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26068013) and c26068013.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26068014) and c26068014.fliptg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26068015) and c26068015.fliptg(e,tp,eg,ep,ev,re,r,rp,0))) 
 	 and (c:IsOnField() or c:GetTurnID()==tid)
 end
 function c26064008.target1(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -56,7 +60,7 @@ function c26064008.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	local opc=g1:Select(tp,1,1,nil)
 	Duel.HintSelection(opc)
 	Duel.SetTargetCard(opc)
-	local op=opc:GetFirst():GetCode()
+	local op=opc:GetFirst():GetOriginalCode()
 	if op==26064001 then
 		e:SetCategory(CATEGORY_TODECK)
 		c26064001.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
@@ -71,12 +75,15 @@ function c26064008.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	elseif op==26064005 then
 		e:SetCategory(CATEGORY_POSITION)
 		c26064005.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==26064904 then
+		e:SetCategory(CATEGORY_DRAW)
+		c26064904.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==26064905 then
+		e:SetCategory(CATEGORY_POSITION)
+		c26064905.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
 	elseif op==26064006 then
-		e:SetCategory(CATEGORY_SPECIAL_SUMMON)
-		c26064006.target(e,tp,eg,ep,ev,re,r,rp,1)
-	elseif op==26064007 then
-		e:SetCategory(CATEGORY_SPECIAL_SUMMON)
-		c26064007.target(e,tp,eg,ep,ev,re,r,rp,1)
+		e:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_POSITION)
+		c26064006.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
 	elseif op==26064009 then
 		e:SetCategory(CATEGORY_POSITION)
 		c26064009.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
@@ -86,15 +93,23 @@ function c26064008.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	elseif op==26064011 then
 		e:SetCategory(CATEGORY_SPECIAL_SUMMON)
 		c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
-	elseif op==26064012 then
+	elseif op==26064016 then
 		e:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_LEAVE_GRAVE)
-		c26064012.target(e,tp,eg,ep,ev,re,r,rp,1)
+		c26064012.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==26068013 then
+		c26068013.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==26064014 then
+		e:SetCategory(CATEGORY_LEAVE_GRAVE)
+		c26064014.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==c26064015 then
+		e:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_POSITION)
+		c26064015.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
 	end
 end
 function c26064008.activate1(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc and tc:IsRelateToEffect(e) then
-		local op=tc:GetCode()
+		local op=tc:GetOriginalCode()
 		if op==26064001 then
 		c26064001.flipop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064002 then
@@ -105,16 +120,26 @@ function c26064008.activate1(e,tp,eg,ep,ev,re,r,rp)
 			c26064004.flipop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064005 then
 			c26064005.flipop(e,tp,eg,ep,ev,re,r,rp,1)
+		elseif op==26064904 then
+			c26064904.flipop(e,tp,eg,ep,ev,re,r,rp,1)
+		elseif op==26064905 then
+			c26064905.flipop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064006 then
 			c26064006.activate(e,tp,eg,ep,ev,re,r,rp,1)
-		elseif op==26064007 then
-			c26064007.activate(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064009 then
 			c26064009.flipop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064010 then
 			c26064010.flipop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064011 then
 			c26064011.flipop(e,tp,eg,ep,ev,re,r,rp,1)
+		elseif op==26064012 then
+			c26064012.flipop(e,tp,eg,ep,ev,re,r,rp,1)
+		elseif op==26068013 then
+			c26068013.flipop(e,tp,eg,ep,ev,re,r,rp,1)
+		elseif op==26068014 then
+			c26068014.flipop(e,tp,eg,ep,ev,re,r,rp,1)
+		elseif op==26068015 then
+			c26068015.flipop(e,tp,eg,ep,ev,re,r,rp,1)
 		end
 	end
 	local c=e:GetHandler()
@@ -128,13 +153,16 @@ function c26064008.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c26064008.filter2(c,e,tp,eg,ep,ev,re,r,rp,tid)
 	return c:IsSetCard(0x664) and c:IsFaceup() and c:IsCanBeEffectTarget(e) and (
-	(c:IsCode(26064004) and c26064004.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064005) and c26064005.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064006) and c26064006.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064007) and c26064007.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064009) and c26064009.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064010) and c26064010.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064011) and c26064011.drtg(e,tp,eg,ep,ev,re,r,rp,0))) 
+	(c:GetOriginalCode()==26064904 and c26064904.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==26064004 and c26064004.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==26064905 and c26064905.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==26064005 and c26064005.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==26064006 and c26064006.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==26064009 and c26064009.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==26064010 and c26064010.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==26064011) or
+	--(c:GetOriginalCode()==26068014 and c26068014.drtg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==26068015 and c26068015.drtg(e,tp,eg,ep,ev,re,r,rp,0))) 
 	 and (c:IsOnField() or c:GetTurnID()==tid)
 end
 function c26064008.target2(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -144,47 +172,56 @@ function c26064008.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local opc=g1:Select(tp,1,1,nil)
 	Duel.HintSelection(opc)
 	Duel.SetTargetCard(opc)
-	local op=opc:GetFirst():GetCode()
+	local op=opc:GetFirst():GetOriginalCode()
 	if op==26064004 then
 		e:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 		c26064004.drtg(e,tp,eg,ep,ev,re,r,rp,1)
 	elseif op==26064005 then
 		e:SetCategory(CATEGORY_DRAW)
 		c26064005.drtg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==26064904 then
+		e:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
+		c26064004.drtg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==26064905 then
+		e:SetCategory(CATEGORY_DRAW)
+		c26064005.drtg(e,tp,eg,ep,ev,re,r,rp,1)
 	elseif op==26064006 then
 		e:SetCategory(CATEGORY_SPECIAL_SUMMON)
 		c26064006.drtg(e,tp,eg,ep,ev,re,r,rp,1)
-	elseif op==26064007 then
-		e:SetCategory(CATEGORY_TODECK)
-		c26064007.drtg(e,tp,eg,ep,ev,re,r,rp,1)
 	elseif op==26064009 then
 		e:SetCategory(CATEGORY_TOHAND)
 		c26064009.drtg(e,tp,eg,ep,ev,re,r,rp,1)
 	elseif op==26064010 then
 		e:SetCategory(CATEGORY_TOHAND)
 		c26064010.drtg(e,tp,eg,ep,ev,re,r,rp,1)
-	elseif op==26064011 then
-		c26064011.drtg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==26068014 then
+		e:SetCategory(CATEGORY_DRAW)
+		c26068014.drtg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==26068015 then
+		e:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
+		c26068015.drtg(e,tp,eg,ep,ev,re,r,rp,1)
 	end
 end
 function c26064008.activate2(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc and tc:IsRelateToEffect(e) then
-		local op=tc:GetCode()
+		local op=tc:GetOriginalCode()
 		if op==26064004 then
 			c26064004.drop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064005 then
 			c26064005.drop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064006 then
 			c26064006.drop(e,tp,eg,ep,ev,re,r,rp,1)
-		elseif op==26064007 then
-			c26064007.drop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064009 then
 			c26064009.drop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064010 then
 			c26064010.drop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064011 then
 			c26064011.drop(e,tp,eg,ep,ev,re,r,rp,1)
+		elseif op==26068014 then
+			c26068014.drop(e,tp,eg,ep,ev,re,r,rp,1)
+		elseif op==26068015 then
+			c26068015.drop(e,tp,eg,ep,ev,re,r,rp,1)
 		end
 	end
 end
@@ -198,16 +235,17 @@ function c26064008.setcon2(e,tp,eg,ep,ev,re,r,rp)
 end
 function c26064008.filter3(c,e,tp,eg,ep,ev,re,r,rp,tid)
 	return c:IsSetCard(0x664) and c:IsFaceup() and c:IsCanBeEffectTarget(e) and (
-	(c:IsCode(26064001) and c26064001.settg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064002) and c26064002.settg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064003) and c26064003.settg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064004) and c26064004.settg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064005) and c26064005.settg(e,tp,eg,ep,ev,re,r,rp,0)) or
-	(c:IsCode(26064007)) or
-	(c:IsCode(26064009) and c26064009.settg(e,tp,eg,ep,ev,re,r,rp,2)) or
-	(c:IsCode(26064010) and c26064010.settg(e,tp,eg,ep,ev,re,r,rp,2)) or
-	(c:IsCode(26064011) and c26064011.settg(e,tp,eg,ep,ev,re,r,rp,2)) or
-	(c:IsCode(26064012) and c26064012.settg(e,tp,eg,ep,ev,re,r,rp,0))) 
+	(c:GetOriginalCode()==(26064001) and c26064001.settg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064002) and c26064002.settg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064003) and c26064003.settg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064004) and c26064004.settg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064005) and c26064005.settg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26064009) and c26064009.settg(e,tp,eg,ep,ev,re,r,rp,2)) or
+	(c:GetOriginalCode()==(26064010) and c26064010.settg(e,tp,eg,ep,ev,re,r,rp,2)) or
+	(c:GetOriginalCode()==(26064011) and c26064011.settg(e,tp,eg,ep,ev,re,r,rp,2)) or
+	(c:GetOriginalCode()==(26064012) and c26064012.settg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26068013) and c26068013.settg(e,tp,eg,ep,ev,re,r,rp,0)) or
+	(c:GetOriginalCode()==(26068015) and c26068015.settg(e,tp,eg,ep,ev,re,r,rp,0))) 
 	 and (c:IsOnField() or c:GetTurnID()==tid)
 end
 function c26064008.target3(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -217,7 +255,7 @@ function c26064008.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	local opc=g1:Select(tp,1,1,nil)
 	Duel.HintSelection(opc)
 	Duel.SetTargetCard(opc)
-	local op=opc:GetFirst():GetCode()
+	local op=opc:GetFirst():GetOriginalCode()
 	if op==26064001 then
 		e:SetCategory(CATEGORY_DRAW)
 		c26064001.settg(e,tp,eg,ep,ev,re,r,rp,1)
@@ -233,11 +271,15 @@ function c26064008.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	elseif op==26064005 then
 		e:SetCategory(CATEGORY_TOHAND+CATEGORY_DRAW)
 		c26064005.settg(e,tp,eg,ep,ev,re,r,rp,1)
-	elseif op==26064007 then
-		return
-	elseif op==26064009 then
+	elseif op==26064904 then
+		e:SetCategory(CATEGORY_DRAW)
+		c26064904.settg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==26064905 then
+		e:SetCategory(CATEGORY_TOHAND+CATEGORY_DRAW)
+		c26064905.settg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==26064909 then
 		e:SetCategory(CATEGORY_TOHAND)
-		c26064009.settg(e,tp,eg,ep,ev,re,r,rp,1)
+		c26064909.settg(e,tp,eg,ep,ev,re,r,rp,1)
 	elseif op==26064010 then
 		e:SetCategory(CATEGORY_TODECK)
 		c26064010.settg(e,tp,eg,ep,ev,re,r,rp,1)
@@ -247,12 +289,18 @@ function c26064008.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	elseif op==26064012 then
 		e:SetCategory(CATEGORY_TODECK+CATEGORY_DRAW)
 		c26064012.settg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==26068013 then
+		e:SetCategory(CATEGORY_DRAW)
+		c26068013.settg(e,tp,eg,ep,ev,re,r,rp,1)
+	elseif op==26068015 then
+		e:SetCategory(CATEGORY_POSITION)
+		c26068015.settg(e,tp,eg,ep,ev,re,r,rp,1)
 	end
 end
 function c26064008.activate3(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc and tc:IsRelateToEffect(e) then
-		local op=tc:GetCode()
+		local op=tc:GetOriginalCode()
 		if op==26064001 then
 			c26064001.setop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064002 then
@@ -263,9 +311,11 @@ function c26064008.activate3(e,tp,eg,ep,ev,re,r,rp)
 			c26064004.setop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064005 then
 			c26064005.setop(e,tp,eg,ep,ev,re,r,rp,1)
-		elseif op==26064007 then
-			c26064007.setop(e,tp,eg,ep,ev,re,r,rp,1)
-		elseif op==26064009 then
+		elseif op==26064904 then
+			c26064904.setop(e,tp,eg,ep,ev,re,r,rp,1)
+		elseif op==26064905 then
+			c26064905.setop(e,tp,eg,ep,ev,re,r,rp,1)
+		elseif op==26064909 then
 			c26064009.setop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064010 then
 			c26064010.setop(e,tp,eg,ep,ev,re,r,rp,1)
@@ -273,6 +323,10 @@ function c26064008.activate3(e,tp,eg,ep,ev,re,r,rp)
 			c26064011.setop(e,tp,eg,ep,ev,re,r,rp,1)
 		elseif op==26064012 then
 			c26064012.setop(e,tp,eg,ep,ev,re,r,rp,1)
+		elseif op==26068013 then
+			c26068013.setop(e,tp,eg,ep,ev,re,r,rp,1)
+		elseif op==26068015 then
+			c26068015.setop(e,tp,eg,ep,ev,re,r,rp,1)
 		end
 	end
 end

@@ -83,19 +83,6 @@ function c26064009.rdop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_CARD,tp,26064009)
 	Duel.ChangeBattleDamage(ep,0)
 	local val=c:GetLevel()
-	Duel.BreakEffect()
-	if Duel.IsCanRemoveCounter(tp,1,0,0xb6,1,REASON_EFFECT) then
-		local check=Duel.GetCounter(tp,1,0,0xb6)>val
-		local tc=Duel.GetFirstMatchingCard(c26064009.counterfilter,tp,LOCATION_FZONE,LOCATION_FZONE,nil)
-		local cc=tc:GetCounter(0xb6)
-		if tc and cc>0 and Duel.SelectYesNo(tp,aux.Stringid(26064009,3)) then
-			if cc>val or Duel.SelectYesNo(tp,aux.Stringid(26064009,4)) then
-				Duel.HintSelection(Group.FromCards(tc))
-				Duel.SendtoGrave(tc,REASON_EFFECT)
-				val=cc
-			end
-		end
-	end
 	val=Duel.Draw(ep,val,REASON_EFFECT)
 	local g=Duel.GetFieldGroup(ep,LOCATION_HAND,0)
 	local dg=g:RandomSelect(1-tp,val)

@@ -233,5 +233,5 @@ end
 function c26061002.atcond2(e,c)
 	local c,ep,ac=e:GetHandler():GetEquipTarget(),e:GetHandlerPlayer(),Duel.GetAttacker()
 	local g=Duel.GetMatchingGroup(nil,ep,LOCATION_MZONE,0,nil)
-	return #g==1 and g:GetFirst()==c and ac and ac==c
+	return aux.IsUnionState(e) and #g==1 and g:GetFirst()==c and ac and ac==c
 end

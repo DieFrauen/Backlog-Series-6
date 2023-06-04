@@ -1,4 +1,4 @@
---Fulmiknight Commander - Gladius
+--Fulmiknight Gladius
 function c26061001.initial_effect(c)
 	--c:SetUniqueOnField(1,0,aux.FilterBoolFunction(Card.IsCode,26061001),LOCATION_ONFIELD)
 	--equip

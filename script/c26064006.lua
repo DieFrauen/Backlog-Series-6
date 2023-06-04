@@ -6,8 +6,8 @@ function c26064006.initial_effect(c)
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetTarget(c26064006.target)
-	e1:SetOperation(c26064006.activate)
+	e1:SetTarget(c26064006.fliptg)
+	e1:SetOperation(c26064006.flipop)
 	c:RegisterEffect(e1)
 	--special summon
 	local e2=Effect.CreateEffect(c)
@@ -29,15 +29,15 @@ function c26064006.filter(c,e,tp,mg)
 		or not c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_RITUAL,tp,false,true) then return false end
 	return mg:CheckWithSumGreater(Card.GetRitualLevel,c:GetLevel(),c)
 end
-function c26064006.target(e,tp,eg,ep,ev,re,r,rp,chk)
+function c26064006.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then
-		local mg=Duel.GetMatchingGroup(c26064006.setfilter,tp,LOCATION_ONFIELD,0,nil,c)
+		local mg=Duel.GetMatchingGroup(c26064006.setfilter,tp,LOCATION_MZONE,0,nil,c)
 		local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
 		return ft>0 and Duel.IsExistingMatchingCard(c26064006.filter,tp,LOCATION_HAND,0,1,nil,e,tp,mg)
 	end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND)
 end
-function c26064006.activate(e,tp,eg,ep,ev,re,r,rp)
+function c26064006.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
 	local mg=Duel.GetMatchingGroup(c26064006.setfilter,tp,LOCATION_ONFIELD,0,nil,c)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)

@@ -6,6 +6,7 @@ function c26061011.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetHintTiming(TIMINGS_CHECK_MONSTER,TIMING_END_PHASE)
+	e1:SetTarget(c26061011.target)
 	c:RegisterEffect(e1)
 	--spsummon
 	local e2=Effect.CreateEffect(c)
@@ -41,6 +42,46 @@ function c26061011.initial_effect(c)
 	e4:SetOperation(c26061011.mtop)
 	c:RegisterEffect(e4)
 end
+
+function c26061011.target(e,tp,eg,ep,ev,re,r,rp,chk)
+	local b1=c26061011.sptg(e,tp,eg,ep,ev,re,r,rp,0)
+	local b2=c26061011.eqtg(e,tp,eg,ep,ev,re,r,rp,0)
+	if chk==0 then return true end
+	local ops={}
+	local opval={}
+		off=1
+		if b1 then
+			ops[off]=aux.Stringid(26061011,0)
+			opval[off-1]=1
+			off=off+1
+		end
+		if b2 then
+			ops[off]=aux.Stringid(26061011,1)
+			opval[off-1]=2
+			off=off+1
+		end
+	local op=0
+	if (b1 or b2 or b3) and Duel.SelectYesNo(tp,94) then
+		op=Duel.SelectOption(tp,table.unpack(ops))
+		if opval[op]==1 then
+			e:SetCategory(CATEGORY_TOGRAVE+CATEGORY_DECKDES)
+			e:SetProperty(0)
+			e:SetOperation(c26061011.spop)
+			c26061011.sptg(e,tp,eg,ep,ev,re,r,rp,1)
+		end
+		if opval[op]==2 then
+			e:SetCategory(CATEGORY_DESTROY+CATEGORY_HANDES)
+			e:SetProperty(0)
+			e:SetOperation(c26061011.eqop)
+			c26061011.eqtg(e,tp,eg,ep,ev,re,r,rp,1)
+		end
+	else
+		e:SetCategory(0)
+		e:SetProperty(0)
+		e:SetOperation(nil)
+	end
+end
+
 function c26061011.spcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.CheckLPCost(tp,1000) end
 	Duel.PayLPCost(tp,1000)

@@ -5,7 +5,7 @@ function c26061007.initial_effect(c)
 	--Activate
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
-	e1:SetCategory(CATEGORY_TOGRAVE)
+	e1:SetCategory(CATEGORY_RECOVER+CATEGORY_COUNTER)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetTarget(c26061007.target)
@@ -18,30 +18,42 @@ function c26061007.initial_effect(c)
 	e2:SetCode(EVENT_LEAVE_FIELD_P)
 	e2:SetOperation(c26061007.leaveop)
 	c:RegisterEffect(e2)
-	local e3=Effect.CreateEffect(c)
-	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-	e3:SetCode(EVENT_DESTROYED)
-	e3:SetLabelObject(e2)
-	e3:SetOperation(c26061007.leave)
-	c:RegisterEffect(e3)
+	local e2a=Effect.CreateEffect(c)
+	e2a:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+	e2a:SetCode(EVENT_DESTROYED)
+	e2a:SetLabelObject(e2)
+	e2a:SetOperation(c26061007.leave)
+	c:RegisterEffect(e2a)
 	--lp loss
+	local e3=Effect.CreateEffect(c)
+	e3:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
+	e3:SetCode(EVENT_PAY_LPCOST)
+	e3:SetProperty(EFFECT_FLAG_DELAY)
+	e3:SetRange(LOCATION_FZONE)
+	e3:SetCondition(c26061007.recon)
+	e3:SetOperation(c26061007.reop)
+	c:RegisterEffect(e3)
+	local e3b=e3:Clone()
+	e3b:SetCode(EVENT_DAMAGE)
+	c:RegisterEffect(e3b)
+	--send "Fulmiknight" Monsters to gy
 	local e4=Effect.CreateEffect(c)
-	e4:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
-	e4:SetCode(EVENT_PAY_LPCOST)
-	e4:SetProperty(EFFECT_FLAG_DELAY)
+	e4:SetDescription(aux.Stringid(26061007,0))
+	e4:SetCategory(CATEGORY_TOGRAVE)
+	e4:SetType(EFFECT_TYPE_IGNITION)
+	--e4:SetCountLimit(1,0,EFFECT_COUNT_CODE_SINGLE)
 	e4:SetRange(LOCATION_FZONE)
-	e4:SetCondition(c26061007.recon)
-	e4:SetOperation(c26061007.reop)
+	e4:SetLabel(2)
+	e4:SetCost(c26061007.tfcost)
+	e4:SetTarget(c26061007.tgtg)
+	e4:SetOperation(c26061007.tgop)
 	c:RegisterEffect(e4)
-	local e4b=e4:Clone()
-	e4b:SetCode(EVENT_DAMAGE)
-	c:RegisterEffect(e4b)
-	--recover LIGHT Monsters
+	--recover "Fulmiknight" Monsters
 	local e5=Effect.CreateEffect(c)
 	e5:SetDescription(aux.Stringid(26061007,1))
 	e5:SetCategory(CATEGORY_TOHAND)
 	e5:SetType(EFFECT_TYPE_IGNITION)
-	e5:SetCountLimit(1,0,EFFECT_COUNT_CODE_SINGLE)
+	--e5:SetCountLimit(1,0,EFFECT_COUNT_CODE_SINGLE)
 	e5:SetRange(LOCATION_FZONE)
 	e5:SetLabel(3)
 	e5:SetCost(c26061007.tfcost)
@@ -53,8 +65,8 @@ function c26061007.initial_effect(c)
 	e6:SetDescription(aux.Stringid(26061007,2))
 	e6:SetType(EFFECT_TYPE_IGNITION)
 	e6:SetRange(LOCATION_FZONE)
-	e6:SetCountLimit(1,0,EFFECT_COUNT_CODE_SINGLE)
-	e6:SetLabel(3)
+	--e6:SetCountLimit(1,0,EFFECT_COUNT_CODE_SINGLE)
+	e6:SetLabel(5)
 	e6:SetCost(c26061007.tfcost)
 	e6:SetTarget(c26061007.tftg)
 	e6:SetOperation(c26061007.tfop)
@@ -87,25 +99,24 @@ function c26061007.filter(c)
 	return c:IsSetCard(0x661) and c:IsAbleToGrave()
 end
 function c26061007.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26061007.filter,tp,LOCATION_DECK+LOCATION_HAND,0,1,nil) end
-	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
-end
-function c26061007.eqfilter(c)
-	return c:IsType(TYPE_EQUIP) and c.accost
-end
-function c26061007.rescon1(sg,e,tp,mg)
-	return #sg:Filter(Card.IsLocation,nil,LOCATION_DECK)<2
-	and #sg:Filter(Card.IsLocation,nil,LOCATION_HAND)<2
+	local c=e:GetHandler()
+	local slp,olp=Duel.GetLP(tp),Duel.GetLP(1-tp)
+	if chk==0 then return true end
+	if slp<olp then
+		local val=math.floor(olp-slp/1000)
+		val=math.min(5000,val)
+		Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,tp,val)
+		Duel.SetOperationInfo(0,CATEGORY_COUNTER,nil,0,tp,val/1000)
+	end
 end
 function c26061007.activate(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-	local g=Duel.GetMatchingGroup(c26061007.filter,tp,LOCATION_DECK+LOCATION_HAND,0,nil)
-	local sg=aux.SelectUnselectGroup(g,e,tp,1,2,c26061007.rescon1,1,tp,HINTMSG_TOGRAVE,c26061007.rescon1)
-	local eqg=sg:Filter(c26061007.eqfilter,nil)
-	local lpv=sg:GetSum(Card.GetBaseAttack)+sg:GetSum(Card.GetBaseDefense)
-	if #sg>0 then
-		Duel.SendtoGrave(sg,REASON_EFFECT)
-		Duel.Recover(tp,lpv,REASON_EFFECT)
+	local c=e:GetHandler()
+	local slp,olp=Duel.GetLP(tp),Duel.GetLP(1-tp)
+	if c:IsRelateToEffect(e) and slp<olp then
+		local val=math.floor(olp-slp/1000)
+		val=math.min(5000,val)
+		c:AddCounter(0x5,val/1000)
+		Duel.Recover(tp,val,REASON_EFFECT)
 	end
 end
 function c26061007.leaveop(e,tp,eg,ep,ev,re,r,rp)
@@ -137,23 +148,35 @@ function c26061007.reop(e,tp,eg,ep,ev,re,r,rp)
 	local cv=c:GetCounter(0x5)-cv
 	Duel.Recover(tp,cv*1000,REASON_EFFECT)
 end
-function c26061007.thfilter(c,tp)
-	local lpv=c:GetBaseAttack()+c:GetBaseDefense()
-	return c:IsSetCard(0x661) and c:IsAbleToHand() and Duel.CheckLPCost(tp,lpv)
+
+function c26061007.tgfilter(c)
+	return c:IsSetCard(0x661) and c:IsAbleToGrave()
 end
-function c26061007.rescon()
-	return function (sg,e,tp,mg)
-		local atk=sg:GetSum(Card.GetAttack)
-		local def=sg:GetSum(Card.GetDefense)
-		return atk+def==5000
+function c26061007.tgtg(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.IsExistingMatchingCard(c26061007.tgfilter,tp,LOCATION_DECK+LOCATION_HAND,0,1,nil) end
+	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
+end
+function c26061007.rescon1(sg,e,tp,mg)
+	return #sg:Filter(Card.IsLocation,nil,LOCATION_DECK)<2
+	and #sg:Filter(Card.IsLocation,nil,LOCATION_HAND)<2
+end
+function c26061007.tgop(e,tp,eg,ep,ev,re,r,rp)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
+	local g=Duel.GetMatchingGroup(c26061007.tgfilter,tp,LOCATION_DECK+LOCATION_HAND,0,nil)
+	local sg=aux.SelectUnselectGroup(g,e,tp,1,2,c26061007.rescon1,1,tp,HINTMSG_TOGRAVE,c26061007.rescon1)
+	if #sg>0 then
+		Duel.SendtoGrave(sg,REASON_EFFECT)
 	end
-end 
+end
+function c26061007.thfilter(c,tp)
+	local lpv=c:GetAttack()+c:GetDefense()
+	return c:IsSetCard(0x661) and c:IsMonster() and c:IsAbleToHand()
+end
 function c26061007.thtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return c26061007.thfilter() end
 	local g=Duel.GetMatchingGroup(c26061007.thfilter,tp,LOCATION_GRAVE,0,nil,tp,lp)
 	if chk==0 then return #g>0 end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_GRAVE)
-	Duel.SetOperationInfo(0,CATEGORY_COUNTER,e:GetHandler(),3,0,0)
 end
 function c26061007.thop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
@@ -162,9 +185,7 @@ function c26061007.thop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 	local g=Duel.GetMatchingGroup(aux.NecroValleyFilter(c26061007.thfilter),tp,LOCATION_GRAVE,0,nil,tp)
 	local sc=g:Select(tp,1,1,nil)
-	local lpv=sc:GetSum(Card.GetBaseAttack)+sg:GetSum(Card.GetBaseDefense)
 	if #sc>0 then
-		Duel.PayLPCost(tp,lpv)
 		Duel.SendtoHand(sc,nil,REASON_EFFECT)
 		Duel.ConfirmCards(1-tp,sc)
 	end

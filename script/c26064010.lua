@@ -7,14 +7,14 @@ function c26064010.initial_effect(c)
 	e1:SetHintTiming(0,TIMING_END_PHASE)
 	e1:SetCost(c26064010.cost)
 	c:RegisterEffect(e1)
-	--indes
+	--destroy replace
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_INDESTRUCTABLE_COUNT)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetTargetRange(LOCATION_ONFIELD,0)
-	e2:SetTarget(c26064010.indfilter)
-	e2:SetValue(c26064010.indct)
+	e2:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
+	e2:SetCode(EFFECT_DESTROY_REPLACE)
+	e2:SetRange(LOCATION_FZONE)
+	e2:SetTarget(c26064010.destg)
+	e2:SetValue(c26064010.value)
+	e2:SetOperation(c26064010.desop)
 	c:RegisterEffect(e2)
 	--when drawn
 	local e3=Effect.CreateEffect(c)
@@ -29,6 +29,7 @@ function c26064010.initial_effect(c)
 	c:RegisterEffect(e3)
 	--leave field
 	local e4=Effect.CreateEffect(c)
+	e4:SetCategory(CATEGORY_TODECK+CATEGORY_DRAW)
 	e4:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
 	e4:SetProperty(EFFECT_FLAG_DELAY)
 	e4:SetCode(EVENT_LEAVE_FIELD)
@@ -37,13 +38,24 @@ function c26064010.initial_effect(c)
 	e4:SetOperation(c26064010.setop)
 	c:RegisterEffect(e4)
 end
-function c26064010.indfilter(e,c)
+
+function c26064010.dfilter(c)
+	return not c:IsReason(REASON_REPLACE) and c:IsFaceup() and c:IsSetCard(0x664)
+end
+function c26064010.destg(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then
+		local count=eg:FilterCount(c26064010.dfilter,nil)
+		e:SetLabel(count)
+		return count>0 and Duel.IsCanRemoveCounter(tp,1,0,0x1b,count,REASON_COST)
+	end
+	return Duel.SelectEffectYesNo(tp,e:GetHandler(),96)
+end
+function c26064010.value(e,c)
 	return c:IsFaceup() and c:IsSetCard(0x664)
 end
-function c26064010.indct(e,re,r,rp)
-	if bit.band(r,REASON_BATTLE+REASON_EFFECT)~=0 then
-		return 1
-	else return 0 end
+function c26064010.desop(e,tp,eg,ep,ev,re,r,rp)
+	local count=e:GetLabel()
+	Duel.RemoveCounter(tp,1,0,0x1b,count,REASON_COST)
 end
 function c26064010.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local b=c26064010.fliptg(e,tp,eg,ep,ev,re,r,rp,0)
@@ -101,14 +113,14 @@ function c26064010.drop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function c26064010.tdfilter(c)
-	return c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsAbleToDeck()
+	return (not c:IsOnField() or c:GetSequence()<4) and c:IsAbleToDeck()
 end
 function c26064010.setcon(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	return re and c:IsPreviousPosition(POS_FACEUP) and not c:IsLocation(LOCATION_DECK)
 end
 function c26064010.settg(e,tp,eg,ep,ev,re,r,rp,chk)
-	local g=Duel.GetMatchingGroup(c26064010.tdfilter,rp,LOCATION_SZONE,0,nil)
+	local g=Duel.GetMatchingGroup(c26064010.tdfilter,rp,LOCATION_SZONE+LOCATION_HAND,0,nil)
 	if chk==0 then return true end
 	if chk==2 then return #g>0 end
 	Duel.SetTargetPlayer(rp)
@@ -116,7 +128,7 @@ function c26064010.settg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c26064010.setop(e,tp,eg,ep,ev,re,r,rp)
 	local p=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER)
-	local g=Duel.GetMatchingGroup(c26064010.tdfilter,p,LOCATION_SZONE,0,nil)
-	Duel.HintSelection(g)
+	local g=Duel.GetMatchingGroup(c26064010.tdfilter,p,LOCATION_SZONE+LOCATION_HAND,0,nil)
 	Duel.SendtoDeck(g,nil,2,REASON_EFFECT)
+	Duel.Draw(p,#g,REASON_EFFECT)
 end

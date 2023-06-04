@@ -98,35 +98,38 @@ function c26061003.initial_effect(c)
 	e5:SetValue(2700)
 	e5:SetCondition(aux.IsUnionState)
 	c:RegisterEffect(e5)
-	--Destroy replace
+	--indestructible
 	local e6=Effect.CreateEffect(c)
-	e6:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+	e6:SetType(EFFECT_TYPE_FIELD)
+	e6:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 	e6:SetRange(LOCATION_MZONE)
-	e2:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-	e6:SetCode(EFFECT_DESTROY_REPLACE)
-	e6:SetTarget(c26061003.desreptg)
-	e6:SetOperation(c26061003.desrepop)
+	e6:SetTargetRange(LOCATION_ONFIELD,0)
+	e6:SetCondition(c26061003.uncond1)
+	e6:SetTarget(c26061003.intg)
+	e6:SetValue(c26061003.efilter)
 	c:RegisterEffect(e6)
 	local e6a=e6:Clone()
-	e6a:SetType(EFFECT_TYPE_EQUIP+EFFECT_TYPE_CONTINUOUS)
 	e6a:SetRange(LOCATION_SZONE)
-	e6a:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
-	e6a:SetCondition(c26061003.eqcond)
+	e6a:SetCondition(c26061003.uncond2)
 	c:RegisterEffect(e6a)
-	--indestructible
-	local e7=Effect.CreateEffect(c)
-	e7:SetType(EFFECT_TYPE_FIELD)
-	e7:SetCode(EFFECT_INDESTRUCTABLE)
-	e7:SetRange(LOCATION_MZONE)
-	e7:SetTargetRange(LOCATION_SZONE+LOCATION_FZONE,0)
-	e7:SetCondition(c26061003.uncond1)
-	e7:SetTarget(c26061003.intg)
-	e7:SetValue(c26061003.efilter)
+	local e7=e6:Clone()
+	e7:SetCode(EFFECT_CANNOT_TO_DECK)
+	e7:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE+EFFECT_FLAG_SET_AVAILABLE)
 	c:RegisterEffect(e7)
-	local e7a=e7:Clone()
+	local e7a=e6:Clone()
+	e7a:SetCode(EFFECT_CANNOT_TO_DECK)
+	e7a:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE+EFFECT_FLAG_SET_AVAILABLE)
 	e7a:SetRange(LOCATION_SZONE)
 	e7a:SetCondition(c26061003.uncond2)
 	c:RegisterEffect(e7a)
+	local e8=e6:Clone()
+	e8:SetCode(EFFECT_CANNOT_TO_GRAVE)
+	c:RegisterEffect(e8)
+	local e8a=e6:Clone()
+	e8a:SetCode(EFFECT_CANNOT_TO_GRAVE)
+	e8a:SetRange(LOCATION_SZONE)
+	e8a:SetCondition(c26061003.uncond2)
+	c:RegisterEffect(e8a)
 end
 function c26061003.UnionLimit(e,c)
 	local tp=e:GetHandlerPlayer()
@@ -228,27 +231,11 @@ end
 function c26061003.repfilter(c,e,ec)
 	return c:IsSetCard(0x661) and c:IsDestructable() and not c:IsStatus(STATUS_DESTROY_CONFIRMED)
 end
-function c26061003.desreptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	local c=e:GetHandler()
-	if c:GetEquipTarget() then c=c:GetEquipTarget() end
-	if chk==0 then return eg:IsContains(c) and c:IsReason(REASON_BATTLE+REASON_EFFECT) and not c:IsReason(REASON_REPLACE+REASON_RULE) and c:IsOnField() and c:IsFaceup()
-		and Duel.IsExistingMatchingCard(c26061003.repfilter,tp,LOCATION_ONFIELD+LOCATION_HAND,0,1,c,e) end
-	if Duel.SelectEffectYesNo(tp,c,96) then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESREPLACE)
-		local g=Duel.SelectMatchingCard(tp,c26061003.repfilter,tp,LOCATION_ONFIELD+LOCATION_HAND,0,1,1,c,e)
-		e:SetLabelObject(g:GetFirst())
-		g:GetFirst():SetStatus(STATUS_DESTROY_CONFIRMED,true)
-		return true
-	else return false end
-end
-function c26061003.desrepop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_CARD,tp,26061003)
-	local tc=e:GetLabelObject()
-	tc:SetStatus(STATUS_DESTROY_CONFIRMED,false)
-	Duel.Destroy(tc,REASON_EFFECT+REASON_REPLACE)
-end
 function c26061003.intg(e,c)
-	return c:IsSetCard(0x661) and c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsFaceup()
+	local ec=e:GetHandler()
+	return c:IsFaceup() and (
+	(c:IsSetCard(0x661) and c:IsType(TYPE_SPELL+TYPE_TRAP)) or
+	(c==ec or c==ec:GetEquipTarget()))
 end
 function c26061003.uncond1(e,c)
 	local ep=e:GetHandlerPlayer()
@@ -258,7 +245,7 @@ end
 function c26061003.uncond2(e,c)
 	local ep=e:GetHandlerPlayer()
 	local g=Duel.GetMatchingGroup(nil,ep,LOCATION_MZONE,0,nil)
-	return #g==1 and g:GetFirst()==e:GetHandler():GetEquipTarget()
+	return aux.IsUnionState(e) and #g==1 and g:GetFirst()==e:GetHandler():GetEquipTarget()
 end
 function c26061003.efilter(e,te)
 	if not te then return end
