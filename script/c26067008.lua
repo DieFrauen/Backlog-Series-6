@@ -2,7 +2,6 @@
 function c26067008.initial_effect(c)
 	--Activate
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(26067008,1))
 	e1:SetCategory(CATEGORY_DRAW+CATEGORY_TODECK)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
@@ -11,27 +10,40 @@ function c26067008.initial_effect(c)
 	c:RegisterEffect(e1)
 	--sort opp deck
 	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(26067008,1))
-	e2:SetType(EFFECT_TYPE_IGNITION)
+	e2:SetDescription(aux.Stringid(26067008,0))
+	e2:SetType(EFFECT_TYPE_QUICK_O)
+	e2:SetCode(EVENT_FREE_CHAIN)
 	e2:SetRange(LOCATION_GRAVE)
-	e2:SetCondition(aux.exccon)
 	e2:SetCost(aux.bfgcost)
 	e2:SetTarget(c26067008.tdtg)
 	e2:SetOperation(c26067008.tdop)
 	c:RegisterEffect(e2)
+	local e2a=e2:Clone()
+	e2a:SetDescription(aux.Stringid(26067008,1))
+	e2a:SetCondition(aux.exccon)
+	c:RegisterEffect(e2a)
 end
-function c26067008.defilter(c)
+function c26067008.defilter1(c)
 	return c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and c:IsAbleToDeck()
 end
+function c26067008.defilter2(c,tp)
+	return c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and c:IsAbleToDeck() and c:GetOwner()==tp and c:IsFaceup()
+end
 function c26067008.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26067008.defilter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,e:GetHandler()) and Duel.IsPlayerCanDraw(tp,1) end
-	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
+	if chkc then return chkc:IsLocation(LOCATION_ONFIELD+LOCATION_HAND+LOCATION_GRAVE+LOCATION_EXTRA) and (c26067008.defilter1(chkc) or c26067008.defilter2(chkc,tp)) end
+	local g1=Duel.GetMatchingGroup(c26067008.defilter1,tp,LOCATION_HAND,0,nil)
+	local g2=Duel.GetMatchingGroup(c26067008.defilter2,tp,0x5c,0x5c,nil,tp)
+	g1:Merge(g2)
+	if chk==0 then return #g1>0 and Duel.IsPlayerCanDraw(tp,1) end
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
 end
 function c26067008.activate(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	local g=Duel.GetMatchingGroup(c26067008.defilter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,e:GetHandler())
-	local sg=g:Select(tp,1,1,nil)
+	local g1=Duel.GetMatchingGroup(c26067008.defilter1,tp,LOCATION_HAND,0,nil)
+	local g2=Duel.GetMatchingGroup(c26067008.defilter2,tp,LOCATION_ONFIELD+LOCATION_GRAVE+LOCATION_EXTRA,LOCATION_ONFIELD+LOCATION_GRAVE+LOCATION_EXTRA,nil,e:GetHandlerPlayer())
+	g1:Merge(g2)
+	local sg=g1:Select(tp,1,1,nil)
 	local sc=sg:GetFirst()
 	if #sg>0 and Duel.SendtoDeck(sc,1-tp,0,REASON_EFFECT)~=0 and sc:IsLocation(LOCATION_DECK) then
 		sc:ReverseInDeck()

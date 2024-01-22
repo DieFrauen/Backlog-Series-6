@@ -5,7 +5,7 @@ function c26065005.initial_effect(c)
 	Link.AddProcedure(c,nil,1,2,c26065005.lcheck)
 	--summon spirits
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(26063005,0))
+	e1:SetDescription(aux.Stringid(26065005,0))
 	e1:SetCategory(CATEGORY_SUMMON)
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e1:SetProperty(EFFECT_FLAG_DELAY)
@@ -18,7 +18,7 @@ function c26065005.initial_effect(c)
 	c:RegisterEffect(e1)
 	--to hand
 	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(26063005,1))
+	e2:SetDescription(aux.Stringid(26065005,1))
 	e2:SetCategory(CATEGORY_DAMAGE)
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
 	e2:SetCode(EVENT_PHASE+PHASE_END)
@@ -37,7 +37,6 @@ function c26065005.initial_effect(c)
 	e3:SetCondition(c26065005.atcon)
 	e3:SetValue(c26065005.atlimit)
 	c:RegisterEffect(e3)
-	
 end
 
 function c26065005.lcheck(g,lc,sumtype,tp)
@@ -54,7 +53,7 @@ function c26065005.spfilter(c,e,tp,zone)
 end
 function c26065005.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then
-		local zone=e:GetHandler():GetLinkedZone(tp)&0x1f
+		local zone=Duel.GetZoneWithLinkedCount(1,tp)&0x1f
 		local ct=Duel.GetLocationCount(tp,LOCATION_MZONE,tp,LOCATION_REASON_TOFIELD,zone)
 		local g=Duel.GetMatchingGroup(c26065005.spfilter,tp,LOCATION_HAND+LOCATION_GRAVE,0,nil,e,tp,zone)
 		return ct>0 and aux.SelectUnselectGroup(g,e,tp,1,2,c26065005.spcheck,0)
@@ -64,7 +63,7 @@ end
 function c26065005.spop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not c:IsRelateToEffect(e) then return end
-	local zone=e:GetHandler():GetLinkedZone(tp)&0x1f
+	local zone=Duel.GetZoneWithLinkedCount(1,tp)&0x1f
 	local ct=Duel.GetLocationCount(tp,LOCATION_MZONE,tp,LOCATION_REASON_TOFIELD,zone)
 	local sg=Duel.GetMatchingGroup(c26065005.spfilter,tp,LOCATION_HAND+LOCATION_GRAVE,0,nil,e,tp,zone)
 	if #sg==0 or ct==0 then return end
@@ -93,7 +92,7 @@ function c26065005.thop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function c26065005.atfilter(c)
-	return not c:IsType(TYPE_LINK)
+	return not c:IsType(TYPE_LINK) and c:IsType(TYPE_SPIRIT)
 end
 function c26065005.atcon(e)
 	return Duel.IsExistingMatchingCard(c26065005.atfilter,e:GetHandlerPlayer(),LOCATION_MZONE,0,1,nil)

@@ -245,7 +245,7 @@ end
 function c26061003.uncond2(e,c)
 	local ep=e:GetHandlerPlayer()
 	local g=Duel.GetMatchingGroup(nil,ep,LOCATION_MZONE,0,nil)
-	return aux.IsUnionState(e) and #g==1 and g:GetFirst()==e:GetHandler():GetEquipTarget()
+	return aux.IsUnionState(e) and #g==1 and g:GetFirst()==e:GetHandler():GetEquipTarget() and ep~=e:GetHandler()
 end
 function c26061003.efilter(e,te)
 	if not te then return end

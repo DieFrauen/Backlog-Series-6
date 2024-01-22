@@ -74,7 +74,6 @@ function c26065006.initial_effect(c)
 end
 function c26065006.matcheck(e,c)
 	local g=c:GetMaterial():Filter(Card.IsCode,nil,26065101,26065102,26065103,26065100)
-	local g=c:GetMaterial()
 	local att=0
 	if g:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_EARTH)>0 then
 		att=att+ATTRIBUTE_EARTH 

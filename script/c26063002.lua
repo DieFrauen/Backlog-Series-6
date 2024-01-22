@@ -99,10 +99,9 @@ function c26063002.thfilter(c)
 	return c:IsType(TYPE_GEMINI) and not c:IsCode(26063002) and c:IsAbleToHand() and c:IsAbleToGrave()
 end
 function c26063002.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	local rvg=Duel.GetMatchingGroup(c26063002.thfilter,tp,LOCATION_DECK,0,nil,e,tp)
-	if chk==0 then return rvg:GetClassCount(Card.GetCode)>=2 end
-	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
-	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+		and Duel.IsExistingMatchingCard(c26063005.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil) end
+	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,tp,LOCATION_DECK)
 end
 function c26063002.operation(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()

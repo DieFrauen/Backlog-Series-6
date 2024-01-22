@@ -39,11 +39,11 @@ function c26065004.regfilter(c,e,tp)
 	return c:IsType(TYPE_MONSTER) and c:IsAbleToDeckAsCost() and c:IsOriginalSetCard(0x665)
 end
 function c26065004.condition(e,tp,eg,ep,ev,re,r,rp)
-	return re:GetHandler():IsSetCard(0x665)
+	local rc=re:GetHandler()
+	return rc:IsSetCard(0x665) or rc:IsType(TYPE_MONSTER)
 end
 function c26065004.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26065004.regfilter,tp,LOCATION_GRAVE,0,1,nil,e,rp) end
-	
 end
 function c26065004.operation(e,tp,eg,ep,ev,re,r,rp)
 	local g=Group.CreateGroup()

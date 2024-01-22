@@ -49,7 +49,7 @@ function c26065001.synlimit(e,c)
 end
 function c26065001.condition(e,tp,eg,ep,ev,re,r,rp)
 	local rc=re:GetHandler()
-	return rc:IsSetCard(0x665) and rc~=e:GetHandler()
+	return (rc:IsSetCard(0x665) or rc:IsType(TYPE_MONSTER)) and rc~=e:GetHandler()
 end
 function c26065001.thfilter(c)
 	return c:IsSetCard(0x665) and c:IsType(TYPE_MONSTER) and c:IsAbleToHand() and not c:IsStatus(STATUS_BATTLE_DESTROYED)

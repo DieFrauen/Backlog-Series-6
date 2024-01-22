@@ -77,13 +77,32 @@ function c26067009.effcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.Hint(HINT_OPSELECTED,1-tp,e:GetDescription())
 end
 function c26067009.drtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsPlayerCanDraw(tp,1) end
-	Duel.SetTargetPlayer(1-tp)
-	Duel.SetTargetParam(1)
-	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,1-tp,1)
+	local top1=Duel.GetDecktopGroup(tp,1)
+	local top2=Duel.GetDecktopGroup(1-tp,1)
+	local b1=top1:GetFirst():IsFaceup() and Duel.IsPlayerCanDraw(tp,1)
+	local b2=top2:GetFirst():IsFaceup() and Duel.IsPlayerCanDraw(1-tp,1)
+	if chk==0 then return b1 or b2 end
+	if b1 then
+		Duel.SetTargetPlayer(tp)
+		Duel.SetTargetParam(1)
+		Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
+	end
+	if b2 then
+		Duel.SetTargetPlayer(1-tp)
+		Duel.SetTargetParam(1)
+		Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,1-tp,1)
+	end
 end
 function c26067009.drop(e,tp,eg,ep,ev,re,r,rp)
-	if not e:GetHandler():IsRelateToEffect(e) then return end
-	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
-	Duel.Draw(p,d,REASON_EFFECT)
+	local top1=Duel.GetDecktopGroup(tp,1)
+	local top2=Duel.GetDecktopGroup(1-tp,1)
+	local b1=top1:GetFirst():IsFaceup() and Duel.IsPlayerCanDraw(tp,1)
+	local b2=top2:GetFirst():IsFaceup() and Duel.IsPlayerCanDraw(1-tp,1)
+	if chk==0 then return b1 or b2 and e:GetHandler():IsRelateToEffect(e) end
+	if b1 then
+		Duel.Draw(tp,1,REASON_EFFECT)
+	end
+	if b2 then
+		Duel.Draw(1-tp,1,REASON_EFFECT)
+	end
 end

@@ -5,16 +5,18 @@ function c26067001.initial_effect(c)
 	Duel.EnableGlobalFlag(GLOBALFLAG_DECK_REVERSE_CHECK)
 	--place in opponent deck
 	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_IGNITION)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e1:SetCode(EVENT_CHAIN_SOLVED)
 	e1:SetRange(LOCATION_PZONE)
 	e1:SetCountLimit(1,26067001)
-	e1:SetTarget(c26067001.detg)
-	e1:SetOperation(c26067001.deop)
+	e1:SetCondition(c26067001.decon1)
+	e1:SetTarget(c26067001.detg1)
+	e1:SetOperation(c26067001.deop1)
 	c:RegisterEffect(e1)
 	local e1a=Effect.CreateEffect(c)
 	e1a:SetType(EFFECT_TYPE_QUICK_O)
 	e1a:SetCode(EVENT_CHAINING)
-	e1a:SetRange(LOCATION_HAND+LOCATION_MZONE)
+	e1a:SetRange(LOCATION_HAND+LOCATION_PZONE)
 	e1a:SetCountLimit(1,26067004)
 	e1a:SetCondition(c26067001.decon2)
 	e1a:SetTarget(c26067001.detg2)
@@ -50,41 +52,61 @@ end
 function c26067001.defilter(c,tp,dck)
 	return c:IsCode(26067009) and (dck or c:GetActivateEffect():IsActivatable(tp,true,true))
 end
-function c26067001.detg(e,tp,eg,ep,ev,re,r,rp,chk)
+function c26067001.decon1(e,tp,eg,ep,ev,re,r,rp)
+	local loc=Duel.GetChainInfo(ev,CHAININFO_TRIGGERING_LOCATION)
+	local atype=re:GetActiveType()
+	local rc=re:GetHandler()
+	return atype==TYPE_PENDULUM+TYPE_SPELL and (loc&LOCATION_PZONE)~=0 and re:IsHasType(EFFECT_TYPE_ACTIVATE) and rc~=e:GetHandler() and rc:IsSetCard(0x667)
+end
+function c26067001.detg1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26067001.defilter,tp,LOCATION_DECK,0,1,nil,tp,false)and not Duel.IsExistingMatchingCard(c26067001.defilter,tp,LOCATION_FZONE,0,1,nil,tp,true) end
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,0,0)
 end
-function c26067001.deop(e,tp,eg,ep,ev,re,r,rp)
+function c26067001.deop1(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not c:IsRelateToEffect(e) then return end
 	local tc=Duel.GetFirstMatchingCard(c26067001.defilter,tp,LOCATION_DECK,0,nil,tp)
-	if Duel.ActivateFieldSpell(tc,e,tp,eg,ep,ev,re,r,rp) and Duel.SendtoDeck(c,1-tp,0,REASON_EFFECT)~=0 and c:IsLocation(LOCATION_DECK) then
-		c:ReverseInDeck()
-		c:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD&~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
+	if Duel.ActivateFieldSpell(tc,e,tp,eg,ep,ev,re,r,rp) then
+		Duel.ShuffleDeck(tp)
+		local pg=Duel.GetFieldGroup(tp,LOCATION_PZONE,0)
+		local tc1=pg:Select(1-tp,1,1,nil):GetFirst()
+		if tc1 and Duel.SendtoDeck(tc1,1-tp,0,REASON_EFFECT)~=0 and c:IsLocation(LOCATION_DECK) then
+			tc1:ReverseInDeck()
+			tc1:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD&~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
+			local tc2=pg:Select(tp,1,1,tc1):GetFirst()
+			if tc2 and Duel.SendtoDeck(tc2,tp,0,REASON_EFFECT)~=0 and c:IsLocation(LOCATION_DECK) then
+				tc2:ReverseInDeck()
+				tc2:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD&~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
+			end
+		end
 	end
 end
 function c26067001.decon2(e,tp,eg,ep,ev,re,r,rp)
 	local ex2=(Duel.GetOperationInfo(ev,CATEGORY_DRAW) or re:IsHasCategory(CATEGORY_DRAW))
 	return ex2 and rp~=tp
 end
-function c26067001.defilter2(c,dk)
-	return not c:IsForbidden() and c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and (dk or c:IsAbleToDeck()) and not c:IsPublic()
+function c26067001.defilter2(c)
+	return not c:IsForbidden() and c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and c:IsAbleToDeck()
 end
 function c26067001.detg2(e,tp,eg,ep,ev,re,r,rp,chk)
+	local loc=LOCATION_HAND+LOCATION_EXTRA 
+	if Duel.IsPlayerAffectedByEffect(tp,26067010) and Duel.CheckLPCost(tp,700) then
+		loc=loc+LOCATION_DECK 
+	end
 	local c=e:GetHandler()
-	local dk=c:IsAbleToDeck()
-	if chk==0 then return Duel.IsExistingMatchingCard(c26067001.defilter2,tp,LOCATION_HAND,0,1,nil,dk) and not e:GetHandler():IsPublic() end
-	local g=Duel.SelectMatchingCard(tp,c26067001.defilter2,tp,LOCATION_HAND,0,1,1,c,dk)
-	g:AddCard(c)
-	Duel.ConfirmCards(1-tp,g)
-	Duel.SetTargetCard(g)
+	if chk==0 then return Duel.IsExistingMatchingCard(c26067001.defilter2,tp,loc,0,1,e:GetHandler()) and not (c:IsLocation(LOCATION_HAND) and c:IsPublic()) end
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,0,0)
 end
 function c26067001.deop2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	local g=Duel.GetTargetCards(e):Filter(Card.IsRelateToEffect,nil,e)
-	if #g<1 then return end
+	if c:IsLocation(LOCATION_PZONE) and not c:IsRelateToEffect(e) then return end
+	local  g=Duel.GetFieldGroup(tp,LOCATION_HAND,0)
+	local g2=Duel.GetMatchingGroup(c26067006.defilter,tp,LOCATION_DECK,0,1,nil)
+	if Duel.IsPlayerAffectedByEffect(tp,26067010) and Duel.CheckLPCost(tp,700) then
+		g:Merge(g2)
+	end
 	local tc=g:Select(tp,1,1,nil):GetFirst()
+	if tc:IsLocation(LOCATION_DECK) then Duel.PayLPCost(tp,700) end
 	if tc and Duel.SendtoDeck(tc,1-tp,0,REASON_EFFECT)~=0 and tc:IsLocation(LOCATION_DECK) then
 		tc:ReverseInDeck()
 		tc:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD &~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
@@ -95,8 +117,8 @@ function c26067001.spcon(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c26067001.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local op=e:GetHandler():GetOwner()
-	if chk==0 then return --not e:GetHandler():IsStatus(STATUS_CHAINING) and
-	Duel.GetLocationCount(op,LOCATION_MZONE)>0 and e:GetHandler():IsCanBeSpecialSummoned(e,0,op,false,false) end
+	if chk==0 then return e:GetType()&EFFECT_TYPE_TRIGGER_F~=EFFECT_TYPE_TRIGGER_F or --not e:GetHandler():IsStatus(STATUS_CHAINING) and
+	(Duel.GetLocationCount(op,LOCATION_MZONE)>0 and e:GetHandler():IsCanBeSpecialSummoned(e,0,op,false,false)) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,e:GetHandler(),1,0,0)
 end
 function c26067001.thfilter(c)

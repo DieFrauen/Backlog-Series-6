@@ -6,6 +6,7 @@ function c26065011.initial_effect(c)
 	e1:SetCategory(CATEGORY_NEGATE+CATEGORY_REMOVE)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_CHAINING)
+	e1:SetCountLimit(1,26065011,EFFECT_COUNT_CODE_OATH)
 	e1:SetCondition(c26065011.negcon)
 	e1:SetTarget(c26065011.negtg)
 	e1:SetOperation(c26065011.negop)
@@ -15,6 +16,7 @@ function c26065011.initial_effect(c)
 	e2:SetDescription(aux.Stringid(26065011,1))
 	e2:SetType(EFFECT_TYPE_ACTIVATE)
 	e2:SetCode(EVENT_CHAINING)
+	e2:SetCountLimit(1,{26065011,1},EFFECT_COUNT_CODE_OATH)
 	e2:SetCondition(c26065011.condition)
 	e2:SetTarget(c26065011.target)
 	e2:SetOperation(c26065011.activate)
@@ -37,10 +39,20 @@ function c26065011.negtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	end
 end
 function c26065011.negop(e,tp,eg,ep,ev,re,r,rp)
-	local ec=re:GetHandler()
-	if Duel.NegateActivation(ev) and re:GetHandler():IsRelateToEffect(re) then
-		ec:CancelToGrave()
-		Duel.SendtoHand(ec,nil,REASON_EFFECT)
+	local c=e:GetHandler()
+	local rc=re:GetHandler()
+	if not Duel.NegateActivation(ev) and not rc:IsRelateToEffect(re) then return end
+	local g=Group.FromCards(c,rc)
+	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26065011,2))
+	local opt=Duel.SelectEffect(tp,
+		{true,aux.Stringid(26065011,3)},
+		{true,aux.Stringid(26065011,4)})
+	if opt==1 then
+		c:CancelToGrave(true)
+		Duel.SendtoHand(c,nil,REASON_EFFECT)
+	elseif opt==2 then
+		rc:CancelToGrave(true)
+		Duel.SendtoHand(rc,nil,REASON_EFFECT)
 	end
 end
 function c26065011.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)

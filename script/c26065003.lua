@@ -48,7 +48,8 @@ function c26065003.synlimit(e,c)
 end
 function c26065003.condition(e,tp,eg,ep,ev,re,r,rp)
 	local rc=re:GetHandler()
-	return rc:IsSetCard(0x665) and rc~=e:GetHandler()
+	return (rc:IsSetCard(0x665) and rc~=e:GetHandler()) or
+	(re:IsActiveType(TYPE_TRAP) and re:IsHasType(EFFECT_TYPE_ACTIVATE))
 end
 function c26065003.thfilter(c)
 	return c:IsSetCard(0x665) and c:IsType(TYPE_TRAP) and c:IsAbleToHand()

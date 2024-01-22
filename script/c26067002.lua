@@ -6,13 +6,18 @@ function c26067002.initial_effect(c)
 	--place in opponent deck
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_QUICK_O)
-	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetRange(LOCATION_HAND)
-	e1:SetCondition(c26067002.decond)
-	e1:SetCost(c26067002.decost)
+	e1:SetCode(EVENT_CHAINING)
+	e1:SetRange(LOCATION_PZONE)
+	e1:SetDescription(aux.Stringid(26067002,0))
+	e1:SetLabel(0)
+	e1:SetCondition(c26067002.decon)
 	e1:SetTarget(c26067002.detg)
 	e1:SetOperation(c26067002.deop)
 	c:RegisterEffect(e1)
+	local e1a=e1:Clone()
+	e1a:SetLabel(1)
+	e1a:SetRange(LOCATION_HAND)
+	c:RegisterEffect(e1a)
 	--when drawn effect
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(26067002,1))
@@ -29,21 +34,9 @@ function c26067002.initial_effect(c)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
 	e3:SetLabel(1)
 	c:RegisterEffect(e3)
-	--disable search
-	local e4=Effect.CreateEffect(c)
-	e4:SetType(EFFECT_TYPE_FIELD)
-	e4:SetCode(EFFECT_CANNOT_TO_HAND)
-	e4:SetRange(LOCATION_PZONE)
-	e4:SetTargetRange(LOCATION_DECK,0)
-	e4:SetLabel(0)
-	e4:SetCondition(c26067002.pcon)
-	c:RegisterEffect(e4)
-	local e5=e4:Clone()
-	e5:SetTargetRange(0,LOCATION_DECK)
-	e5:SetLabel(1)
-	c:RegisterEffect(e5)
 	--Activate
 	local e6=Effect.CreateEffect(c)
+	e2:SetDescription(aux.Stringid(26067002,2))
 	e6:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e6:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e6:SetCode(EVENT_SPSUMMON_SUCCESS)
@@ -53,40 +46,42 @@ function c26067002.initial_effect(c)
 	e6:SetTarget(c26067002.target)
 	e6:SetOperation(c26067002.activate)
 	c:RegisterEffect(e6)
-	--pendulum effect
-	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_IGNITION)
-	e1:SetRange(LOCATION_PZONE)
-	e1:SetCountLimit(1,{26067002,2})
-	e1:SetTarget(c26067002.tdtg)
-	e1:SetOperation(c26067002.tdop)
-	c:RegisterEffect(e1)
 end
-function c26067002.decond(e,tp,eg,ep,ev,re,r,rp,chk)
-	return Duel.GetTurnPlayer()~=tp
+function c26067002.decon(e,tp,eg,ep,ev,re,r,rp,chk)
+	--condition 1: Special Summons (from GY)
+	local ex1,g1,gc1,dp1,dv1=Duel.GetOperationInfo(ev,CATEGORY_SPECIAL_SUMMON)
+	--condition 2: Targets a card(s) in GY
+	local g=Duel.GetChainInfo(ev,CHAININFO_TARGET_CARDS)
+	local ex2=re:IsHasProperty(EFFECT_FLAG_CARD_TARGET) and g and g:IsExists(Card.IsLocation,1,nil,LOCATION_GRAVE)
+	--condition 3: activates itself from GY
+	local loc=Duel.GetChainInfo(ev,CHAININFO_TRIGGERING_LOCATION)
+	local ex3=loc==LOCATION_GRAVE 
+
+	if (ex1 and (dv1&LOCATION_GRAVE)==LOCATION_GRAVE) or ex2 or ex3 then return true end
+	return false
 end
 function c26067002.defilter(c)
 	return c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and c:IsAbleToDeck()
 end
-function c26067002.decost(e,tp,eg,ep,ev,re,r,rp,chk)
-	local c=e:GetHandler()
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and c26067002.filter(chkc) end
-	if chk==0 then return (Duel.CheckLocation(tp,LOCATION_PZONE,0) or Duel.CheckLocation(tp,LOCATION_PZONE,1))
-		and Duel.IsExistingMatchingCard(c26067002.defilter,tp,LOCATION_HAND,0,1,c) and not c:IsPublic() end
-	local tc=Duel.SelectMatchingCard(tp,c26067002.defilter,tp,LOCATION_HAND,0,1,1,c):GetFirst()
-	Duel.MoveToField(tc,tp,tp,LOCATION_PZONE,POS_FACEUP,true)
-end
 function c26067002.detg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26067002.defilter,tp,LOCATION_HAND,0,1,nil) and not e:GetHandler():IsStatus(STATUS_CHAINING) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26067002.defilter,tp,LOCATION_HAND,0,1,e:GetHandler()) and not e:GetHandler():IsStatus(STATUS_CHAINING) end
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,tp,CATEGORY_TOHAND)
 end
 function c26067002.deop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not c:IsRelateToEffect(e) then return end
-	c:CancelToGrave()
-	if Duel.SendtoDeck(c,1-tp,0,REASON_EFFECT)~=0 and c:IsLocation(LOCATION_DECK) then
-		c:ReverseInDeck()
-		c:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD&~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
+	local g=Duel.GetMatchingGroup(c26067004.defilter,tp,LOCATION_HAND+LOCATION_EXTRA,0,1,nil)
+	local g2=Duel.GetMatchingGroup(c26067004.defilter,tp,LOCATION_DECK,0,1,nil)
+	if Duel.IsPlayerAffectedByEffect(tp,26067010) and Duel.CheckLPCost(tp,700) then
+		g:Merge(g2)
+	end
+	local sg=g:Select(tp,1,1,nil)
+	if #sg==0 then return end
+	local sc=sg:GetFirst()
+	if sc:IsLocation(LOCATION_DECK) then Duel.PayLPCost(tp,700) end
+	if Duel.SendtoGrave(sc,REASON_EFFECT,1-tp)~=0 and Duel.CheckPendulumZones(tp) and Duel.SelectYesNo(tp,aux.Stringid(26067002,3)) then
+		local sc=g2:Select(tp,1,1,nil):GetFirst()
+		Duel.MoveToField(sc,tp,tp,LOCATION_PZONE,POS_FACEUP,true)
 	end
 end
 function c26067002.spcon(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -103,12 +98,6 @@ function c26067002.spop(e,tp,eg,ep,ev,re,r,rp)
 	if c:IsRelateToEffect(e) then
 		Duel.SpecialSummon(c,1,op,op,false,false,POS_FACEUP)
 	end
-end
-function c26067002.pcon(e)
-	local p=e:GetHandlerPlayer()
-	if e:GetLabel()==1 then p=1-p end
-	local tc=Duel.GetDecktopGroup(p,1):GetFirst()
-	return tc and tc:IsSetCard(0x667) and tc:IsFaceup()
 end
 function c26067002.condition(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
@@ -127,25 +116,5 @@ function c26067002.activate(e,tp,eg,ep,ev,re,r,rp)
 	if #g>0 then
 		Duel.SendtoHand(g,nil,REASON_EFFECT)
 		Duel.ConfirmCards(1-tp,g)
-	end
-end
-function c26067002.tdtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():IsAbleToDeck() end
-	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,0,0)
-end
-function c26067002.tdop(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	if not c:IsRelateToEffect(e) then return end
-	if Duel.SendtoDeck(c,tp,0,REASON_EFFECT)~=0 and c:IsLocation(LOCATION_DECK) then
-		c:ReverseInDeck()
-		c:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD&~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
-		local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetType(EFFECT_TYPE_FIELD)
-		e1:SetCode(EFFECT_DRAW_COUNT)
-		e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-		e1:SetTargetRange(1,0)
-		e1:SetValue(2)
-		e1:SetReset(RESET_PHASE+PHASE_DRAW+RESET_SELF_TURN,1)
-		Duel.RegisterEffect(e1,tp)
 	end
 end
