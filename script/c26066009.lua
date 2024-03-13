@@ -7,8 +7,9 @@ function c26066009.initial_effect(c)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetTarget(c26066009.target)
 	e1:SetOperation(c26066009.activate)
+	e1:SetCountLimit(1,26066009,EFFECT_COUNT_CODE_OATH)
 	c:RegisterEffect(e1)
-	--Register Special Summons from the Extra Deck
+	--Register Special Summons
 	aux.GlobalCheck(c26066009,function()
 		local ge1=Effect.CreateEffect(c)
 		ge1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
@@ -24,7 +25,7 @@ function c26066009.checkop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function c26066009.filter1(c)
-	return c:IsAbleToHand() and c:IsSetCard(0x666)
+	return c:IsAbleToHand() and c:IsSetCard(0x1666)
 end
 function c26066009.filter2(c)
 	return c:IsSummonable(true,nil) and c:IsSetCard(0x666)
@@ -47,8 +48,8 @@ function c26066009.activate(e,tp,eg,ep,ev,re,r,rp)
 	local b3=(b2 and p3 and p1 and p2)
 	Duel.Hint(HINT_SELECTMSG,1-tp,aux.Stringid(26066009,0))
 	local op=Duel.SelectEffect(tp,
-		{b1,aux.Stringid(26066009,1)},
-		{b2,aux.Stringid(26066009,2)},
+		{b2,aux.Stringid(26066009,1)},
+		{b1,aux.Stringid(26066009,2)},
 		{b3,aux.Stringid(26066009,3)})
 	if op~=2 then 
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)

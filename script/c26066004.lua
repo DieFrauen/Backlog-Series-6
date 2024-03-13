@@ -45,7 +45,7 @@ function c26066004.initial_effect(c)
 	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e3:SetRange(LOCATION_GRAVE)
-	e3:SetCode(EVENT_TO_GRAVE)
+	e3:SetCode(EVENT_CHAIN_SOLVED)
 	e3:SetCountLimit(2,26066004)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
 	e3:SetCondition(c26066004.rthcon)
@@ -56,7 +56,7 @@ end
 function c26066004.ntcon(e,c,minc)
 	if c==nil then return true end
 	local tp=c:GetControler()
-	return minc==0 and c:GetLevel()>4 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.GetActivityCount(tp,ACTIVITY_SPSUMMON)==0
+	return minc==0 and c:GetLevel()>4 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)==0 and Duel.GetActivityCount(tp,ACTIVITY_SPSUMMON)==0
 end
 function c26066004.nscon(e,tp,eg,ep,ev,re,r,rp)
 	local tp=e:GetHandlerPlayer()
@@ -70,14 +70,16 @@ function c26066004.trsumcon(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():IsSummonType(SUMMON_TYPE_TRIBUTE)
 end
 function c26066004.sumtrcon(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetHandler():IsReason(REASON_SUMMON)
+	return true --e:GetHandler():IsReason(REASON_SUMMON)
 end
 function c26066004.thfilter(c)
 	return c:IsSetCard(0x666) and c:IsTrap() and c:IsAbleToHand()
 end
 function c26066004.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26066004.thfilter,tp,LOCATION_DECK,0,1,nil) end
+	local c=e:GetHandler()
+	if chk==0 then return Duel.IsExistingMatchingCard(c26066004.thfilter,tp,LOCATION_DECK,0,1,nil) and c:GetFlagEffect(26066004)==0 end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
+	c:RegisterFlagEffect(26066004,RESET_CHAIN,0,1)
 end
 function c26066004.thop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26066004,4))
@@ -93,18 +95,21 @@ function c26066004.gfilter(c,g)
 	return g:IsContains(c) and c:IsTrap()
 end
 function c26066004.rthcon(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.IsExistingMatchingCard(c26066004.gfilter,tp,0,LOCATION_GRAVE,1,nil,eg)
+	return re:IsHasType(EFFECT_TYPE_ACTIVATE) and re:IsActiveType(TYPE_TRAP) and rp~=tp 
 end
 function c26066004.rthtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():IsRelateToEffect(e) end
-	Duel.SetOperationInfo(0,CATEGORY_TOHAND,e:GetHandler(),1,0,0)
+	local c=e:GetHandler()
+	if chk==0 then return c:IsRelateToEffect(e) and c:GetFlagEffect(26066004)==0 end
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,c,1,0,0)
+	c:RegisterFlagEffect(26066004,RESET_CHAIN,0,1)
 end
 function c26066004.rthop(e,tp,eg,ep,ev,re,r,rp)
-	if not e:GetHandler():IsRelateToEffect(e) then return end
+	local c=e:GetHandler()
+	if not c:IsRelateToEffect(e) then return end
 	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26066004,4))
 	if c26066004.disable(e,tp) then return end
-	if Duel.SendtoHand(e:GetHandler(),nil,REASON_EFFECT)==1 then
-		Duel.ConfirmCards(1-tp,e:GetHandler())
+	if Duel.SendtoHand(c,nil,REASON_EFFECT)==1 then
+		Duel.ConfirmCards(1-tp,c)
 	end
 end
 function c26066004.cfilter(c,tp)
@@ -128,8 +133,17 @@ function c26066004.disable(e,tp)
 		Duel.SendtoGrave(sg,REASON_EFFECT+REASON_RELEASE)
 		sg:RegisterFlagEffect(26066007,RESET_EVENT+RESETS_STANDARD,0,1)
 		if op==1 then
-			Duel.NegateEffect(0)
-			return true
+			if Duel.IsPlayerAffectedByEffect(tp,26066006) then
+				if c26066006.ferry(e,tp) then
+					return false
+				else 
+					Duel.NegateEffect(0)
+					return true
+				end
+			else
+				Duel.NegateEffect(0)
+				return true
+			end
 		end
 	end
 end

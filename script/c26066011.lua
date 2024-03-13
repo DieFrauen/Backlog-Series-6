@@ -10,7 +10,6 @@ function c26066011.initial_effect(c)
 	e1:SetTarget(c26066011.target)
 	e1:SetOperation(c26066011.activate)
 	c:RegisterEffect(e1)
-
 end
 function c26066011.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsAbleToHand() end
@@ -31,8 +30,9 @@ function c26066011.code(c,code)
 	return c:IsFaceup() and not c:IsCode(code)
 end
 function c26066011.activate(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
-	if not tc and tc:IsFaceup() and tc:IsRelateToEffect(e)) then
+	if tc and tc:IsFaceup() and tc:IsRelateToEffect(e) then
 		local ct,b1,b2,b3,code=0,true,false,false,tc:GetCode()
 		if tc:IsMonster() then ct=TYPE_MONSTER 
 		elseif tc:IsSpell() then ct=TYPE_SPELL
@@ -63,6 +63,17 @@ function c26066011.activate(e,tp,eg,ep,ev,re,r,rp)
 		elseif op==3 then
 			Duel.SendtoGrave(tc,REASON_EFFECT)
 			tc:RegisterFlagEffect(26066007,RESET_EVENT+RESETS_STANDARD,0,1)
+			local e2=Effect.CreateEffect(c)
+			e2:SetType(EFFECT_TYPE_SINGLE)
+			e2:SetCode(EFFECT_DISABLE)
+			e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+			tc:RegisterEffect(e2)
+			local e3=Effect.CreateEffect(c)
+			e3:SetType(EFFECT_TYPE_SINGLE)
+			e3:SetCode(EFFECT_DISABLE_EFFECT)
+			e3:SetValue(RESET_TURN_SET)
+			e3:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+			tc:RegisterEffect(e3)
 		end
 	else
 		Duel.BreakEffect()

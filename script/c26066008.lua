@@ -8,7 +8,7 @@ function c26066008.initial_effect(c)
 	--place on field after being tributed
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(26066008,0))
-	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
+	e2:SetCategory(CATEGORY_LEAVE_GRAVE)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e2:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_RELEASE)
@@ -87,7 +87,7 @@ function c26066008.eqfilter(c,cd)
 end
 function c26066008.drcon(e,tp,eg,ep,ev,re,r,rp)
 	local loc,id=Duel.GetChainInfo(ev,CHAININFO_TRIGGERING_LOCATION,CHAININFO_CHAIN_ID)
-	return rp==e:GetLabel() and re:IsActiveType(TYPE_SPELL) and re:IsHasType(EFFECT_TYPE_ACTIVATE) and not re:GetHandler():IsSetCard(0x666) --and Duel.IsChainDisablable(ev) 
+	return rp==e:GetLabel() and re:IsActiveType(TYPE_SPELL) and re:IsHasType(EFFECT_TYPE_ACTIVATE) and not re:GetHandler():IsSetCard(0x666) and Duel.IsChainDisablable(ev) 
 end
 function c26066008.spdrain(e,tp,eg,ep,ev,re,r,rp)
 	local p=e:GetLabel()

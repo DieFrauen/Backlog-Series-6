@@ -85,11 +85,12 @@ function c26066002.spdrain(e,tp,eg,ep,ev,re,r,rp)
 	local p=1-tp
 	local sg=Duel.GetMatchingGroup(c26066002.drain,p,LOCATION_HAND+LOCATION_DECK,0,nil,p)
 	local p1=#sg>0
-	local p2=Duel.IsChainDisablable(ev)
+	local p2=Duel.IsChainDisablable(ev) or p1
+	if not (p1 or p2) then return end
 	Duel.Hint(HINT_SELECTMSG,1-tp,aux.Stringid(26066002,1))
 	local op=Duel.SelectEffect(p,
-		{p1,aux.Stringid(26066002,1)},
-		{true,aux.Stringid(26066002,2)})
+		{p1,aux.Stringid(26066002,2)},
+		{p2,aux.Stringid(26066002,3)})
 	if op==1 then
 		local sc=sg:Select(p,1,1,nil):GetFirst()
 		Duel.SendtoGrave(sc,REASON_EFFECT+REASON_RELEASE)

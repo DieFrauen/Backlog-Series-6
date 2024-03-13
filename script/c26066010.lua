@@ -8,7 +8,7 @@ function c26066010.initial_effect(c)
 	--place on field after being tributed
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(26066010,0))
-	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
+	e2:SetCategory(CATEGORY_LEAVE_GRAVE)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e2:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_RELEASE)
@@ -83,7 +83,7 @@ function c26066010.eqfilter(c,cd)
 end
 function c26066010.drcon(e,tp,eg,ep,ev,re,r,rp)
 	local loc,id=Duel.GetChainInfo(ev,CHAININFO_TRIGGERING_LOCATION,CHAININFO_CHAIN_ID)
-	return rp==e:GetLabel() and re:IsActiveType(TYPE_TRAP) and re:IsHasType(EFFECT_TYPE_ACTIVATE) and not re:GetHandler():IsSetCard(0x666) --and Duel.IsChainDisablable(ev) 
+	return rp==e:GetLabel() and re:IsActiveType(TYPE_TRAP) and re:IsHasType(EFFECT_TYPE_ACTIVATE) and not re:GetHandler():IsSetCard(0x666) and Duel.IsChainDisablable(ev) 
 end
 function c26066010.spdrain(e,tp,eg,ep,ev,re,r,rp)
 	local p=e:GetLabel()
@@ -98,17 +98,17 @@ end
 
 function c26066010.damcon(e,tp,eg,ep,ev,re,r,rp)
 	local dam=Duel.GetBattleDamage(1-tp)
-	local val=math.floor(dam/300)
-	return dam>=300 and Duel.IsPlayerCanDiscardDeck(1-tp,1)
+	local val=math.floor(dam/400)
+	return dam>=400 and Duel.IsPlayerCanDiscardDeck(1-tp,1)
 end
 function c26066010.damop(e,tp,eg,ep,ev,re,r,rp)
 	local dam=Duel.GetBattleDamage(1-tp)
-	local val=math.floor(dam/300)
+	local val=math.floor(dam/400)
 	Duel.DiscardDeck(1-tp,val,REASON_EFFECT)
 	local og=Duel.GetOperatedGroup()
 	for tc in aux.Next(og) do
 		tc:RegisterFlagEffect(26066007,RESET_EVENT+RESETS_STANDARD,0,1)
 	end
 	Duel.Hint(HINT_CARD,1-tp,26066010)
-	Duel.ChangeBattleDamage(1-tp,dam-(#og*300))
+	Duel.ChangeBattleDamage(1-tp,dam-(#og*400))
 end

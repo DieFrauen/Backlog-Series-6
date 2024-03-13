@@ -79,7 +79,7 @@ function c26066007.trop(e,tp,eg,ep,ev,re,r,rp)
 	if sg then
 		local mg=Duel.GetMatchingGroup(aux.NecroValleyFilter(c26066007.thfilter),tp,LOCATION_DECK+LOCATION_GRAVE,0,nil,sg)
 		mg:Sub(sg)
-		if #mg>0 and Duel.SelectYesNo(tp,aux.Stringid(26066007,1)) then
+		if #mg>0 and Duel.SelectYesNo(tp,aux.Stringid(26066007,0)) then
 			local ec=mg:Select(tp,1,1,nil)
 			Duel.SendtoHand(ec,nil,REASON_EFFECT)
 			Duel.ConfirmCards(1-tp,ec)
@@ -97,7 +97,7 @@ end
 function c26066007.discon(e,tp,eg,ep,ev,re,r,rp)
 	local rc=re:GetHandler()
 	local code1,code2=re:GetHandler():GetOriginalCodeRule()
-	return (rc:GetFlagEffect(26066007)~=0 or Duel.IsExistingMatchingCard(c26066007.code,tp,0,LOCATION_GRAVE,1,nil,true,code1,code2)) and not rc:IsSetCard(0x666)
+	return (rc:GetFlagEffect(26066007)~=0 or Duel.IsExistingMatchingCard(c26066007.code,tp,0,LOCATION_GRAVE,1,nil,true,code1,code2)) and not rc:IsSetCard(0x666) and code2~=26066006
 end
 function c26066007.disop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_CARD,0,26066007)

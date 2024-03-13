@@ -7,21 +7,7 @@ function c26066001.initial_effect(c)
 	e0:SetCode(EFFECT_SPSUMMON_CONDITION)
 	c:RegisterEffect(e0)
 	--summon with 3 tribute
-	local e0a=aux.AddNormalSummonProcedure(c,true,false,3,3,SUMMON_TYPE_TRIBUTE,aux.Stringid(26066001,0))
-	local e0b=aux.AddNormalSetProcedure(c)
-	--summon with s/t
-	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
-	e1:SetCode(EFFECT_ADD_EXTRA_TRIBUTE)
-	e1:SetTargetRange(LOCATION_ONFIELD,0)
-	e1:SetTarget(aux.TargetBoolFunction(c26066001.nsfilter))
-	e1:SetValue(POS_FACEUP)
-	c:RegisterEffect(e1)
-	local e1a=e1:Clone()
-	e1a:SetTargetRange(LOCATION_HAND,0)
-	e1a:SetCondition(c26066001.nscon)
-	c:RegisterEffect(e1a)
+	local e1=aux.AddNormalSummonProcedure(c,true,false,3,3,SUMMON_TYPE_TRIBUTE,aux.Stringid(26066001,0))
 	--tribute check
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_SINGLE)
@@ -35,19 +21,36 @@ function c26066001.initial_effect(c)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
 	e3:SetCode(EVENT_SUMMON_SUCCESS)
+	e3:SetCost(c26066001.cost)
 	e3:SetCondition(c26066001.condition)
 	e3:SetTarget(c26066001.target)
 	e3:SetOperation(c26066001.operation)
 	e3:SetLabelObject(e2)
 	c:RegisterEffect(e3)
 	--Banish 3 of each
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e2:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
-	e2:SetCode(EVENT_ADJUST)
-	e2:SetRange(LOCATION_MZONE)
-	e2:SetOperation(c26066001.adjustop)
-	c:RegisterEffect(e2)
+	local e4=Effect.CreateEffect(c)
+	e4:SetDescription(aux.Stringid(26066001,2))
+	e4:SetCategory(CATEGORY_REMOVE)
+	e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e4:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
+	e4:SetRange(LOCATION_MZONE)
+	e4:SetCode(EVENT_TO_GRAVE)
+	e4:SetTarget(c26066001.b3tg)
+	e4:SetOperation(c26066001.b3op)
+	e4:SetLabelObject(e2)
+	c:RegisterEffect(e4)
+	--Cannot be destroyed
+	local e5=Effect.CreateEffect(c)
+	e5:SetType(EFFECT_TYPE_SINGLE)
+	e5:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+	e5:SetRange(LOCATION_MZONE)
+	e5:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
+	e5:SetValue(1)
+	e5:SetCondition(c26066001.indescon)
+	c:RegisterEffect(e5)
+end
+function c26066001.indescon(e)
+	return e:GetHandler():IsSummonType(SUMMON_TYPE_TRIBUTE)
 end
 function c26066001.valcheck(e,c)
 	local g=c:GetMaterial()
@@ -58,30 +61,30 @@ function c26066001.valcheck(e,c)
 	end
 	e:SetLabel(typ)
 end
-function c26066001.nscon(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.IsPlayerAffectedByEffect(e:GetHandlerPlayer(),26066007)
-end
-function c26066001.nsfilter(c)
-	return c:IsType(TYPE_SPELL+TYPE_TRAP)
+function c26066001.cost(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.CheckLPCost(tp,3000) end
+	Duel.PayLPCost(tp,3000)
 end
 function c26066001.condition(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():IsSummonType(SUMMON_TYPE_TRIBUTE)
 end
 function c26066001.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	local typ=e:GetLabelObject():GetLabel()
-	local g=Duel.GetMatchingGroup(Card.IsType,tp,LOCATION_ONFIELD+LOCATION_HAND,LOCATION_ONFIELD+LOCATION_HAND,e:GetHandler(),typ)
-	if chk==0 then return #g>0 end
+	local c=e:GetHandler()
+	local g=Duel.GetMatchingGroup(Card.IsType,tp,LOCATION_ONFIELD+LOCATION_HAND,LOCATION_ONFIELD+LOCATION_HAND,nil,typ)
+	if chk==0 then return #g>0 and c:GetFlagEffect(26066001)==0 end
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,#g,0,0)
+	c:RegisterFlagEffect(26066001,RESET_CHAIN,0,1)
 end
-function c26066001.match(c,g)
-	return g:IsExists(Card.IsCode,1,nil,c:GetCode())
+function c26066001.match(c,g1,g2)
+	return g1:IsExists(Card.IsCode,1,nil,c:GetCode()) or g2:IsExists(Card.IsCode,1,nil,c:GetCode())
 end
 function c26066001.operation(e,tp,eg,ep,ev,re,r,rp)
 	local typ=e:GetLabelObject():GetLabel()
-	local g1=Duel.GetMatchingGroup(Card.IsType,tp,LOCATION_ONFIELD+LOCATION_HAND,0,e:GetHandler(),typ)
-	local g2=Duel.GetMatchingGroup(Card.IsType,tp,0,LOCATION_ONFIELD+LOCATION_HAND,e:GetHandler(),typ)
-	local d1=Duel.GetMatchingGroup(c26066001.match,tp,LOCATION_DECK+LOCATION_EXTRA,0,nil,g1)
-	local d2=Duel.GetMatchingGroup(c26066001.match,tp,0,LOCATION_DECK+LOCATION_EXTRA,nil,g2)
+	local g1=Duel.GetMatchingGroup(Card.IsType,tp,LOCATION_ONFIELD+LOCATION_HAND,0,nil,typ)
+	local g2=Duel.GetMatchingGroup(Card.IsType,tp,0,LOCATION_ONFIELD+LOCATION_HAND,nil,typ)
+	local d1=Duel.GetMatchingGroup(c26066001.match,tp,LOCATION_DECK+LOCATION_EXTRA,0,nil,g1,g2)
+	local d2=Duel.GetMatchingGroup(c26066001.match,tp,0,LOCATION_DECK+LOCATION_EXTRA,nil,g2,g1)
 	d1:Merge(g1)
 	d2:Merge(g2)
 	local sp1,sp2=Group.CreateGroup(),Group.CreateGroup()
@@ -113,45 +116,26 @@ function c26066001.operation(e,tp,eg,ep,ev,re,r,rp)
 	Duel.ShuffleHand(1-tp)
 	Duel.ShuffleHand(tp)
 end
-function c26066001.END(c,g)
-	return g:IsExists(Card.IsCode,3,nil,c:GetCode())
+function c26066001.END(c)
+	return c:IsAbleToRemove() and aux.SpElimFilter(c)
 end
-function c26066001.adjustop(e,tp,eg,ep,ev,re,r,rp)
-	local phase=Duel.GetCurrentPhase()
-	if (phase==PHASE_DAMAGE and not Duel.IsDamageCalculated()) or phase==PHASE_DAMAGE_CAL then return end
-	local g1=Duel.GetFieldGroup(tp,LOCATION_GRAVE,0)
-	local g2=Duel.GetFieldGroup(tp,0,LOCATION_GRAVE)
-	local sg1=g1:Filter(c26066001.END,nil,g1)
-	local sg2=g2:Filter(c26066001.END,nil,g2)
-	local readjust=false
-	local fil3=nil
-	if #sg1>0 then
-		Duel.Hint(HINT_CARD,tp,26066001)
-		for tc in aux.Next(sg1) do
-			if tc:IsLocation(LOCATION_GRAVE) then
-				fil3=sg1:Filter(Card.IsCode,nil,tc:GetCode())
-				Duel.HintSelection(fil3)
-				Duel.Remove(fil3,POS_FACEDOWN,REASON_RULE)
-			end
-		end
-		local bg=(math.floor(Duel.GetMatchingGroupCount(Card.IsFacedown,0,LOCATION_REMOVED,0,nil)/3))
-		Duel.DiscardDeck(tp,math.min(Duel.GetFieldGroupCount(tp,LOCATION_DECK,0),3),REASON_EFFECT)
-		readjust=true
-	end
-	if #sg2>0 then
-		Duel.Hint(HINT_CARD,tp,26066001)
-		for tc in aux.Next(sg2) do
-			if tc:IsLocation(LOCATION_GRAVE) then
-				fil3=sg2:Filter(Card.IsCode,nil,tc:GetCode())
-				Duel.HintSelection(fil3)
-				Duel.Remove(fil3,POS_FACEDOWN,REASON_RULE)
-			end
-		end
-		local bg=(math.floor(Duel.GetMatchingGroupCount(Card.IsFacedown,0,0,LOCATION_REMOVED,nil)/3))
-		Duel.DiscardDeck(1-tp,math.min(Duel.GetFieldGroupCount(tp,0,LOCATION_DECK),3),REASON_EFFECT)
-		readjust=true
-	end
-	if readjust then 
-		Duel.Readjust()
+function c26066001.rescon(sg,e,tp,mg)
+	return sg:GetClassCount(Card.GetCode)==1
+end
+function c26066001.b3tg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	local c=e:GetHandler()
+	local rg=Duel.GetMatchingGroup(c26066001.END,tp,0,LOCATION_GRAVE+LOCATION_ONFIELD,nil)
+	if chk==0 then return aux.SelectUnselectGroup(rg,e,tp,3,3,c26066001.rescon,0) and c:GetFlagEffect(26066001)==0 end
+	Duel.SetOperationInfo(0,CATEGORY_REMOVE,rsg,3,0,0)
+	c:RegisterFlagEffect(26066001,RESET_CHAIN,0,1)
+end
+function c26066001.b3op(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	local rg=Duel.GetMatchingGroup(c26066001.END,tp,0,LOCATION_GRAVE+LOCATION_ONFIELD,nil)
+	local sg=aux.SelectUnselectGroup(rg,e,tp,3,3,c26066001.rescon,1,tp,HINTMSG_REMOVE)
+	Duel.HintSelection(sg)
+	if #sg>0 and Duel.Remove(sg,POS_FACEDOWN,REASON_EFFECT)~=0 then
+		local p=sg:GetFirst():GetOwner()
+		Duel.DiscardDeck(p,1,REASON_EFFECT)
 	end
 end
