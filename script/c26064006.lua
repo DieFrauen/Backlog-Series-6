@@ -1,15 +1,9 @@
 --Over-wind Astrolabe
 function c26064006.initial_effect(c)
-	--Activate
-	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(26064006,0))
-	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e1:SetType(EFFECT_TYPE_ACTIVATE)
-	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetTarget(c26064006.fliptg)
-	e1:SetOperation(c26064006.flipop)
+	local e1=Ritual.CreateProc({handler=c,lvtype=RITPROC_GREATER,extrafil=c26064006.extrafil,extraop=c26064006.extraop,matfilter=c26064006.forcedgroup,sumpos=POS_FACEUP+POS_FACEDOWN_DEFENSE,stage2=c26064006.stage2})
+	e1:SetCategory(e1:GetCategory()|CATEGORY_POSITION)
 	c:RegisterEffect(e1)
-	--special summon
+	--DRAW effect
 	local e2=Effect.CreateEffect(c)
 	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
@@ -21,25 +15,20 @@ function c26064006.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 c26064006.listed_names={26064004}
-function c26064006.setfilter(c)
-	return c:IsCanTurnSet()
+c26064006.DRAW=true
+c26064006.ACTV=true
+function c26064006.extrafil(e,tp,eg,ep,ev,re,r,rp,chk)
+	return Duel.GetFieldGroup(tp,LOCATION_MZONE,LOCATION_MZONE)
 end
-function c26064006.filter(c,e,tp,mg)
-	if not c:IsType(TYPE_FLIP) or not c:IsType(TYPE_RITUAL)
-		or not c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_RITUAL,tp,false,true) then return false end
-	return mg:CheckWithSumGreater(Card.GetRitualLevel,c:GetLevel(),c)
+function c26064006.extraop(mat,e,tp,eg,ep,ev,re,r,rp,tc)
+	return Duel.ChangePosition(mat,POS_FACEDOWN_DEFENSE)
 end
-function c26064006.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then
-		local mg=Duel.GetMatchingGroup(c26064006.setfilter,tp,LOCATION_MZONE,0,nil,c)
-		local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
-		return ft>0 and Duel.IsExistingMatchingCard(c26064006.filter,tp,LOCATION_HAND,0,1,nil,e,tp,mg)
-	end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND)
+function c26064006.forcedgroup(c,e,tp)
+	return c:IsFaceup() and c:IsCanTurnSet() and not c:IsImmuneToEffect(e)
 end
 function c26064006.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
-	local mg=Duel.GetMatchingGroup(c26064006.setfilter,tp,LOCATION_ONFIELD,0,nil,c)
+	local mg=Duel.GetMatchingGroup(c26064006.setfilter,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,nil,c)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 	local tg=Duel.SelectMatchingCard(tp,c26064006.filter,tp,LOCATION_HAND,0,1,1,nil,e,tp,mg)
 	local tc=tg:GetFirst()
@@ -63,6 +52,12 @@ function c26064006.flipop(e,tp,eg,ep,ev,re,r,rp)
 		end
 	end
 end
+function c26064006.stage2(mg,e,tp,eg,ep,ev,re,r,rp,sc)
+	if sc:IsFacedown() then
+		local sg=Duel.GetMatchingGroup(Card.IsFacedown,tp,LOCATION_MZONE,0,nil)
+		Duel.ShuffleSetCard(sg)
+	end
+end
 function c26064006.spcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return not e:GetHandler():IsPublic() end
 end
@@ -71,7 +66,7 @@ function c26064006.spfilter(c,e,tp)
 		   (c:IsCode(26064004) and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_RITUAL,tp,false,true))
 end
 function c26064006.drtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsLocation(LOCATION_GRAVE) and c83764718.filter(chkc,e,tp) end
+	if chkc then return chkc:IsLocation(LOCATION_GRAVE) and c26064006.spfilter(chkc,e,tp) end
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
 		and Duel.IsExistingTarget(c26064006.spfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil,e,tp) end
 	local g=Duel.SelectTarget(tp,c26064006.spfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil,e,tp)
@@ -86,10 +81,6 @@ function c26064006.drop(e,tp,eg,ep,ev,re,r,rp)
 		else
 			Duel.SpecialSummon(tc,0,tp,tp,false,false,pos)
 		end
-		if pos==POS_FACEDOWN_DEFENSE then
-			Duel.ConfirmCards(1-tp,tc)
-			local sg=Duel.GetMatchingGroup(Card.IsFacedown,tp,LOCATION_MZONE,0,nil)
-			Duel.ShuffleSetCard(sg)
-		end
+		c26064006.stage2(nil,e,tp,eg,ep,ev,re,r,rp,tc)
 	end
 end

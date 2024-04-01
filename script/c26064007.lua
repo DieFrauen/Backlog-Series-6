@@ -4,18 +4,18 @@ function c26064007.initial_effect(c)
 	local e0=Effect.CreateEffect(c)
 	e0:SetType(EFFECT_TYPE_ACTIVATE)
 	e0:SetCode(EVENT_FREE_CHAIN)
-	e0:SetCost(c26064007.reg)
+	e0:SetCost(c26064007.cost)
 	c:RegisterEffect(e0)
 	--Activate
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(26064007,0))
-	e1:SetCategory(CATEGORY_TODECK)
+	e1:SetCategory(CATEGORY_TODECK+CATEGORY_DRAW)
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e1:SetCode(EVENT_PHASE+PHASE_END)
+	e1:SetCode(EVENT_PHASE+PHASE_STANDBY)
 	e1:SetRange(LOCATION_FZONE)
 	e1:SetCountLimit(1)
-	e1:SetTarget(c26064007.target)
-	e1:SetOperation(c26064007.activate)
+	e1:SetTarget(c26064007.fliptg)
+	e1:SetOperation(c26064007.flipop)
 	c:RegisterEffect(e1)
 	--counter
 	local e2=Effect.CreateEffect(c)
@@ -35,7 +35,6 @@ function c26064007.initial_effect(c)
 	e3:SetTarget(c26064007.lvtg)
 	e3:SetOperation(c26064007.lvop)
 	c:RegisterEffect(e3)
-	--search
 	local e3a=e3:Clone()
 	e3a:SetType(EFFECT_TYPE_QUICK_O)
 	e3a:SetCode(EVENT_FREE_CHAIN)
@@ -64,34 +63,35 @@ function c26064007.initial_effect(c)
 	e5:SetOperation(c26064007.setop)
 	c:RegisterEffect(e5)
 end
-function c26064007.reg(e,tp,eg,ep,ev,re,r,rp,chk)
+function c26064007.cost(e,tp,eg,ep,ev,re,r,rp,chk)
+	local b=c26064007.fliptg(e,tp,eg,ep,ev,re,r,rp,2)
 	if chk==0 then return true end
-	e:GetHandler():RegisterFlagEffect(26064007,RESET_PHASE+PHASE_END,EFFECT_FLAG_OATH,1)
+	if b and Duel.SelectYesNo(tp,aux.Stringid(26064007,0)) then 
+		e:SetTarget(c26064007.fliptg)
+		e:SetCategory(CATEGORY_TODECK+CATEGORY_DRAW)
+		e:SetOperation(c26064007.flipop)
+	end
 end
 function c26064007.tdfilter(c)
 	return c:IsSetCard(0x664) and c:IsAbleToDeck()
 end
-function c26064007.target(e,tp,eg,ep,ev,re,r,rp,chk)
+function c26064007.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return Duel.IsExistingMatchingCard(c26064007.tdfilter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil) and e:GetHandler():GetFlagEffect(26064007)~=0 end
+	if chk==2 or chk==0 then return Duel.IsExistingMatchingCard(c26064007.tdfilter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,c) end
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,tp,LOCATION_HAND+LOCATION_ONFIELD)
 end
-function c26064007.activate(e,tp,eg,ep,ev,re,r,rp)
+function c26064007.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	local g=Duel.GetMatchingGroup(tdfilter,tp,LOCATION_ONFIELD+LOCATION_HAND,0,nil)
+	local g=Duel.GetMatchingGroup(tdfilter,tp,LOCATION_ONFIELD+LOCATION_HAND,0,c)
 	if g:GetCount()>0 and not Duel.IsPlayerAffectedByEffect(1-tp,EFFECT_SKIP_TURN) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-		local sg=g:Select(tp,1,1,nil):GetFirst()
+		local sg=g:Select(tp,1,1,c):GetFirst()
+		Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26064007,5))
+		local opt=Duel.SelectOption(tp,aux.Stringid(26064007,6),aux.Stringid(26064007,7))
 		Duel.ConfirmCards(tp,sg)
-		if sg and Duel.SendtoDeck(sg,nil,0,REASON_EFFECT) then
-			local e1=Effect.CreateEffect(c)
-			e1:SetType(EFFECT_TYPE_FIELD)
-			e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-			e1:SetCode(EFFECT_SKIP_TURN)
-			e1:SetRange(LOCATION_FZONE)
-			e1:SetTargetRange(0,1)
-			e1:SetReset(RESET_PHASE+PHASE_END+RESET_OPPO_TURN)
-			c:RegisterEffect(e1)
+		if sg and Duel.SendtoDeck(sg,nil,opt,REASON_EFFECT) then
+			Duel.ShuffleHand(tp)
+			Duel.Draw(tp,1,REASON_EFFECT)
 		end
 	end
 end

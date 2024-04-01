@@ -36,6 +36,7 @@ function c26064009.initial_effect(c)
 	c:RegisterEffect(e3)
 	--leave field
 	local e4=Effect.CreateEffect(c)
+	e4:SetDescription(aux.Stringid(26064005,1))
 	e4:SetCategory(CATEGORY_TOHAND)
 	e4:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
 	e4:SetProperty(EFFECT_FLAG_DELAY)
@@ -44,9 +45,16 @@ function c26064009.initial_effect(c)
 	e4:SetTarget(c26064009.settg)
 	e4:SetOperation(c26064009.setop)
 	c:RegisterEffect(e4)
+	local e4a=e4:Clone()
+	e4a:SetCode(EVENT_TO_GRAVE)
+	e4a:SetCondition(c26064009.setcon2)
+	c:RegisterEffect(e4a)
 end
+c26064009.FLIP=true
+c26064009.DRAW=true
+c26064009.TURN=true
 function c26064009.cost(e,tp,eg,ep,ev,re,r,rp,chk)
-	local b=c26064009.fliptg(e,tp,eg,ep,ev,re,r,rp,0)
+	local b=c26064009.fliptg(e,tp,eg,ep,ev,re,r,rp,2)
 	if chk==0 then return true end
 	if b and Duel.SelectYesNo(tp,aux.Stringid(26064009,0)) then 
 		e:SetTarget(c26064009.fliptg)
@@ -55,10 +63,11 @@ function c26064009.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	end
 end
 function c26064009.posfilter(c)
-	return not c:IsAttackPos() and c:IsCanChangePosition() 
+	return c:IsCanChangePosition() and not c:IsPosition(POS_FACEUP_ATTACK)
 end
 function c26064009.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26064009.posfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
+	if chk==0 then return true end
+	if chk==2 then return Duel.IsExistingMatchingCard(c26064009.posfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_POSITION,nil,1,0,0)
 end
 function c26064009.flipop(e,tp,eg,ep,ev,re,r,rp)
@@ -73,9 +82,6 @@ end
 function c26064009.rdcon(e,tp,eg,ep,ev,re,r,rp)
 	local ac=c26064009.check(Duel.GetAttacker(),tp)
 	return ac and ev>0
-end
-function c26064009.counterfilter(c)
-	return c:IsCode(26064007) and c:IsAbleToGrave() and c:GetCounter(0xb6)>0
 end
 function c26064009.rdop(e,tp,eg,ep,ev,re,r,rp)
 	local c=Duel.GetAttacker()
@@ -118,15 +124,18 @@ function c26064009.setcon(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	return c:IsPreviousPosition(POS_FACEUP) and not c:IsLocation(LOCATION_DECK) and re
 end
+function c26064009.setcon2(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	return c:IsReason(REASON_EFFECT) and not (c:GetPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEUP))
+end
 function c26064009.thfilter(c)
 	return c:IsFaceup() and c:IsAbleToHand()
 end
 function c26064009.settg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetMatchingGroup(c26064009.thfilter,rp,LOCATION_MZONE,0,nil)
-	if chk==0 then return true end
-	if chk==2 then return #g>0 end
-	Duel.SetTargetPlayer(rp)
-	Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,#g,rp,1)
+	if chk==0 then return e:GetType()&EFFECT_TYPE_TRIGGER_F ~=0 or #g>0 end
+	Duel.SetTargetPlayer(rp) 
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,#g,rp,LOCATION_MZONE)
 end
 function c26064009.setop(e,tp,eg,ep,ev,re,r,rp)
 	local p=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER)

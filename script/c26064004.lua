@@ -37,10 +37,17 @@ function c26064004.initial_effect(c)
 	e4:SetOperation(c26064004.setop)
 	c:RegisterEffect(e4)
 	local e5=e4:Clone()
-	e5:SetCode(EVENT_LEAVE_FIELD)
+	e5:SetCode(EVENT_TO_HAND)
 	e5:SetCondition(c26064004.setcon2)
 	c:RegisterEffect(e5)
+	local e6=e4:Clone()
+	e6:SetCode(EVENT_LEAVE_FIELD)
+	e6:SetCondition(c26064004.setcon2)
+	c:RegisterEffect(e6)
 end
+c26064004.FLIP=true
+c26064004.DRAW=true
+c26064004.TURN=true
 function c26064004.ntcon(e,c,minc)
 	if c==nil then return true end
 	return minc==0 and c:GetLevel()>4 and Duel.GetLocationCount(c:GetControler(),LOCATION_MZONE)>0
@@ -51,6 +58,7 @@ end
 function c26064004.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	if chk==0 then return true end
+	if chk==2 then return Duel.IsPlayerCanDraw(tp,1) end
 	Duel.SetTargetPlayer(tp)
 	Duel.SetTargetParam(1)
 	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)

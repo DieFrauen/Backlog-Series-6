@@ -41,6 +41,7 @@ function c26064011.initial_effect(c)
 	c:RegisterEffect(e5)
 	--leave field
 	local e6=Effect.CreateEffect(c)
+	e6:SetDescription(aux.Stringid(26064005,2))
 	e6:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
 	e6:SetProperty(EFFECT_FLAG_DELAY)
 	e6:SetCode(EVENT_LEAVE_FIELD)
@@ -48,9 +49,16 @@ function c26064011.initial_effect(c)
 	e6:SetTarget(c26064011.settg)
 	e6:SetOperation(c26064011.setop)
 	c:RegisterEffect(e6)
+	local e6a=e6:Clone()
+	e6a:SetCode(EVENT_TO_GRAVE)
+	e6a:SetCondition(c26064011.setcon2)
+	c:RegisterEffect(e6a)
 end
+c26064011.FLIP=true
+c26064011.DRAW=true
+c26064011.TURN=true
 function c26064011.cost(e,tp,eg,ep,ev,re,r,rp,chk)
-	local b=c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,0)
+	local b=c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,2)
 	if chk==0 then return true end
 	if b and Duel.SelectYesNo(tp,aux.Stringid(26064011,0)) then 
 		e:SetTarget(c26064011.fliptg)
@@ -59,7 +67,8 @@ function c26064011.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	end
 end
 function c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26064011.spfilter,tp,LOCATION_DECK,0,1,nil) end
+	if chk==0 then return true end
+	if chk==2 then return Duel.IsExistingMatchingCard(c26064011.spfilter,tp,LOCATION_DECK,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,0,tp,LOCATION_DECK)
 end
 function c26064011.spfilter(c)
@@ -111,6 +120,9 @@ end
 function c26064011.drfilter(c,e,tp)
 	return c:IsType(TYPE_TRAP) and c:IsSetCard(0x664) and not c:IsPublic()
 end
+function c26064011.drtg(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return true end
+end
 function c26064011.drop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local e1=Effect.CreateEffect(c)
@@ -142,7 +154,7 @@ function c26064011.handvalue(e,rc,re)
 end
 function c26064011.costtg(e,te,tp)
 	local tc=te:GetHandler()
-	return tc:IsLocation(LOCATION_HAND) and tc:GetFlagEffect(26064011)>0 and tc:GetFlagEffectLabel(26064011)==e:GetHandler():GetFieldID()
+	return tc:IsLocation(LOCATION_HAND) and tc:IsSetCard(0x664) and tc:GetFlagEffect(26064011)>0 and tc:GetFlagEffectLabel(26064011)==e:GetHandler():GetFieldID()
 end
 function c26064011.costop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_CARD,0,26064011)
@@ -161,11 +173,15 @@ function c26064011.setcon(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	return re and c:IsPreviousPosition(POS_FACEUP) and not c:IsLocation(LOCATION_DECK)
 end
+function c26064011.setcon2(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	return c:IsReason(REASON_EFFECT) and not (c:GetPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEUP))
+end
 function c26064011.settg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetFieldGroup(rp,0,LOCATION_HAND)
-	local gc=#g
-	if chk==0 then return true end
-	if chk==2 then return gc>0 and g:FilterCount(Card.IsAbleToRemove,nil)==gc and Duel.IsPlayerCanDraw(rp,gc) end
+	local gc=g:FilterCount(Card.IsAbleToRemove,nil)
+	if chk==0 then return e:GetType()&EFFECT_TYPE_TRIGGER_F ~=0
+	or (#g==gc and gc>0 and Duel.IsPlayerCanDraw(rp,gc)) end
 	Duel.SetTargetPlayer(rp)
 	Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,gc,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,rp,gc)

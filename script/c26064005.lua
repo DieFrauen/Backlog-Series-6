@@ -31,13 +31,23 @@ function c26064005.initial_effect(c)
 	e4:SetOperation(c26064005.setop)
 	c:RegisterEffect(e4)
 	local e5=e4:Clone()
-	e5:SetCode(EVENT_LEAVE_FIELD)
-	e5:SetCondition(c26064005.setcon2)
+	e5:SetCode(EVENT_TO_HAND)
 	c:RegisterEffect(e5)
+	local e6=e4:Clone()
+	e6:SetCode(EVENT_LEAVE_FIELD)
+	e6:SetCondition(c26064005.setcon2)
+	c:RegisterEffect(e6)
+end
+c26064005.FLIP=true
+c26064005.DRAW=true
+c26064005.TURN=true
+function c26064005.ritual_custom_check(e,tp,g,c)
+	return g:FilterCount(Card.IsType,nil,TYPE_FLIP)>0
 end
 function c26064005.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
+	local g=Duel.GetMatchingGroup(Card.IsCanTurnSet,tp,LOCATION_MZONE,LOCATION_MZONE,e:GetHandler())
 	if chk==0 then return true end
-	local g=Duel.GetMatchingGroup(Card.IsCanTurnSet,tp,0,LOCATION_MZONE,e:GetHandler())
+	if chk==2 then return #g>0 end
 	Duel.SetOperationInfo(0,CATEGORY_POSITION,g,g:GetCount(),0,0)
 end
 function c26064005.flipop(e,tp,eg,ep,ev,re,r,rp)

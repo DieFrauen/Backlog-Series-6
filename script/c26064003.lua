@@ -22,7 +22,7 @@ function c26064003.initial_effect(c)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e3:SetCode(EVENT_TO_GRAVE)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
-	e3:SetCountLimit(1,26064003)
+	--e3:SetCountLimit(1,26064003)
 	e3:SetCondition(c26064003.setcon1)
 	e3:SetTarget(c26064003.settg)
 	e3:SetOperation(c26064003.setop)
@@ -39,12 +39,16 @@ function c26064003.initial_effect(c)
 	e4:SetCondition(c26064003.otcon)
 	c:RegisterEffect(e4)
 end
+c26064003.FLIP=true
+c26064003.TURN=true
 function c26064003.otcon(e,c,minc)
 	if c==nil then return true end
 	return c:GetLevel()>4 and minc<=1
 end
 function c26064003.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
+	local g=Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_DECK,0,nil,0x664)
 	if chk==0 then return true end
+	if chk==2 then return #g>0 end
 	if e:GetHandler():GetFlagEffect(26064004)~=0 then
 		Duel.SetChainLimit(aux.FALSE)
 		Duel.Hint(HINT_CARD,0,26064004)

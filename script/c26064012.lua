@@ -1,6 +1,6 @@
 --Over-Wind Back
 function c26064012.initial_effect(c)
-	--place
+	--ACTIVATE effect
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(26064012,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_LEAVE_GRAVE)
@@ -10,13 +10,16 @@ function c26064012.initial_effect(c)
 	e1:SetTarget(c26064012.fliptg)
 	e1:SetOperation(c26064012.flipop)
 	c:RegisterEffect(e1)
-	--quickdraw act
+	--DRAW effect
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_LEAVE_GRAVE)
+	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+	e2:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_DRAW)
-	e2:SetOperation(c26064012.checkop2)
+	e2:SetTarget(c26064012.drtg)
+	e2:SetOperation(c26064012.drop)
 	c:RegisterEffect(e2)
-	--leave field
+	--TURN effect
 	local e3=Effect.CreateEffect(c)
 	e3:SetCategory(CATEGORY_TODECK+CATEGORY_DRAW)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
@@ -26,9 +29,9 @@ function c26064012.initial_effect(c)
 	e3:SetOperation(c26064012.setop)
 	c:RegisterEffect(e3)
 end
-function c26064012.qpcond(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetTurnPlayer()~=e:GetHandlerPlayer()
-end
+c26064012.FLIP=true
+c26064012.DRAW=true
+c26064012.TURN=true
 function c26064012.checkop1(e,tp,eg,ep,ev,re,r,rp)
 	local tc=eg:GetFirst()
 	while tc do
@@ -36,17 +39,6 @@ function c26064012.checkop1(e,tp,eg,ep,ev,re,r,rp)
 			tc:RegisterFlagEffect(26064012,RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,0,1)
 		end
 		tc=eg:GetNext()
-	end
-end
-function c26064012.checkop2(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	if Duel.GetCurrentPhase()&PHASE_DRAW~=0 then
-		local e1=Effect.CreateEffect(c)
-		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_TRAP_ACT_IN_HAND)
-		e1:SetHintTiming(TIMING_CHAIN_END)
-		e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_DRAW)
-		c:RegisterEffect(e1)
 	end
 end
 function c26064012.filter(c,e,tp)
@@ -58,7 +50,7 @@ function c26064012.filter(c,e,tp)
 end
 function c26064012.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chkc then return chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) and c26064012.filter(chkc) end
-	if chk==0 then return Duel.IsExistingTarget(c26064012.filter,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
+	if chk==0 or chk==2 then return Duel.IsExistingTarget(c26064012.filter,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
 	local sg=Duel.SelectTarget(tp,c26064012.filter,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,sg,sg:GetCount(),0,0)
@@ -86,6 +78,29 @@ function c26064012.flipop(e,tp,eg,ep,ev,re,r,rp)
 			local trn=Duel.GetTurnCount(tp)+Duel.GetTurnCount(1-tp)
 			tc:AddCounter(0x1b,trn)
 		end
+	end
+end
+function c26064012.drfilter(c)
+	return c:IsSetCard(0x664) and c:IsAbleToHand()
+end
+function c26064012.rescon(sg,e,tp,mg)
+	return #sg:Filter(Card.IsType,nil,TYPE_MONSTER)<2
+	and   #sg:Filter(Card.IsType,nil,TYPE_SPELL)<2
+	and  #sg:Filter(Card.IsLocation,nil,LOCATION_ONFIELD)<2
+	and #sg:Filter(Card.IsLocation,nil,LOCATION_GRAVE)<2
+end
+function c26064012.drtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chkc then return chkc:IsLocation(LOCATION_GRAVE) and c26064012.drfilter(chkc) end
+	local rg=Duel.GetMatchingGroup(c26064012.drfilter,tp,LOCATION_GRAVE+LOCATION_ONFIELD,0,nil)
+	if chk==0 then return aux.SelectUnselectGroup(rg,e,tp,1,3,c26064012.rescon,0) end
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_GRAVE)
+end
+function c26064012.drop(e,tp,eg,ep,ev,re,r,rp)
+	local rg=Duel.GetMatchingGroup(c26064012.drfilter,tp,LOCATION_GRAVE+LOCATION_ONFIELD,0,nil)
+	local rsg=aux.SelectUnselectGroup(rg,e,tp,1,2,c26064012.rescon,1,tp,HINTMSG_ATOHAND)
+	if rsg:GetCount()>0 then
+		Duel.SendtoHand(rsg,nil,REASON_EFFECT)
+		Duel.ConfirmCards(1-tp,rsg)
 	end
 end
 function c26064012.setcon(e,tp,eg,ep,ev,re,r,rp)
