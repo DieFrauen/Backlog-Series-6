@@ -1,8 +1,15 @@
 --Sidereal Over-wind Marshall - Saeculum
 function c26064005.initial_effect(c)
 	c:EnableReviveLimit()
+	local e0=Effect.CreateEffect(c)
+	e0:SetType(EFFECT_TYPE_SINGLE)
+	e0:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
+	e0:SetCode(EFFECT_SPSUMMON_CONDITION)
+	e0:SetValue(c26064005.splimit)
+	c:RegisterEffect(e0)
 --flip
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(26064005,0))
 	e1:SetCategory(CATEGORY_POSITION)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_FLIP)
 	e1:SetProperty(EFFECT_FLAG_DELAY)
@@ -11,7 +18,7 @@ function c26064005.initial_effect(c)
 	c:RegisterEffect(e1)
 --draw
 	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(26064005,2))
+	e3:SetDescription(aux.Stringid(26064005,4))
 	e3:SetCategory(CATEGORY_DRAW)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e3:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
@@ -22,6 +29,7 @@ function c26064005.initial_effect(c)
 	c:RegisterEffect(e3)
 --leave field
 	local e4=Effect.CreateEffect(c)
+	e4:SetDescription(aux.Stringid(26064005,3))
 	e4:SetCategory(CATEGORY_TOHAND+CATEGORY_DRAW)
 	e4:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e4:SetProperty(EFFECT_FLAG_DELAY)
@@ -41,6 +49,9 @@ end
 c26064005.FLIP=true
 c26064005.DRAW=true
 c26064005.TURN=true
+function c26064005.splimit(e,se,sp,st)
+	return (st&SUMMON_TYPE_RITUAL)==SUMMON_TYPE_RITUAL
+end
 function c26064005.ritual_custom_check(e,tp,g,c)
 	return g:FilterCount(Card.IsType,nil,TYPE_FLIP)>0
 end
@@ -55,9 +66,11 @@ function c26064005.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local gp=Duel.GetTurnPlayer()
 	local g1=Duel.GetMatchingGroup(Card.IsCanTurnSet,tp,LOCATION_MZONE,LOCATION_MZONE,c)
 	Duel.ChangePosition(g1,POS_FACEDOWN_DEFENSE)
+	if Duel.GetFlagEffect(tp,26064005)~=0 then return end
 	if (gp~=tp and Duel.SelectYesNo(tp,aux.Stringid(26064005,0)))
-	or (Duel.SelectYesNo(tp,aux.Stringid(26064005,0)) and Duel.SelectYesNo(tp,aux.Stringid(26064005,1))) then 
-		local e1=Effect.CreateEffect(e:GetHandler())
+	or (Duel.SelectYesNo(tp,aux.Stringid(26064005,0)) and Duel.SelectYesNo(tp,aux.Stringid(26064005,1) and Duel.SelectYesNo(tp,aux.Stringid(26064005,2)))) then 
+		Duel.RegisterFlagEffect(tp,26064005,0,0,1)
+		local e1=Effect.CreateEffect(c)
 		e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 		e1:SetType(EFFECT_TYPE_FIELD)
 		e1:SetCode(EFFECT_CANNOT_BP)
@@ -73,11 +86,14 @@ function c26064005.flipop(e,tp,eg,ep,ev,re,r,rp)
 end
 function c26064005.setcon1(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	return c:IsPreviousPosition(POS_FACEDOWN) and c:IsPreviousLocation(LOCATION_ONFIELD)
+	return c:IsPreviousPosition(POS_FACEDOWN) and c:IsPreviousLocation(LOCATION_ONFIELD) and c26064005.setcon(c,tp,rp)
 end
 function c26064005.setcon2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	return c:IsPreviousPosition(POS_FACEUP) and not c:IsLocation(LOCATION_DECK)
+	return c:IsPreviousPosition(POS_FACEUP) and not c:IsLocation(LOCATION_DECK) and c26064005.setcon(c,tp,rp)
+end
+function c26064005.setcon(c,tp,rp)
+	return c:IsReason(REASON_BATTLE) or (c:IsReason(REASON_EFFECT) and rp~=tp)
 end
 function c26064005.thcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return not e:GetHandler():IsPublic() end
@@ -87,13 +103,17 @@ function c26064005.filter(c,e,sp)
 end
 function c26064005.drtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
-	Duel.SetTargetPlayer(tp)
 	Duel.SetTargetParam(1)
-	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
+	Duel.SetPossibleOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
 end
 function c26064005.drop(e,tp,eg,ep,ev,re,r,rp)
-	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
-	Duel.Draw(p,d,REASON_EFFECT)
+	if not Duel.IsPlayerCanDraw(tp,1) then return end
+	Duel.ConfirmDecktop(tp,1)
+	local g=Duel.GetDecktopGroup(tp,1)
+	local tc=g:GetFirst()
+	if tc:IsSetCard(0x664) then
+		Duel.Draw(tp,1,REASON_EFFECT)
+	else return end
 end
 function c26064005.thfilter(c)
 	return c:IsFaceup() and not c:IsSetCard(0x664) and c:IsAbleToHand()

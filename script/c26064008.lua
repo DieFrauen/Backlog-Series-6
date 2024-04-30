@@ -2,6 +2,7 @@
 function c26064008.initial_effect(c)
 	--Activate
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(26064008,0))
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetHintTiming(TIMING_END_PHASE,TIMING_END_PHASE)
@@ -10,7 +11,7 @@ function c26064008.initial_effect(c)
 	c:RegisterEffect(e1)
 	--when drawn
 	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(26064005,2))
+	e2:SetDescription(aux.Stringid(26064008,1))
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e2:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_DRAW)
@@ -20,6 +21,7 @@ function c26064008.initial_effect(c)
 	c:RegisterEffect(e2)
 	--leave field
 	local e3=Effect.CreateEffect(c)
+	e2:SetDescription(aux.Stringid(26064008,2))
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
 	e3:SetCode(EVENT_LEAVE_FIELD)
@@ -69,8 +71,12 @@ function c26064008.activate1(e,tp,eg,ep,ev,re,r,rp)
 	end
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) and e:IsHasType(EFFECT_TYPE_ACTIVATE) then
+		Duel.BreakEffect()
 		c:CancelToGrave()
-		Duel.SendtoDeck(c,nil,1,REASON_EFFECT)
+		local g=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_GRAVE,0,nil,26064008)
+		if #g>0 then Duel.HintSelection(g) end
+		g:AddCard(c)
+		Duel.SendtoDeck(g,nil,1,REASON_EFFECT)
 	end
 end
 function c26064008.cost2(e,tp,eg,ep,ev,re,r,rp,chk)

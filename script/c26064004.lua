@@ -38,7 +38,7 @@ function c26064004.initial_effect(c)
 	c:RegisterEffect(e4)
 	local e5=e4:Clone()
 	e5:SetCode(EVENT_TO_HAND)
-	e5:SetCondition(c26064004.setcon2)
+	--e5:SetCondition(c26064004.setcon2)
 	c:RegisterEffect(e5)
 	local e6=e4:Clone()
 	e6:SetCode(EVENT_LEAVE_FIELD)
@@ -68,23 +68,28 @@ function c26064004.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local gp=Duel.GetTurnPlayer()
 	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
 	Duel.Draw(p,d,REASON_EFFECT)
+	local phase=Duel.GetCurrentPhase()
+	if phase==(PHASE_DRAW|PHASE_STANDBY|PHASE_END) then return end
 	if (gp~=tp and Duel.SelectYesNo(tp,aux.Stringid(26064004,1))) or (Duel.SelectYesNo(tp,aux.Stringid(26064004,1)) and Duel.SelectYesNo(tp,aux.Stringid(26064004,2))) then 
-		if Duel.GetCurrentPhase()==PHASE_MAIN1 then
+		if phase==PHASE_MAIN1 then
 			Duel.SkipPhase(gp,PHASE_MAIN1,RESET_PHASE+PHASE_END,1) return
-		elseif Duel.GetCurrentPhase()>=PHASE_BATTLE_START and Duel.GetCurrentPhase()<=PHASE_BATTLE then
+		elseif phase>=PHASE_BATTLE_START and Duel.GetCurrentPhase()<=PHASE_BATTLE then
 			Duel.SkipPhase(gp,PHASE_BATTLE,RESET_PHASE+PHASE_BATTLE,1,1) return
-		elseif Duel.GetCurrentPhase()==PHASE_MAIN2 then
+		elseif phase==PHASE_MAIN2 then
 			Duel.SkipPhase(gp,PHASE_MAIN2,RESET_PHASE+PHASE_END,1) return
 		end
 	end
 end
 function c26064004.setcon1(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	return c:IsPreviousPosition(POS_FACEDOWN) and c:IsPreviousLocation(LOCATION_ONFIELD)
+	return c:IsPreviousPosition(POS_FACEDOWN) and c:IsPreviousLocation(LOCATION_ONFIELD) and c26064004.setcon(c,tp,rp)
 end
 function c26064004.setcon2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	return c:IsPreviousPosition(POS_FACEUP) and not c:IsLocation(LOCATION_DECK)
+	return c:IsPreviousPosition(POS_FACEUP) and not c:IsLocation(LOCATION_DECK) and c26064004.setcon(c,tp,rp)
+end
+function c26064004.setcon(c,tp,rp)
+	return c:IsReason(REASON_BATTLE) or (c:IsReason(REASON_EFFECT) and rp~=tp)
 end
 function c26064004.drcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return not e:GetHandler():IsPublic() end

@@ -112,11 +112,10 @@ function c26064002.setop(e,tp,eg,ep,ev,re,r,rp)
 		if (s1 and s2) or not s2 then
 			--Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)
 			Duel.MSet(tp,tc,true,nil)
-			local e1=Effect.CreateEffect(e:GetHandler())
+			local e1=Effect.CreateEffect(c)
 			e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 			e1:SetCode(EVENT_CHAIN_END)
-			e1:SetProperty(EFFECT_FLAG_IMMEDIATELY_APPLY)
-			e1:SetCountLimit(1)
+			e1:SetProperty(EFFECT_FLAG_DELAY)
 			e1:SetOperation(c26064002.drop)
 			e1:SetReset(RESET_PHASE+PHASE_END)
 			Duel.RegisterEffect(e1,tp,true)
@@ -125,10 +124,13 @@ function c26064002.setop(e,tp,eg,ep,ev,re,r,rp)
 		end
 	end
 end
-
+function c26064002.drcon(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.GetCurrentChain()<0
+end
 function c26064002.drop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_CARD,0,26064002)
 	Duel.Draw(tp,1,REASON_EFFECT)
+	e:Reset()
 end
 function c26064002.ns(e,tp,eg,ep,ev,re,r,rp,chk)
 	local b1=c26064002.fliptg(e,tp,eg,ep,ev,re,r,rp,2)

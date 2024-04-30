@@ -2,6 +2,7 @@
 function c26064011.initial_effect(c)
 	--Activate
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(26064011,6))
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetHintTiming(0,TIMING_END_PHASE)
@@ -31,7 +32,7 @@ function c26064011.initial_effect(c)
 	c:RegisterEffect(e4)
 	--when drawn
 	local e5=Effect.CreateEffect(c)
-	e5:SetDescription(aux.Stringid(26064005,2))
+	e5:SetDescription(aux.Stringid(26064011,5))
 	e5:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e5:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
 	e5:SetCode(EVENT_DRAW)
@@ -41,7 +42,7 @@ function c26064011.initial_effect(c)
 	c:RegisterEffect(e5)
 	--leave field
 	local e6=Effect.CreateEffect(c)
-	e6:SetDescription(aux.Stringid(26064005,2))
+	e6:SetDescription(aux.Stringid(26064011,6))
 	e6:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
 	e6:SetProperty(EFFECT_FLAG_DELAY)
 	e6:SetCode(EVENT_LEAVE_FIELD)
@@ -80,6 +81,7 @@ function c26064011.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=g:GetFirst()
 	if tc:IsCanBeSpecialSummoned(e,0,tp,false,false) and Duel.SelectYesNo(tp,aux.Stringid(26064011,3)) then
 		Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_DEFENSE)
+		if tc:IsFacedown() then Duel.ConfirmCards(1-tp,tc) end
 	else
 		Duel.ShuffleDeck(tp)
 		Duel.MoveSequence(tc,0)

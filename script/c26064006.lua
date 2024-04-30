@@ -24,7 +24,7 @@ function c26064006.extraop(mat,e,tp,eg,ep,ev,re,r,rp,tc)
 	return Duel.ChangePosition(mat,POS_FACEDOWN_DEFENSE)
 end
 function c26064006.forcedgroup(c,e,tp)
-	return c:IsFaceup() and c:IsCanTurnSet() and not c:IsImmuneToEffect(e)
+	return c:IsFaceup() and c:IsCanTurnSet() and not c:IsImmuneToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE,0)>0
 end
 function c26064006.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
@@ -68,13 +68,14 @@ end
 function c26064006.drtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsLocation(LOCATION_GRAVE) and c26064006.spfilter(chkc,e,tp) end
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and Duel.IsExistingTarget(c26064006.spfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil,e,tp) end
-	local g=Duel.SelectTarget(tp,c26064006.spfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil,e,tp)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
+		and Duel.IsExistingMatchingCard(c26064006.spfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil,e,tp) end
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_GRAVE)
 end
 function c26064006.drop(e,tp,eg,ep,ev,re,r,rp)
-	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) then
+	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+	local tc=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(c26064006.spfilter),tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil,e,tp):GetFirst()
+	if tc then
 		local pos=Duel.SelectPosition(tp,tc,POS_DEFENSE)
 		if tc:IsCode(26064004) then
 			Duel.SpecialSummon(tc,SUMMON_TYPE_RITUAL,tp,tp,false,true,pos)
