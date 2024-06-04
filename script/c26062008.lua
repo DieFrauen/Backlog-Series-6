@@ -3,11 +3,15 @@ function c26062008.initial_effect(c)
 	--synchro summon
 	Synchro.AddProcedure(c,nil,1,1,Synchro.NonTunerEx(Card.IsAttribute,ATTRIBUTE_FIRE),1,99)
 	c:EnableReviveLimit()
+	--summon eff
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-	e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
+	e2:SetDescription(aux.Stringid(26062008,0))
+	e2:SetCategory(CATEGORY_TOGRAVE)
+	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+	e2:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
-	e2:SetOperation(c26062008.regop)
+	e2:SetTarget(c26062008.target)
+	e2:SetOperation(c26062008.operation)
 	c:RegisterEffect(e2)
 	--atk up
 	local e3=Effect.CreateEffect(c)
@@ -43,26 +47,18 @@ end
 function c26062008.eftg(e,c)
 	return c:IsType(TYPE_EFFECT) and c:IsSetCard(0x662) and not c:IsType(TYPE_TUNER)
 end
-function c26062008.lvtg(e,c)
-	if (c:IsType(TYPE_TUNER) or c:IsSetCard(0x662)) and c:IsLevelBelow(9) then
-		e:SetLabel(c:GetLevel())
-		return true
-	end
+function c26062008.filter(c)
+	return c:IsSetCard(0x662) and c:IsAbleToGrave()
 end
-function c26062008.lvval(e,c)
-	if c==e:GetHandler() then return 5
-	else return e:GetLabel() end
+function c26062008.target(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.IsExistingMatchingCard(c26062008.filter,tp,LOCATION_DECK,0,1,nil) end
+	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
 end
-function c26062008.regop(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	if c:IsSummonType(SUMMON_TYPE_SYNCHRO) then
-		local gc=c:GetMaterial():GetSum(Card.GetPreviousLevelOnField)
-		local e1=Effect.CreateEffect(c)
-		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_CHANGE_LEVEL_FINAL)
-		e1:SetValue(gc)
-		e1:SetReset(RESET_EVENT+RESETS_STANDARD)
-		c:RegisterEffect(e1)
+function c26062008.operation(e,tp,eg,ep,ev,re,r,rp)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
+	local g=Duel.SelectMatchingCard(tp,c26062008.filter,tp,LOCATION_DECK,0,1,1,nil)
+	if g:GetCount()>0 then
+		Duel.SendtoGrave(g,REASON_EFFECT)
 	end
 end
 function c26062008.filter(c)
@@ -81,6 +77,7 @@ function c26062008.spop(e,tp,eg,ep,ev,re,r,rp)
 	if not c:IsRelateToEffect(e) or not c:IsCanBeSpecialSummoned(e,0,tp,false,false) then return end
 	Duel.Hint(HINT_CARD,tp,26062008)
 	Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)
+	if c:IsType(TYPE_SYNCHRO) then return end
 	local fid=e:GetHandler():GetFieldID()
 	c:RegisterFlagEffect(26062008,RESET_EVENT+RESETS_STANDARD,0,1,fid)
 	local e1=Effect.CreateEffect(e:GetHandler())
@@ -94,15 +91,6 @@ function c26062008.spop(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetOperation(c26062008.desop)
 	e1:SetReset(RESET_PHASE+PHASE_END)
 	Duel.RegisterEffect(e1,tp)
-	if c:IsType(TYPE_SYNCHRO) then return end
-	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(3300)
-	e2:SetType(EFFECT_TYPE_SINGLE)
-	e2:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
-	e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
-	e2:SetReset(RESET_EVENT+RESETS_REDIRECT)
-	e2:SetValue(LOCATION_REMOVED)
-	c:RegisterEffect(e2,true)
 end
 function c26062008.descon(e,tp,eg,ep,ev,re,r,rp)
 	local tc=e:GetLabelObject()
@@ -110,7 +98,7 @@ function c26062008.descon(e,tp,eg,ep,ev,re,r,rp)
 end
 function c26062008.desop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=e:GetLabelObject()
-	Duel.Destroy(tc,REASON_EFFECT)
+	Duel.Destroy(tc,REASON_EFFECT,LOCATION_REMOVED)
 end
 function c26062008.eftg(e,c)
 	local ep=c:GetControler()

@@ -10,7 +10,7 @@ function c26062010.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(26062010,1))
 	e2:SetCategory(CATEGORY_DAMAGE)
-	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
+	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 	e2:SetRange(LOCATION_FZONE)
 	e2:SetLabel(0)
@@ -57,40 +57,29 @@ function c26062010.initial_effect(c)
 	--damage on chain
 	local e5=Effect.CreateEffect(c)
 	e5:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e5:SetCode(EVENT_CHAINING)
+	e5:SetCode(EVENT_CHAIN_SOLVING)
 	e5:SetRange(LOCATION_FZONE)
-	e5:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e5:SetOperation(c26062010.regop)
+	e5:SetOperation(c26062010.chop)
 	c:RegisterEffect(e5)
-	local e6=Effect.CreateEffect(c)
-	e6:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e6:SetCode(EVENT_CHAIN_SOLVING)
-	e6:SetRange(LOCATION_FZONE)
-	e6:SetCondition(c26062010.chcon)
-	e6:SetOperation(c26062010.chop)
-	c:RegisterEffect(e6)
 end
 function c26062010.regop(e,tp,eg,ep,ev,re,r,rp)
 	e:GetHandler():RegisterFlagEffect(26062010,RESET_EVENT+RESETS_STANDARD-RESET_TURN_SET+RESET_CHAIN,0,1)
 end
 function c26062010.chcon(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	return ep==1-tp and c:GetFlagEffect(26062010)>0
+	return c:GetFlagEffect(26062010)>0
 end
 function c26062010.chop(e,tp,eg,ep,ev,re,r,rp)
 	local ch=Duel.GetCurrentChain()
-	local lg=Group.CreateGroup()
-	for i=1,ch do
-		local te,tgp=Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT,CHAININFO_TRIGGERING_PLAYER)
-		local tc=te:GetHandler()
-		if tgp==tp and tc:IsSetCard(0x662) and tc:IsLevelAbove(1) then
-			lg:AddCard(tc)
-		end
+	local e1,p1=Duel.GetChainInfo(ch  ,CHAININFO_TRIGGERING_EFFECT,CHAININFO_TRIGGERING_PLAYER)
+	local e2,p2=Duel.GetChainInfo(ch-1,CHAININFO_TRIGGERING_EFFECT,CHAININFO_TRIGGERING_PLAYER)
+	local sc=e1:GetHandler()
+	local tc=e2:GetHandler()
+	if (p1==tp and sc and sc:IsSetCard(0x662) and sc:IsMonster() and sc:GetOriginalLevel()==ch)
+	or (p1~=tp and p2==tp and tc and tc:IsSetCard(0x662)) then
+		Duel.Hint(HINT_CARD,0,26062010)
+		Duel.Damage(1-tp,ch*100,REASON_EFFECT)
 	end
-	local val=lg:GetSum(Card.GetOriginalLevel)
-	if val<=0 then return end
-	Duel.Hint(HINT_CARD,0,26062010)
-	Duel.Damage(1-tp,val*100,REASON_EFFECT)
 end
 function c26062010.damtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end

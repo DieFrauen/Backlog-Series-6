@@ -24,6 +24,7 @@ function c26062006.initial_effect(c)
 	e4:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e4:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
 	e4:SetCode(EVENT_TO_GRAVE)
+	e4:SetCountLimit(1,{26062006,1})
 	e4:SetTarget(c26062006.grtg)
 	e4:SetOperation(c26062006.grop)
 	c:RegisterEffect(e4)
@@ -77,27 +78,31 @@ function c26062006.grop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
 	if tc:IsFaceup() and tc:IsRelateToEffect(e) then
-		if tc:IsSetCard(0x662) and (tc:IsLevelAbove(2) or not tc:IsType(TYPE_TUNER)) and Duel.SelectYesNo(tp,aux.Stringid(26062006,1)) then
+		local b1= tc:IsLevelAbove(2)
+		local b2= tc:GetType()&TYPE_TUNER ==0
+		local b3= (b1 and b2)
+		if not (b1 or b2) then return end
+		Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26062006,1))
+		local op=Duel.SelectEffect(tp,
+			{b1,aux.Stringid(26062006,2)},
+			{b2,aux.Stringid(26062006,3)},
+			{b3,aux.Stringid(26062006,4)})
+		if op~=2 then
 			local e1=Effect.CreateEffect(c)
 			e1:SetType(EFFECT_TYPE_SINGLE)
 			e1:SetCode(EFFECT_CHANGE_LEVEL)
 			e1:SetReset(RESET_EVENT+0x1fe0000)
 			e1:SetValue(1)
 			tc:RegisterEffect(e1)
+		end
+		if op~=1 then
 			local e2=Effect.CreateEffect(c)
 			e2:SetType(EFFECT_TYPE_SINGLE)
 			e2:SetCode(EFFECT_ADD_TYPE)
 			e2:SetValue(TYPE_TUNER)
 			e2:SetReset(RESET_EVENT+0x1fe0000)
 			tc:RegisterEffect(e2)
-			return
 		end
-		local e1=Effect.CreateEffect(c)
-		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_UPDATE_LEVEL)
-		e1:SetReset(RESET_EVENT+0x1fe0000)
-		e1:SetValue(1)
-		tc:RegisterEffect(e1)
 	end
 end
 function c26062006.lvfilter(c,lv)
