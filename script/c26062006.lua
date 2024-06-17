@@ -1,22 +1,27 @@
 --Blazon - Vair the Vanguard
 function c26062006.initial_effect(c)
-	--send to grave
+	c:SetSPSummonOnce(26062006)
+	--special summon
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(26062006,0))
-	e1:SetCategory(CATEGORY_DRAW)
-	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e1:SetCode(EVENT_TO_GRAVE)
 	e1:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
-	e1:SetCode(EVENT_SUMMON_SUCCESS)
-	e1:SetCountLimit(1,26062006)
-	e1:SetCost(c26062006.cost)
-	e1:SetTarget(c26062006.target)
-	e1:SetOperation(c26062006.operation)
+	e1:SetRange(LOCATION_HAND)
+	e1:SetCondition(c26062006.spcon)
+	e1:SetTarget(c26062006.sptg)
+	e1:SetOperation(c26062006.spop)
 	c:RegisterEffect(e1)
-	local e2=e1:Clone()
-	e2:SetCode(EVENT_FLIP_SUMMON_SUCCESS)
+	--cannot link material
+	local e2=Effect.CreateEffect(c)
+	e2:SetType(EFFECT_TYPE_SINGLE)
+	e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
+	e2:SetCode(EFFECT_CANNOT_BE_LINK_MATERIAL)
+	e2:SetValue(1)
 	c:RegisterEffect(e2)
-	local e3=e1:Clone()
-	e3:SetCode(EVENT_SPSUMMON_SUCCESS)
+	local e3=e2:Clone()
+	e3:SetCode(EFFECT_CANNOT_BE_XYZ_MATERIAL)
 	c:RegisterEffect(e3)
 	--grave eff
 	local e4=Effect.CreateEffect(c)
@@ -28,45 +33,34 @@ function c26062006.initial_effect(c)
 	e4:SetTarget(c26062006.grtg)
 	e4:SetOperation(c26062006.grop)
 	c:RegisterEffect(e4)
-	--lv up
-	local e5=Effect.CreateEffect(c)
-	e5:SetDescription(aux.Stringid(26062006,2))
-	e5:SetCategory(CATEGORY_LVCHANGE)
-	e5:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e5:SetType(EFFECT_TYPE_QUICK_O)
-	e5:SetCode(EVENT_FREE_CHAIN)
-	e5:SetRange(LOCATION_MZONE)
-	e5:SetCountLimit(1)
-	e5:SetHintTiming(0x1c0)
-	e5:SetTarget(c26062006.lvtg)
-	e5:SetOperation(c26062006.lvop)
-	c:RegisterEffect(e5)
 end
-function c26062006.cfilter(c)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x662) and not c:IsType(TYPE_TUNER) and c:IsAbleToGraveAsCost()
+function c26062006.cfilter(c,e,tp)
+	return c:IsSetCard(0x662) and c:IsMonster() and not c:IsCode(id) and c:IsControler(tp) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
-function c26062006.cost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26062006.cfilter,tp,LOCATION_HAND,0,1,nil,tp) and Duel.IsExistingMatchingCard(c26062006.cfilter,tp,LOCATION_DECK,0,1,nil,tp) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-	local g1=Duel.SelectMatchingCard(tp,c26062006.cfilter,tp,LOCATION_HAND,0,1,1,nil,tp):GetFirst()
-	local g2=Duel.SelectMatchingCard(tp,c26062006.cfilter,tp,LOCATION_DECK,0,1,1,nil,tp):GetFirst()
-	Duel.SendtoGrave(Group.FromCards(g1,g2),REASON_COST)
+function c26062006.filter(c,e,tp,tid)
+	return c:GetTurnID()==tid and c:IsSetCard(0x662) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
-function c26062006.tgfilter(c)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x662) and c:IsAbleToGraveAsCost()
+function c26062006.spcon(e,tp,eg,ep,ev,re,r,rp)
+	return eg:IsExists(c26062006.cfilter,1,nil,e,tp)
 end
-function c26062006.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsPlayerCanDraw(tp,1) end
-	Duel.SetTargetPlayer(tp)
-	Duel.SetTargetParam(1)
-	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
+function c26062006.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
+	local tid=Duel.GetTurnCount()
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>1
+		and e:GetHandler():IsCanBeSpecialSummoned(e,0,tp,false,false)
+		and Duel.IsExistingMatchingCard(c26062006.filter,tp,LOCATION_GRAVE,0,1,nil,e,tp,tid) end
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,2,0,0)
 end
-function c26062006.operation(e,tp,eg,ep,ev,re,r,rp)
-	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
-	Duel.Draw(p,d,REASON_EFFECT)
-end
-function c26062006.grfilter(c)
-	return c:IsFaceup() and c:IsSetCard(0x662) and (c:IsLevelAbove(2) or not c:IsType(TYPE_TUNER))
+function c26062006.spop(e,tp,eg,ep,ev,re,r,rp)
+	local tid=Duel.GetTurnCount()
+	if not e:GetHandler():IsRelateToEffect(e) then return end
+	if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then return end
+	if Duel.GetLocationCount(tp,LOCATION_MZONE)<2 then return end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+	local g=Duel.SelectMatchingCard(tp,c26062006.filter,tp,LOCATION_GRAVE,0,1,1,e:GetHandler(),e,tp,tid)
+	if #g>0 then
+		g:AddCard(e:GetHandler())
+		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
+	end
 end
 function c26062006.grtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsLocation(LOCATION_MZONE) and c26062006.grfilter(chkc) end

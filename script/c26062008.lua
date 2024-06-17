@@ -1,4 +1,4 @@
---Blazon General - Argus
+--Blazon - Argela the Ardent
 function c26062008.initial_effect(c)
 	--synchro summon
 	Synchro.AddProcedure(c,nil,1,1,Synchro.NonTunerEx(Card.IsAttribute,ATTRIBUTE_FIRE),1,99)
@@ -47,22 +47,22 @@ end
 function c26062008.eftg(e,c)
 	return c:IsType(TYPE_EFFECT) and c:IsSetCard(0x662) and not c:IsType(TYPE_TUNER)
 end
-function c26062008.filter(c)
-	return c:IsSetCard(0x662) and c:IsAbleToGrave()
+function c26062008.tgfilter(c,e,tp)
+	return c:IsSetCard(0x662) and c:IsAbleToGrave() and not Duel.IsExistingMatchingCard(c26062008.nmfilter,tp,LOCATION_GRAVE,0,1,nil,c:GetCode())
+end
+function c26062008.nmfilter(c,code)
+	return c:IsCode(code)
 end
 function c26062008.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26062008.filter,tp,LOCATION_DECK,0,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26062008.tgfilter,tp,LOCATION_DECK,0,1,nil,e,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
 end
 function c26062008.operation(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-	local g=Duel.SelectMatchingCard(tp,c26062008.filter,tp,LOCATION_DECK,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,c26062008.tgfilter,tp,LOCATION_DECK,0,1,1,nil,e,tp)
 	if g:GetCount()>0 then
 		Duel.SendtoGrave(g,REASON_EFFECT)
 	end
-end
-function c26062008.filter(c)
-	return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsType(TYPE_MONSTER)
 end
 function c26062008.spcon(e,tp,eg,ep,ev,re,r,rp)
 	local chain=Duel.GetCurrentChain()

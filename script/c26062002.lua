@@ -1,4 +1,4 @@
---Blazon Lieutenant - Sable
+--Blazon - Serpure the Seeker
 function c26062002.initial_effect(c)
 	c:SetSPSummonOnce(26062002)
 	--special summon
@@ -38,32 +38,52 @@ function c26062002.initial_effect(c)
 	e3:SetOperation(c26062002.grop)
 	c:RegisterEffect(e3)
 end
-function c26062002.dcost(c)
-	return (c:IsSetCard(0x662) or (c:IsAttribute(ATTRIBUTE_FIRE) and c:IsMonster())) and c:IsAbleToGrave()
+function c26062002.dcost(c,tp)
+	return (c:IsSetCard(0x662) or (c:IsAttribute(ATTRIBUTE_FIRE)
+	and c:IsMonster()))
+	and Duel.IsPlayerCanRelease(tp,c)
+end
+function c26062002.otcost(c,tc)
+	return c:IsCode(tc:GetCode()) and c:IsFaceup()
+end
+function c26062002.dkcost(c,tp)
+	return c:IsSetCard(0x662) and c:IsMonster() and not c:IsType(TYPE_TUNER) and Duel.IsPlayerCanRelease(tp,c) and not Duel.IsExistingMatchingCard(c26062002.otcost,tp,LOCATION_GRAVE+LOCATION_ONFIELD,0,1,nil,c) and not c:IsCode(26062002)
 end
 function c26062002.spcon(e,c)
+	local sc=e:GetHandler()
 	if c==nil then return true end
 	local tp=c:GetControler()
-	local g1=Duel.GetMatchingGroup(c26062002.dcost,tp,LOCATION_HAND+LOCATION_ONFIELD,0,e:GetHandler())
+	local g1=Duel.GetMatchingGroup(c26062002.dcost,tp,LOCATION_HAND+LOCATION_ONFIELD,0,c,tp)
 	local g2=Duel.GetMatchingGroup(c26062002.cfcost,tp,LOCATION_GRAVE,0,nil)
+	local g3=Duel.GetMatchingGroup(c26062002.dkcost,tp,LOCATION_DECK,0,c,tp)
 	g1:Merge(g2)
+	if #g3>0 and Duel.IsPlayerAffectedByEffect(tp,26062007) and Duel.GetFlagEffect(tp,26062007)==0
+	then g1:Merge(g3) end
 	return aux.SelectUnselectGroup(g1,e,tp,1,1,aux.ChkfMMZ(1),0,c)
 end
 function c26062002.cfcost(c)
 	return c:IsCode(26062011) and c:IsAbleToRemoveAsCost()
 end
 function c26062002.sptg(e,tp,eg,ep,ev,re,r,rp,c)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DISCARD)
-	local g1=Duel.GetMatchingGroup(c26062002.dcost,tp,LOCATION_HAND+LOCATION_ONFIELD,0,e:GetHandler())
+	local sc=e:GetHandler()
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RELEASE)
+	local g1=Duel.GetMatchingGroup(c26062002.dcost,tp,LOCATION_HAND+LOCATION_ONFIELD,0,sc,tp)
 	local g2=Duel.GetMatchingGroup(c26062002.cfcost,tp,LOCATION_GRAVE,0,nil)
-	local sg=nil
+	local g3=Duel.GetMatchingGroup(c26062002.dkcost,tp,LOCATION_DECK,0,sc,tp,e:GetHandler())
+	if #g3>0 and Duel.IsPlayerAffectedByEffect(tp,26062007) and Duel.GetFlagEffect(tp,26062007)==0
+	then g1:Merge(g3) end
+	local sc=nil
 	if g2:GetCount()>0 and (g1:GetCount()==0 or Duel.SelectYesNo(tp,aux.Stringid(26062011,3))) then
-		sg=g2:Select(tp,1,1,nil)
+		sc=g2:Select(tp,1,1,nil):GetFirst()
 	else 
-		sg=aux.SelectUnselectGroup(g1,e,tp,1,1,aux.ChkfMMZ(1),1,tp,HINTMSG_DISCARD,nil,nil,true)
+		sc=aux.SelectUnselectGroup(g1,e,tp,1,1,aux.ChkfMMZ(1),1,tp,HINTMSG_RELEASE,nil,nil,true):GetFirst()
 	end
-	if #sg>0 then
-		e:SetLabelObject(sg:GetFirst())
+	if sc then
+		if g3:IsContains(sc) then 
+			Duel.Hint(HINT_CARD,tp,26062007)
+			Duel.RegisterFlagEffect(tp,26062007,RESET_PHASE+PHASE_END,0,1)
+		end
+		e:SetLabelObject(sc)
 		return true
 	end
 	return false
@@ -74,7 +94,7 @@ function c26062002.spop(e,tp,eg,ep,ev,re,r,rp,c)
 	if tc:IsCode(26062011) and tc:IsLocation(LOCATION_GRAVE) then
 		Duel.Remove(tc,POS_FACEUP,REASON_COST)
 	else
-		Duel.SendtoGrave(tc,REASON_COST)
+		Duel.SendtoGrave(tc,REASON_COST+REASON_RELEASE)
 	end 
 end
 function c26062002.condition(e,tp,eg,ep,ev,re,r,rp)
@@ -82,7 +102,7 @@ function c26062002.condition(e,tp,eg,ep,ev,re,r,rp)
 	return rc and rc:IsSetCard(0x662)
 end
 function c26062002.filter(c)
-	return c:IsSetCard(0x662) and c:IsMonster() and c:IsAbleToGrave()
+	return c:IsSetCard(0x662) and c:IsAbleToGrave()
 end
 function c26062002.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26062002.filter,tp,LOCATION_DECK,0,1,nil) end
@@ -91,16 +111,11 @@ end
 function c26062002.lvfilter(c,g)
 	return g:IsExists(Card.IsLevel,1,nil,c:GetLevel())
 end
-function c26062002.rescon(sg,e,tp,mg)
-	local g=Duel.GetFieldGroup(tp,LOCATION_GRAVE,0)
-	return (sg:GetClassCount(Card.GetLevel)==#sg and not sg:IsExists(c26062002.lvfilter,1,nil,g)) or #sg==1
-end
 function c26062002.operation(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-	local g=Duel.GetMatchingGroup(c26062002.filter,tp,LOCATION_DECK,0,nil)
-	if g:GetCount()>0 then
-		local sg=aux.SelectUnselectGroup(g,e,tp,1,2,c26062002.rescon,1,tp,HINTMSG_SELECT,c26062002.rescon)
-		Duel.SendtoGrave(sg,REASON_EFFECT)
+	local g=Duel.SelectMatchingCard(tp,c26062002.filter,tp,LOCATION_DECK,0,1,1,nil)
+	if #g>0 then
+		Duel.SendtoGrave(g,REASON_EFFECT)
 	end
 end
 function c26062002.grfilter(c)

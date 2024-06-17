@@ -1,159 +1,193 @@
 --Glistening Blazon Charge
 function c26062011.initial_effect(c)
-	--deck destruction
+	--return
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(26062011,0))
-	e1:SetCategory(CATEGORY_DECKDES)
+	e1:SetCategory(CATEGORY_TOHAND)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetHintTiming(0,TIMING_END_PHASE)
-	e1:SetCondition(c26062011.condition)
+	e1:SetCost(c26062011.cost)
 	e1:SetTarget(c26062011.target1)
 	e1:SetOperation(c26062011.activate1)
 	c:RegisterEffect(e1)
-	--return
+	--mantle
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(26062011,1))
 	e2:SetCategory(CATEGORY_TOHAND)
 	e2:SetType(EFFECT_TYPE_ACTIVATE)
 	e2:SetCode(EVENT_FREE_CHAIN)
-	e2:SetHintTiming(0,TIMING_END_PHASE)
-	e2:SetCondition(c26062011.condition)
+	e2:SetCost(c26062011.cost)
 	e2:SetTarget(c26062011.target2)
 	e2:SetOperation(c26062011.activate2)
 	c:RegisterEffect(e2)
-	--damage spread
+	--disable
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(26062011,2))
+	e3:SetCategory(CATEGORY_DISABLE)
 	e3:SetType(EFFECT_TYPE_ACTIVATE)
-	e3:SetCode(EVENT_CHAINING)
-	e3:SetCondition(c26062011.condition)
+	e3:SetCode(EVENT_FREE_CHAIN)
+	e3:SetCost(c26062011.cost)
 	e3:SetTarget(c26062011.target3)
 	e3:SetOperation(c26062011.activate3)
 	c:RegisterEffect(e3)
-	if not c26062011.global_check then
-		c26062011.global_check=true
-		c26062011[0]=0
-		c26062011[1]=0
-		local ge1=Effect.CreateEffect(c)
-		ge1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-		ge1:SetCode(EVENT_CHAINING)
-		ge1:SetOperation(c26062011.checkop)
-		Duel.RegisterEffect(ge1,0)
-		local ge2=Effect.CreateEffect(c)
-		ge2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-		ge2:SetCode(EVENT_CHAIN_END)
-		ge2:SetOperation(c26062011.clearop)
-		Duel.RegisterEffect(ge2,0)
-	end
+	--disable
+	local e4=Effect.CreateEffect(c)
+	e4:SetDescription(aux.Stringid(26062011,4))
+	e4:SetCategory(CATEGORY_DECKDES)
+	e4:SetType(EFFECT_TYPE_ACTIVATE)
+	e4:SetCode(EVENT_FREE_CHAIN)
+	e4:SetCost(c26062011.cost)
+	e4:SetTarget(c26062011.target4)
+	e4:SetOperation(c26062011.activate4)
+	c:RegisterEffect(e4)
 end
-function c26062011.condition(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	return c26062011[tp]>0
+c26062011.check=false
+function c26062011.cost(e,tp,eg,ep,ev,re,r,rp,chk)
+	c26062011.check=true
+	if chk==0 then return true end
 end
-function c26062011.checkop(e,tp,eg,ep,ev,re,r,rp)
+function c26062011.rfilter(c)
+	return c:IsSetCard(0x662) and c:IsAbleToDeckAsCost()
+end
+function c26062011.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local ch=Duel.GetCurrentChain()
-	local g1=Group.CreateGroup()
-	local p1,p2=0,0
-	for i=1,ch do
-		local te,tgp=Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT,CHAININFO_TRIGGERING_PLAYER)
-		local tc=te:GetHandler()
-		if tc:IsSetCard(0x662) then
-			if tgp==0 then
-				p1=p1+1
-			else
-				p2=p2+1
-			end
+	local loc=LOCATION_GRAVE+LOCATION_ONFIELD+LOCATION_HAND 
+	local rg=Duel.GetMatchingGroup(c26062011.rfilter,tp,loc,0,e:GetHandler())
+	if chk==0 then
+		if not c26062011.check then return false end
+		c26062011.check=false
+		return aux.SelectUnselectGroup(rg,e,tp,1,ch,aux.dncheck,0) and Duel.IsExistingMatchingCard(c26062011.filter1,tp,LOCATION_SZONE,LOCATION_SZONE,1,nil)
 		end
-	end
-	c26062011[tp]=p1
-	c26062011[1-tp]=p2
+	Duel.Hint(HINT_OPSELECTED,1-tp,e:GetDescription())
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+	local rsg=aux.SelectUnselectGroup(rg,e,tp,1,ch,aux.dncheck,1,tp,HINTMSG_TODECK)
+	Duel.SendtoDeck(rsg,tp,2,REASON_COST)
+	e:SetLabel(#rsg)
+	local sg=Duel.GetMatchingGroup(c26062011.filter1,tp,0,LOCATION_ONFIELD,c)
+	Duel.SetOperationInfo(0,CATEGORY_TODECK,sg,1,0,0)
 end
-function c26062011.clearop(e,tp,eg,ep,ev,re,r,rp)
-	c26062011[0]=0
-	c26062011[1]=0
-end
-function c26062011.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	local ct=c26062011[tp]
-	if chk==0 then return Duel.IsPlayerCanDiscardDeck(tp,ct) end
-	Duel.SetOperationInfo(0,CATEGORY_DECKDES,nil,0,tp,ct)
-end
-function c26062011.excfilter(c)
-	return c:IsSetCard(0x662) and c:IsMonster()
-end
-function c26062011.activate1(e,tp,eg,ep,ev,re,r,rp)
-	local ct=c26062011[tp]
-	ct=math.min(ct,10)
-	if not Duel.IsPlayerCanDiscardDeck(tp,ct) then return end
-	Duel.ConfirmDecktop(tp,ct)
-	local g=Duel.GetDecktopGroup(tp,ct)
-	local sg=g:Filter(c26062011.excfilter,nil)
-	if #sg>0 then
-		Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26062011,4))
-		if #sg==#g or Duel.SelectOption(tp,aux.Stringid(26062011,5),aux.Stringid(26062011,6)) then
-			Duel.DisableShuffleCheck()
-			Duel.SendtoGrave(sg,REASON_EFFECT|REASON_EXCAVATE)
-			Duel.ShuffleDeck(tp)
-		else
-			Duel.SendtoGrave(g,REASON_EFFECT|REASON_EXCAVATE)
-		end
-	end
-end
-function c26062011.thfilter(c)
+function c26062011.filter1(c)
 	return c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsAbleToHand()
 end
-function c26062011.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	local c=e:GetHandler()
-	local ct=c26062011[tp]
-	if chk==0 then return ct>0 and Duel.IsExistingMatchingCard(c26062011.thfilter,tp,0,LOCATION_ONFIELD,1,c) end
-	local sg=Duel.GetMatchingGroup(c26062011.thfilter,tp,0,LOCATION_ONFIELD,c)
-	Duel.SetOperationInfo(0,CATEGORY_TOHAND,sg,1,0,0)
-end
-function c26062011.activate2(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.GetMatchingGroup(c26062011.thfilter,tp,0,LOCATION_ONFIELD,nil)
+function c26062011.activate1(e,tp,eg,ep,ev,re,r,rp)
+	local g=Duel.GetMatchingGroup(c26062011.filter1,tp,0,LOCATION_ONFIELD,nil)
 	if #g==0 then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local sg=g:Select(tp,1,c26062011[tp]-1,nil)
-	Duel.SendtoHand(sg,nil,REASON_EFFECT)
+	local sg=g:Select(tp,1,e:GetLabel(),nil)
+	Duel.SendtoDeck(sg,nil,2,REASON_EFFECT)
 end
-function c26062011.bfilter(c,ct)
-	return c:IsMonster() and c:IsFaceup() and c:IsAbleToRemove() and not (c:IsType(TYPE_TUNER) or c:IsLevelAbove(ct))
+function c26062011.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	local ch=Duel.GetCurrentChain()
+	local loc=LOCATION_GRAVE+LOCATION_ONFIELD+LOCATION_HAND 
+	local rg=Duel.GetMatchingGroup(c26062011.rfilter,tp,loc,0,e:GetHandler())
+	if chk==0 then
+		if not c26062011.check then return false end
+		c26062011.check=false
+		return ch>0 and aux.SelectUnselectGroup(rg,e,tp,1,ch,aux.dncheck,0)
+		end
+	Duel.Hint(HINT_OPSELECTED,1-tp,e:GetDescription())
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+	local rsg=aux.SelectUnselectGroup(rg,e,tp,1,ch,aux.dncheck,1,tp,HINTMSG_TODECK)
+	Duel.SendtoDeck(rsg,tp,2,REASON_COST)
 end
-function c26062011.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-	local ct=c26062011[tp]
-	local g=Duel.GetMatchingGroup(c26062011.bfilter,tp,LOCATION_ONFIELD+LOCATION_GRAVE,LOCATION_ONFIELD+LOCATION_GRAVE,nil,ct)
-	if chk==0 then return ct>0 end
-	Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,1,0,0)
+function c26062011.activate2(e,tp,eg,ep,ev,re,r,rp)
+	if Duel.HasFlagEffect(tp,26062011) then return end
+	Duel.RegisterFlagEffect(tp,26062011,RESET_CHAIN,0,1)
+	local c=e:GetHandler()
+	--Blazon monsters you control cannot have their effects negated
+	local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetCode(EFFECT_CANNOT_DISABLE)
+	e1:SetTargetRange(LOCATION_ONFIELD,0)
+	e1:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,0x662))
+	e1:SetReset(RESET_CHAIN)
+	Duel.RegisterEffect(e1,tp)
+	--The activated effects of your Blazon cards cannot be negated
+	local e2=Effect.CreateEffect(c)
+	e2:SetType(EFFECT_TYPE_FIELD)
+	e2:SetCode(EFFECT_CANNOT_DISEFFECT)
+	e2:SetValue(c26062011.cannotdisfilter)
+	e2:SetReset(RESET_CHAIN)
+	Duel.RegisterEffect(e2,tp)
+	local e3=Effect.CreateEffect(c)
+	e3:SetType(EFFECT_TYPE_FIELD)
+	e3:SetCode(EFFECT_CANNOT_INACTIVATE)
+	e3:SetValue(c26062011.cannotdisfilter)
+	e3:SetReset(RESET_CHAIN)
+	Duel.RegisterEffect(e3,tp)
+end
+function c26062011.cannotdisfilter(e,ct)
+	local trig_e=Duel.GetChainInfo(ct,CHAININFO_TRIGGERING_EFFECT)
+	local trig_c=trig_e:GetHandler()
+	return trig_c:IsControler(e:GetHandlerPlayer()) and trig_c:IsSetCard(0x662)
+end
+function c26062011.filter3(c)
+	return not c:IsDisabled()
+end
+function c26062011.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	local ch=Duel.GetCurrentChain()
+	local loc=LOCATION_GRAVE+LOCATION_ONFIELD+LOCATION_HAND 
+	local rg=Duel.GetMatchingGroup(c26062011.rfilter,tp,loc,0,e:GetHandler())
+	if chk==0 then
+		if not c26062011.check then return false end
+		c26062011.check=false
+		return ch>1 and aux.SelectUnselectGroup(rg,e,tp,1,ch,aux.dncheck,0) and Duel.IsExistingMatchingCard(c26062011.filter3,tp,0,LOCATION_MZONE,1,nil)
+		end
+	Duel.Hint(HINT_OPSELECTED,1-tp,e:GetDescription())
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+	local rsg=aux.SelectUnselectGroup(rg,e,tp,1,ch,aux.dncheck,1,tp,HINTMSG_TODECK)
+	Duel.SendtoDeck(rsg,tp,2,REASON_COST)
+	e:SetLabel(#rsg)
+	local sg=Duel.GetMatchingGroup(c26062011.filter3,tp,0,LOCATION_MZONE,c)
+	Duel.SetOperationInfo(0,CATEGORY_DISABLE,nil,1,0,0)
 end
 function c26062011.activate3(e,tp,eg,ep,ev,re,r,rp)
-	local ct=c26062011[tp]
-	local tc=Duel.SelectMatchingCard(tp,c26062011.bfilter,tp,LOCATION_ONFIELD+LOCATION_GRAVE,LOCATION_ONFIELD+LOCATION_GRAVE,1,1,nil,ct):GetFirst()
-	if tc then
-		Duel.HintSelection(tc)
-		local lab=0
-		if tc:IsOnField() then lab=1 end
-		if Duel.Remove(tc,0,REASON_EFFECT+REASON_TEMPORARY)~=0 then
-			tc:RegisterFlagEffect(26062011,RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,0,1)
-			local e1=Effect.CreateEffect(e:GetHandler())
-			e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-			e1:SetCode(EVENT_PHASE+PHASE_END)
-			e1:SetReset(RESET_PHASE+PHASE_END)
-			e1:SetLabelObject(tc)
-			e1:SetCountLimit(1)
-			e1:SetLabel(lab)
-			e1:SetCondition(c26062011.retcon)
-			e1:SetOperation(c26062011.retop)
-			Duel.RegisterEffect(e1,tp)
+	local c=e:GetHandler()
+	local g=Duel.GetMatchingGroup(c26062011.filter3,tp,0,LOCATION_MZONE,nil)
+	if #g==0 then return end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SELECT)
+	local sg=g:Select(tp,1,e:GetLabel(),nil)
+	for tc in aux.Next(sg) do
+		local e1=Effect.CreateEffect(c)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+		e1:SetCode(EFFECT_DISABLE)
+		e1:SetReset(RESET_EVENT+RESETS_STANDARD)
+		e1:SetLabelObject(tc)
+		tc:RegisterEffect(e1)
+		local e2=Effect.CreateEffect(c)
+		e2:SetType(EFFECT_TYPE_SINGLE)
+		e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+		e2:SetCode(EFFECT_DISABLE_EFFECT)
+		e2:SetValue(RESET_TURN_SET)
+		e2:SetReset(RESET_EVENT+RESETS_STANDARD)
+		e2:SetLabelObject(tc)
+		tc:RegisterEffect(e2)
+	end
+end
+function c26062011.target4(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	local ch=Duel.GetCurrentChain()
+	local loc=LOCATION_GRAVE+LOCATION_ONFIELD+LOCATION_HAND 
+	local rg=Duel.GetMatchingGroup(c26062011.rfilter,tp,loc,0,e:GetHandler())
+	if chk==0 then
+		if not c26062011.check then return false end
+		c26062011.check=false
+		return ch>2 and aux.SelectUnselectGroup(rg,e,tp,1,ch,aux.dncheck,0) and Duel.IsPlayerCanDiscardDeck(tp,1) and Duel.IsPlayerCanDiscardDeck(1-tp,1)
 		end
-	end
+	Duel.Hint(HINT_OPSELECTED,1-tp,e:GetDescription())
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+	local dc=math.min(
+	Duel.GetFieldGroupCount(tp,LOCATION_DECK,0),
+	Duel.GetFieldGroupCount(tp,0,LOCATION_DECK))
+	local max=math.min(ch,dc)
+	local rsg=aux.SelectUnselectGroup(rg,e,tp,1,max,aux.dncheck,1,tp,HINTMSG_TODECK)
+	Duel.SendtoDeck(rsg,tp,2,REASON_COST)
+	Duel.SetOperationInfo(0,CATEGORY_DECKDES,nil,0,PLAYER_ALL,#rsg)
+	e:SetLabel(#rsg)
 end
-function c26062011.retcon(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetLabelObject():GetFlagEffect(26062011)~=0
-end
-function c26062011.retop(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetLabelObject()
-	if e:GetLabel()==1 then
-		Duel.ReturnToField(c)
-	else
-		Duel.SendtoGrave(c,REASON_RETURN)
-	end
+function c26062011.activate4(e,tp,eg,ep,ev,re,r,rp)
+	local ct=e:GetLabel()
+	if not Duel.IsPlayerCanDiscardDeck(tp,ct*2) and Duel.IsPlayerCanDiscardDeck(1-tp,ct) then return end
+	Duel.DiscardDeck(tp,ct*2,REASON_EFFECT)
+	Duel.DiscardDeck(1-tp,ct,REASON_EFFECT)
 end

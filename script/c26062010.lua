@@ -11,13 +11,20 @@ function c26062010.initial_effect(c)
 	e2:SetDescription(aux.Stringid(26062010,1))
 	e2:SetCategory(CATEGORY_DAMAGE)
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_DELAY)
 	e2:SetRange(LOCATION_FZONE)
 	e2:SetLabel(0)
-	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
+	e2:SetCode(EVENT_SUMMON_SUCCESS)
+	e2:SetCondition(c26062010.damcon)
 	e2:SetTarget(c26062010.damtg)
 	e2:SetOperation(c26062010.damop)
 	c:RegisterEffect(e2)
+	local e2a=e2:Clone()
+	e2a:SetCode(EVENT_FLIP_SUMMON_SUCCESS)
+	c:RegisterEffect(e2a)
+	local e2b=e2:Clone()
+	e2b:SetCode(EVENT_SPSUMMON_SUCCESS)
+	c:RegisterEffect(e2b)
 	--draw
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(26062010,2))
@@ -76,10 +83,13 @@ function c26062010.chop(e,tp,eg,ep,ev,re,r,rp)
 	local sc=e1:GetHandler()
 	local tc=e2:GetHandler()
 	if (p1==tp and sc and sc:IsSetCard(0x662) and sc:IsMonster() and sc:GetOriginalLevel()==ch)
-	or (p1~=tp and p2==tp and tc and tc:IsSetCard(0x662)) then
+	or (ch>1 and p1~=tp and p2==tp and tc and tc:IsSetCard(0x662)) then
 		Duel.Hint(HINT_CARD,0,26062010)
 		Duel.Damage(1-tp,ch*100,REASON_EFFECT)
 	end
+end
+function c26062010.damcon(e,tp,eg,ep,ev,re,r,rp)
+	return eg:IsExists(Card.IsSetCard,1,nil,0x662)
 end
 function c26062010.damtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end

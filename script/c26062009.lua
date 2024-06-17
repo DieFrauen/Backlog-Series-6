@@ -88,16 +88,15 @@ function c26062009.rmfilter(c,chn)
 	return c:IsAbleToRemove() and (c:IsLocation(0x0a) or aux.SpElimFilter(c,false,true)) and c:IsPublic() and c:IsLevelBelow(chn)
 end
 function c26062009.rmtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	local chn=e:GetLabel()
 	if chk==0 then return true end
-	local chn=Duel.GetCurrentChain()
-	local g=Duel.GetMatchingGroup(c26062009.rmfilter,tp,LOCATION_MZONE+LOCATION_GRAVE ,LOCATION_MZONE+LOCATION_GRAVE ,e:GetHandler(),chn)
+	local ch=Duel.GetCurrentChain()
+	local g=Duel.GetMatchingGroup(c26062009.rmfilter,tp,LOCATION_MZONE+LOCATION_GRAVE,LOCATION_MZONE+LOCATION_GRAVE,e:GetHandler(),ch)
 	Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,#g,0,0)
-	e:SetLabel(chn)
+	e:SetLabel(ch)
 end
 function c26062009.rmop(e,tp,eg,ep,ev,re,r,rp)
-	local c,chn=e:GetHandler(),e:GetLabel()
-	local g=Duel.GetMatchingGroup(c26062009.rmfilter,tp,LOCATION_MZONE+LOCATION_GRAVE ,LOCATION_MZONE+LOCATION_GRAVE,c,chn)
+	local c,ch=e:GetHandler(),e:GetLabel()
+	local g=Duel.GetMatchingGroup(c26062009.rmfilter,tp,LOCATION_MZONE+LOCATION_GRAVE ,LOCATION_MZONE+LOCATION_GRAVE,c,ch)
 	local rlv=Group.GetSum(g,Card.GetLevel)
 	if Duel.Remove(g,POS_FACEUP,REASON_EFFECT) then
 		local e1=Effect.CreateEffect(c)
