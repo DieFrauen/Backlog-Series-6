@@ -39,12 +39,12 @@ function c26061007.initial_effect(c)
 	--send "Fulmiknight" Monsters to gy
 	local e4=Effect.CreateEffect(c)
 	e4:SetDescription(aux.Stringid(26061007,0))
-	e4:SetCategory(CATEGORY_TOGRAVE)
+	e4:SetCategory(CATEGORY_TOGRAVE+CATEGORY_DRAW)
 	e4:SetType(EFFECT_TYPE_IGNITION)
-	--e4:SetCountLimit(1,0,EFFECT_COUNT_CODE_SINGLE)
+	e4:SetCountLimit(1)
 	e4:SetRange(LOCATION_FZONE)
 	e4:SetLabel(2)
-	e4:SetCost(c26061007.tfcost)
+	e4:SetCost(c26061007.tgcost)
 	e4:SetTarget(c26061007.tgtg)
 	e4:SetOperation(c26061007.tgop)
 	c:RegisterEffect(e4)
@@ -53,7 +53,7 @@ function c26061007.initial_effect(c)
 	e5:SetDescription(aux.Stringid(26061007,1))
 	e5:SetCategory(CATEGORY_TOHAND)
 	e5:SetType(EFFECT_TYPE_IGNITION)
-	--e5:SetCountLimit(1,0,EFFECT_COUNT_CODE_SINGLE)
+	e5:SetCountLimit(1)
 	e5:SetRange(LOCATION_FZONE)
 	e5:SetLabel(3)
 	e5:SetCost(c26061007.tfcost)
@@ -65,13 +65,12 @@ function c26061007.initial_effect(c)
 	e6:SetDescription(aux.Stringid(26061007,2))
 	e6:SetType(EFFECT_TYPE_IGNITION)
 	e6:SetRange(LOCATION_FZONE)
-	--e6:SetCountLimit(1,0,EFFECT_COUNT_CODE_SINGLE)
+	e6:SetCountLimit(1)
 	e6:SetLabel(5)
 	e6:SetCost(c26061007.tfcost)
 	e6:SetTarget(c26061007.tftg)
 	e6:SetOperation(c26061007.tfop)
 	c:RegisterEffect(e6)
-	
 	aux.GlobalCheck(c26061007,function()
 		c26061007[0]=nil
 		c26061007[1]=nil
@@ -112,11 +111,11 @@ end
 function c26061007.activate(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local slp,olp=Duel.GetLP(tp),Duel.GetLP(1-tp)
-	if c:IsRelateToEffect(e) and slp<olp then
-		local val=math.floor(olp-slp/1000)
-		val=math.min(5000,val)
-		c:AddCounter(0x5,val/1000)
-		Duel.Recover(tp,val,REASON_EFFECT)
+	if c:IsRelateToEffect(e) and slp+1000<olp then
+		local val=math.floor((olp-slp)/1000)
+		local valc=math.min(5000,val*1000)
+		c:AddCounter(0x5,valc/1000)
+		Duel.Recover(tp,valc,REASON_EFFECT)
 	end
 end
 function c26061007.leaveop(e,tp,eg,ep,ev,re,r,rp)
@@ -148,25 +147,37 @@ function c26061007.reop(e,tp,eg,ep,ev,re,r,rp)
 	local cv=c:GetCounter(0x5)-cv
 	Duel.Recover(tp,cv*1000,REASON_EFFECT)
 end
-
+function c26061007.tfcost(e,tp,eg,ep,ev,re,r,rp,chk)
+	local c=e:GetHandler()
+	local ct=e:GetLabel()
+	if chk==0 then return c:IsCanRemoveCounter(tp,0x5,ct,REASON_COST) end
+	c:RemoveCounter(tp,0x5,ct,REASON_COST)
+end
+function c26061007.tgcost(e,tp,eg,ep,ev,re,r,rp,chk)
+	local c=e:GetHandler()
+	local ct=e:GetLabel()
+	local g=Duel.GetMatchingGroup(c26061007.tgfilter,tp,LOCATION_DECK+LOCATION_HAND,0,nil)
+	if chk==0 then return c:IsCanRemoveCounter(tp,0x5,ct,REASON_COST) and aux.SelectUnselectGroup(g,e,tp,2,2,c26061007.rescon,0) end
+	local sg=aux.SelectUnselectGroup(g,e,tp,2,2,c26061007.rescon,1,tp,HINTMSG_TOGRAVE,c26061007.rescon)
+	c:RemoveCounter(tp,0x5,ct,REASON_COST)
+	Duel.SendtoGrave(sg,REASON_EFFECT)
+end
+function c26061007.rescon(sg,e,tp,mg)
+	return #sg:Filter(Card.IsLocation,nil,LOCATION_DECK)<2
+	and #sg:Filter(Card.IsLocation,nil,LOCATION_HAND)<2
+end
 function c26061007.tgfilter(c)
 	return c:IsSetCard(0x661) and c:IsAbleToGrave()
 end
 function c26061007.tgtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26061007.tgfilter,tp,LOCATION_DECK+LOCATION_HAND,0,1,nil) end
-	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
-end
-function c26061007.rescon1(sg,e,tp,mg)
-	return #sg:Filter(Card.IsLocation,nil,LOCATION_DECK)<2
-	and #sg:Filter(Card.IsLocation,nil,LOCATION_HAND)<2
+	if chk==0 then return Duel.IsPlayerCanDraw(tp,1) and Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)>1 end
+	Duel.SetTargetPlayer(tp)
+	Duel.SetTargetParam(1)
+	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
 end
 function c26061007.tgop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-	local g=Duel.GetMatchingGroup(c26061007.tgfilter,tp,LOCATION_DECK+LOCATION_HAND,0,nil)
-	local sg=aux.SelectUnselectGroup(g,e,tp,1,2,c26061007.rescon1,1,tp,HINTMSG_TOGRAVE,c26061007.rescon1)
-	if #sg>0 then
-		Duel.SendtoGrave(sg,REASON_EFFECT)
-	end
+	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
+	Duel.Draw(p,d,REASON_EFFECT)
 end
 function c26061007.thfilter(c,tp)
 	local lpv=c:GetAttack()+c:GetDefense()
@@ -191,12 +202,6 @@ function c26061007.thop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 
-function c26061007.tfcost(e,tp,eg,ep,ev,re,r,rp,chk)
-	local c=e:GetHandler()
-	local ct=e:GetLabel()
-	if chk==0 then return c:IsCanRemoveCounter(tp,0x5,ct,REASON_COST) end
-	c:RemoveCounter(tp,0x5,ct,REASON_COST)
-end
 function c26061007.tffilter(c,tp)
 	return c:IsCode(26061008) and c:GetActivateEffect():IsActivatable(tp,true,true)
 end

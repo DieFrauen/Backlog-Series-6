@@ -29,6 +29,18 @@ function c26063003.initial_effect(c)
 	local e2=e1:Clone()
 	e2:SetCode(EFFECT_UPDATE_DEFENSE)
 	c:RegisterEffect(e2)
+	--Material effects
+		local e1m=Effect.CreateEffect(c)
+		e1m:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_FIELD)
+		e1m:SetCode(EFFECT_UPDATE_ATTACK)
+		e1m:SetCondition(c26063003.xmcond)
+		e1m:SetTargetRange(LOCATION_MZONE,0)
+		e1m:SetValue(300)
+		e1m:SetTarget(c26063003.xmtg)
+		c:RegisterEffect(e1m)
+		local e2m=e1m:Clone()
+		e2m:SetCode(EFFECT_UPDATE_DEFENSE)
+		c:RegisterEffect(e2m)
 	--cannot target
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_SINGLE)
@@ -37,7 +49,16 @@ function c26063003.initial_effect(c)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetCondition(Gemini.EffectStatusCondition)
 	e3:SetValue(aux.tgoval)
-	c:RegisterEffect(e2)
+	c:RegisterEffect(e3)
+	--material effects
+		local e3m=Effect.CreateEffect(c)
+		e3m:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_FIELD)
+		e3m:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
+		e3m:SetCondition(c26063003.xmcond)
+		e3m:SetTargetRange(LOCATION_MZONE,0)
+		e3m:SetTarget(c26063003.xmtg)
+		e3m:SetValue(aux.tgoval)
+		c:RegisterEffect(e3m)
 	--normal summon
 	local e4=Effect.CreateEffect(c)
 	e4:SetDescription(aux.Stringid(26063003,0))
@@ -66,6 +87,17 @@ function c26063003.initial_effect(c)
 	local e5b=e5:Clone()
 	e5b:SetCode(EVENT_SPSUMMON_SUCCESS)
 	c:RegisterEffect(e5b)
+end
+function c26063003.xmcond(e,tp,eg,ep,ev,re,r,rp)
+	local c,tp=e:GetHandler(),e:GetHandlerPlayer()
+	if Duel.IsPlayerAffectedByEffect(tp,26068010) and c:IsType(TYPE_EFFECT) then return c==e:GetHandler() end
+	return c:IsGeminiStatus() and c.StelloyEff1~=nil 
+end
+function c26063003.xmtg(e,c)
+	local ec,tp=e:GetHandler(),e:GetHandlerPlayer()
+	if Duel.IsPlayerAffectedByEffect(tp,26068010) and c:IsType(TYPE_EFFECT) then return c==e:GetHandler() end
+	if ec:IsGeminiStatus() and ec.StelloyEff1~=nil  then
+	return ec.ovmtg(e,c) end
 end
 function c26063003.gemini(e)
 	local c=e:GetHandler()

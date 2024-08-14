@@ -6,7 +6,7 @@ function c26064010.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetHintTiming(0,TIMING_END_PHASE)
-	e1:SetCost(c26064010.cost)
+	e1:SetTarget(c26064010.cost)
 	c:RegisterEffect(e1)
 	--destroy replace
 	local e2=Effect.CreateEffect(c)

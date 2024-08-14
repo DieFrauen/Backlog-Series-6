@@ -6,7 +6,7 @@ function c26064011.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetHintTiming(0,TIMING_END_PHASE)
-	e1:SetCost(c26064011.cost)
+	e1:SetTarget(c26064011.cost)
 	c:RegisterEffect(e1)
 	--uncounterable flip summons
 	local e2=Effect.CreateEffect(c)
@@ -62,9 +62,9 @@ function c26064011.cost(e,tp,eg,ep,ev,re,r,rp,chk)
 	local b=c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,2)
 	if chk==0 then return true end
 	if b and Duel.SelectYesNo(tp,aux.Stringid(26064011,0)) then 
-		e:SetTarget(c26064011.fliptg)
 		e:SetCategory(CATEGORY_SPECIAL_SUMMON)
 		e:SetOperation(c26064011.flipop)
+		c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
 	end
 end
 function c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -123,28 +123,32 @@ function c26064011.drfilter(c,e,tp)
 	return c:IsType(TYPE_TRAP) and c:IsSetCard(0x664) and not c:IsPublic()
 end
 function c26064011.drtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return true end
+	if chk==0 then return Duel.GetFlagEffect(tp,26064011)==0 end
 end
 function c26064011.drop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_TRAP_ACT_IN_HAND)
-	e1:SetDescription(aux.Stringid(26064011,1))
-	e1:SetTargetRange(LOCATION_HAND,0)
-	e1:SetReset(RESET_PHASE+PHASE_END)
-	e1:SetCondition(c26064011.handcon)
-	e1:SetValue(c26064011.handvalue)
-	Duel.RegisterEffect(e1,tp)
-	--Activation cost
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_ACTIVATE_COST)
-	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e2:SetTargetRange(1,0)
-	e2:SetTarget(c26064011.costtg)
-	e2:SetOperation(c26064011.costop)
-	Duel.RegisterEffect(e2,tp)
+	if Duel.GetFlagEffect(tp,26064011)==0 then
+		local e1=Effect.CreateEffect(c)
+		e1:SetType(EFFECT_TYPE_FIELD)
+		e1:SetCode(EFFECT_TRAP_ACT_IN_HAND)
+		e1:SetDescription(aux.Stringid(26064011,1))
+		e1:SetTargetRange(LOCATION_HAND,0)
+		e1:SetReset(RESET_PHASE+PHASE_END)
+		e1:SetCondition(c26064011.handcon)
+		e1:SetValue(c26064011.handvalue)
+		Duel.RegisterEffect(e1,tp)
+		--Activation cost
+		local e2=Effect.CreateEffect(c)
+		e2:SetType(EFFECT_TYPE_FIELD)
+		e2:SetCode(EFFECT_ACTIVATE_COST)
+		e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+		e2:SetReset(RESET_PHASE+PHASE_END)
+		e2:SetTargetRange(1,0)
+		e2:SetTarget(c26064011.costtg)
+		e2:SetOperation(c26064011.costop)
+		Duel.RegisterEffect(e2,tp)
+		Duel.RegisterFlagEffect(tp,26064011,RESET_PHASE+PHASE_END,0,1) 
+	end
 end
 function c26064011.handcon(e)
 	local tp=e:GetHandlerPlayer()

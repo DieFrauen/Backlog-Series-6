@@ -80,11 +80,10 @@ function c26061010.operation(e,tp,eg,ep,ev,re,r,rp)
 	g1:Merge(g2)
 	if #g1>0 then
 		Duel.BreakEffect()
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-		local sel=g1:Select(tp,1,#g1,nil)
-		Duel.SendtoHand(sel,nil,REASON_EFFECT)
-		Duel.ConfirmCards(1-tp,sel)
-		local lpv=sel:GetSum(Card.GetAttack)+sel:GetSum(Card.GetDefense)
+		local sg=aux.SelectUnselectGroup(g1,e,tp,1,#g1,aux.dncheck,1,tp,HINTMSG_ATOHAND)
+		Duel.SendtoHand(sg,nil,REASON_EFFECT)
+		Duel.ConfirmCards(1-tp,sg)
+		local lpv=sg:GetSum(Card.GetAttack)+sg:GetSum(Card.GetDefense)
 		Duel.Recover(tp,lpv,REASON_EFFECT)
 	end
 end

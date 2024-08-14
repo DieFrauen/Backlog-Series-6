@@ -62,6 +62,9 @@ function c26062006.spop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
+function c26062006.grfilter(c)
+	return c:IsSetCard(0x662) and not (c:GetLevel()==1 and c:IsType(TYPE_TUNER))
+end
 function c26062006.grtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsLocation(LOCATION_MZONE) and c26062006.grfilter(chkc) end
 	if chk==0 then return Duel.IsExistingTarget(c26062006.grfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end

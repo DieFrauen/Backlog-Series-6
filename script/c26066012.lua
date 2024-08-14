@@ -46,15 +46,15 @@ function c26066012.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SendtoGrave(rg,REASON_COST+REASON_RELEASE)
 end
 function c26066012.filter(c)
-	return c:IsAbleToDeck() and c:GetOwner():IsPlayerCanDiscardDeck(1)
+	return c:IsFaceup() and c:IsAbleToDeck()
 end
 function c26066012.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return (Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil) or Duel.IsPlayerCanSendtoDeck(tp,re:GetHandler())) and rp~=tp end
+	if chk==0 then return (Duel.IsExistingMatchingCard(c26066012.filter,tp,0,LOCATION_GRAVE+LOCATION_REMOVED,1,nil) or Duel.IsPlayerCanSendtoDeck(tp,re:GetHandler())) and rp~=tp end
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,1-tp,LOCATION_GRAVE+LOCATION_REMOVED)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_TOGRAVE,nil,1,1-tp,LOCATION_DECK)
 end
 function c26066012.activate(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.GetMatchingGroup(Card.IsAbleToDeck,tp,0,LOCATION_GRAVE+LOCATION_REMOVED,nil)
+	local g=Duel.GetMatchingGroup(c26066012.filter,tp,0,LOCATION_GRAVE+LOCATION_REMOVED,nil)
 	local rc=re:GetHandler()
 	rc:CancelToGrave()
 	g:AddCard(rc)

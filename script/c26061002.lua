@@ -1,6 +1,5 @@
 --Fulmiknight Partisan
 function c26061002.initial_effect(c)
-	c:SetUniqueOnField(1,0,aux.FilterBoolFunction(Card.IsCode,26061002),LOCATION_ONFIELD)
 	--equip
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(1068)
@@ -96,16 +95,16 @@ function c26061002.initial_effect(c)
 	e5:SetType(EFFECT_TYPE_EQUIP)
 	e5:SetCode(EFFECT_UPDATE_ATTACK)
 	e5:SetValue(2600)
-	e5:SetCondition(aux.IsUnionState)
+	e5:SetCondition(c26061002.uncond)
 	c:RegisterEffect(e5)
 	--pierce
 	local e6=Effect.CreateEffect(c)
 	e6:SetType(EFFECT_TYPE_SINGLE)
 	e6:SetCode(EFFECT_PIERCE)
-	e6:SetCondition(c26061002.uncond)
 	c:RegisterEffect(e6)
 	local e6a=e6:Clone()
 	e6a:SetType(EFFECT_TYPE_EQUIP)
+	e6a:SetCondition(aux.IsUnionState)
 	c:RegisterEffect(e6a)
 	--immune
 	local e7=Effect.CreateEffect(c)
@@ -226,12 +225,10 @@ function c26061002.efilter(e,te)
 	return te:IsActivated() 
 end
 function c26061002.atcond1(e,c)
-	local c,ep,ac=e:GetHandler(),e:GetHandlerPlayer(),Duel.GetAttacker()
-	local g=Duel.GetMatchingGroup(nil,ep,LOCATION_MZONE,0,nil)
-	return #g==1 and g:GetFirst()==c and ac and ac==c
+	local c,ac=e:GetHandler(),Duel.GetAttacker()
+	return ac and ac==c
 end
 function c26061002.atcond2(e,c)
-	local c,ep,ac=e:GetHandler():GetEquipTarget(),e:GetHandlerPlayer(),Duel.GetAttacker()
-	local g=Duel.GetMatchingGroup(nil,ep,LOCATION_MZONE,0,nil)
-	return aux.IsUnionState(e) and #g==1 and g:GetFirst()==c and ac and ac==c
+	local c,ac=e:GetHandler(),Duel.GetAttacker()
+	return aux.IsUnionState(e) and ac and ac==c
 end

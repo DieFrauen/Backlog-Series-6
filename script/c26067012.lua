@@ -20,6 +20,7 @@ function c26067012.initial_effect(c)
 	e2:SetCode(EVENT_FREE_CHAIN)
 	e2:SetRange(LOCATION_SZONE)
 	e2:SetCountLimit(1,26067012)
+	e2:SetCost(c26067012.tdcost)
 	e2:SetTarget(c26067012.tdtg)
 	e2:SetOperation(c26067012.tdop)
 	c:RegisterEffect(e2)
@@ -135,14 +136,18 @@ end
 function c26067012.tdfilter(c)
 	return c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and c:IsAbleToDeck()
 end
+function c26067012.tdcost(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.CheckLPCost(tp,700) end
+	Duel.PayLPCost(tp,700)
+end
 function c26067012.tdtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26067006.tdfilter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,e:GetHandler()) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26067012.tdfilter,tp,LOCATION_HAND,0,1,e:GetHandler()) end
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,0,0)
 end
 function c26067012.tdop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not c:IsRelateToEffect(e) then return end
-	local g=Duel.GetMatchingGroup(c26067006.defilter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil)
+	local g=Duel.GetMatchingGroup(c26067012.defilter,tp,LOCATION_HAND,0,1,nil)
 	local sg=g:Select(tp,1,1,nil)
 	local sc=sg:GetFirst()
 	if sc and Duel.SendtoDeck(sc,1-tp,0,REASON_EFFECT)~=0 and sc:IsLocation(LOCATION_DECK) then
@@ -150,16 +155,16 @@ function c26067012.tdop(e,tp,eg,ep,ev,re,r,rp)
 		sc:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD&~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
 	end
 end
-function c26067012.thfilter(c)
-	return c:IsFaceup() and c:IsSetCard(0x667) and c:IsType(TYPE_PENDULUM) and c:IsAbleToHand()
+function c26067012.thfilter(c,p)
+	return c:IsFaceup() and c:IsSetCard(0x667) and c:IsType(TYPE_PENDULUM) and c:IsAbleToHand() and c:GetOwner()==p
 end
 function c26067012.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26067012.thfilter,tp,LOCATION_EXTRA,0,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26067012.thfilter,tp,LOCATION_EXTRA+LOCATION_GRAVE,LOCATION_EXTRA+LOCATION_GRAVE,1,nil,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_EXTRA)
 end
 function c26067012.thop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local g=Duel.SelectMatchingCard(tp,c26067012.thfilter,tp,LOCATION_EXTRA,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,c26067012.thfilter,tp,LOCATION_EXTRA+LOCATION_GRAVE,LOCATION_EXTRA+LOCATION_GRAVE,1,1,nil,tp)
 	if #g>0 then
 		Duel.SendtoHand(g,nil,REASON_EFFECT)
 		Duel.ConfirmCards(1-tp,g)

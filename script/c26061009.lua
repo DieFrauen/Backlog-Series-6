@@ -26,9 +26,9 @@ function c26061009.rescon1(sg,e,tp,mg)
 	return sg:IsExists(Card.IsSetCard,1,nil,0x661)
 end
 function c26061009.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26061009.filter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,e:GetHandler()) and Duel.IsPlayerCanDraw(tp,2) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26061009.filter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,e:GetHandler()) and Duel.IsPlayerCanDraw(tp,1) end
 	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,0,tp,1)
-	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,2)
+	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
 	Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,tp,0)
 end
 function c26061009.eqfilter(c)
@@ -43,7 +43,7 @@ function c26061009.activate(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SendtoGrave(sg,REASON_EFFECT)
 	local eqg=sg:Filter(c26061009.eqfilter,nil)
 	lpv=sg:GetSum(Card.GetBaseAttack)+sg:GetSum(Card.GetBaseDefense)
-	Duel.Draw(tp,2,REASON_EFFECT)
+	Duel.Draw(tp,#sg,REASON_EFFECT)
 	Duel.Recover(tp,lpv,REASON_EFFECT)
 	if lpv==5000 then
 		Duel.BreakEffect()

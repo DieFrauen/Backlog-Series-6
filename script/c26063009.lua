@@ -1,7 +1,14 @@
 --Astelloy Noble Guild
 function c26063009.initial_effect(c)
+	--Activate (no effect)
+	local e0=Effect.CreateEffect(c)
+	e0:SetType(EFFECT_TYPE_ACTIVATE)
+	e0:SetCode(EVENT_FREE_CHAIN)
+	e0:SetDescription(7)
+	c:RegisterEffect(e0)
 	--Activate
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(26063009,0))
 	e1:SetCategory(CATEGORY_HANDES+CATEGORY_DRAW)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
@@ -52,10 +59,8 @@ function c26063009.dfilter(c)
 end
 function c26063009.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	local cg=Duel.GetMatchingGroup(nil,tp,LOCATION_HAND,0,nil)
-	if chk==0 then return #cg>=1 and Duel.IsPlayerCanDraw(tp,#cg-1) end
-	if #cg>1 then
-		Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,#cg-1)
-	end
+	if chk==0 then return #cg>0 and Duel.IsPlayerCanDraw(tp,#cg) end
+	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,#cg)
 end
 function c26063009.activate(e,tp,eg,ep,ev,re,r,rp)
 	local cg=Duel.GetMatchingGroup(Card.IsDiscardable,tp,LOCATION_HAND,0,nil)
@@ -75,7 +80,7 @@ function c26063009.gcond(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(c26063009.cfilter,1,nil,tp)
 end
 function c26063009.filter(c,cd)
-	return c:IsSummonable(true,nil) and c:IsType(TYPE_NORMAL) and c:GetRace()&cd:GetRace()~=0 and c:GetAttribute()&cd:GetAttribute()~=0
+	return c:IsSummonable(true,nil) and c:GetLevel()&cd:GetLevel()~=0
 end
 function c26063009.gtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	e:SetLabelObject(eg:GetFirst())

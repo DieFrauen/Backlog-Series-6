@@ -72,14 +72,15 @@ end
 function c26066002.drain(c,p)
 	return c:IsMonster()
 	and c:IsReleasableByEffect()
-	and not Duel.IsExistingMatchingCard(c26066002.eqfilter,p,LOCATION_ONFIELD+LOCATION_GRAVE,LOCATION_ONFIELD+LOCATION_GRAVE,1,nil,c:GetCode())
+	and not Duel.IsExistingMatchingCard(c26066002.eqfilter,p,LOCATION_ONFIELD+LOCATION_GRAVE,0,1,nil,c:GetCode())
 end
 function c26066002.eqfilter(c,cd)
 	return c:IsCode(cd) and c:IsFaceup()
 end
 function c26066002.drcon(e,tp,eg,ep,ev,re,r,rp)
 	local loc,id=Duel.GetChainInfo(ev,CHAININFO_TRIGGERING_LOCATION,CHAININFO_CHAIN_ID)
-	return rp~=tp and re:IsActiveType(TYPE_MONSTER) and not re:GetHandler():IsDisabled()
+	local rc=re:GetHandler()
+	return rp~=tp and re:IsActiveType(TYPE_MONSTER) and not (rc:IsDisabled() or rc:IsStatus(STATUS_DISABLED))
 end
 function c26066002.spdrain(e,tp,eg,ep,ev,re,r,rp)
 	local p=1-tp

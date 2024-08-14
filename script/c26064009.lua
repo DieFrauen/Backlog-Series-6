@@ -6,7 +6,7 @@ function c26064009.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetHintTiming(0,TIMING_END_PHASE)
-	e1:SetCost(c26064009.cost)
+	e1:SetTarget(c26064009.cost)
 	c:RegisterEffect(e1)
 	--direct attack/hand damage/set
 	local e2=Effect.CreateEffect(c)
@@ -74,7 +74,7 @@ end
 function c26064009.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:GetOriginalType()&TYPE_CONTINUOUS ~=0 and not c:IsRelateToEffect(e) then return end
-	local sg=Duel.SelectMatchingCard(tp,c26064008.posfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
+	local sg=Duel.SelectMatchingCard(tp,c26064009.posfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
 	Duel.ChangePosition(sg,POS_FACEUP_ATTACK)
 end
 function c26064009.check(c,tp)

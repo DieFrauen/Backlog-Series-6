@@ -81,10 +81,11 @@ function c26067004.decon(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(c26067004.cfilter,1,nil,e,1-tp,opp) 
 end
 function c26067004.defilter(c) 
-	return not c:IsForbidden() and c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667)
+	return not c:IsForbidden() and c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and (c:IsLocation(LOCATION_DECK) or c:IsAbleToDeck()) and c:IsAbleToChangeControler()
 end
 function c26067004.detg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.CheckPendulumZones(tp) end
+	if chk==0 then return 
+	Duel.IsExistingMatchingCard(c26067004.defilter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil) and (e:GetLabel()>2 or Duel.CheckPendulumZones(tp)) end
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,0,0)
 end
 function c26067004.deop(e,tp,eg,ep,ev,re,r,rp)
@@ -92,14 +93,19 @@ function c26067004.deop(e,tp,eg,ep,ev,re,r,rp)
 	if not c:IsRelateToEffect(e) then return end
 	if e:GetLabel()>2 and Duel.MoveToField(c,tp,tp,LOCATION_PZONE,POS_FACEUP,true)==0 then return end
 	Duel.BreakEffect()
-	local g=Duel.GetMatchingGroup(c26067004.defilter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil)
-	local g2=Duel.GetMatchingGroup(c26067004.defilter,tp,LOCATION_DECK,0,1,nil)
-	if Duel.IsPlayerAffectedByEffect(tp,26067010) then
+	local g=Duel.GetMatchingGroup(c26067004.defilter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,nil)
+	local g2=Duel.GetMatchingGroup(c26067004.defilter,tp,LOCATION_DECK,0,nil)
+	if Duel.IsPlayerAffectedByEffect(tp,26067009) and Duel.CheckLPCost(tp,700) then
 		g:Merge(g2)
 	end
 	local sg=g:Select(tp,1,1,nil)
 	if #sg==0 then return end
 	local sc=sg:GetFirst()
+	if sc:IsLocation(LOCATION_DECK) then
+		Duel.PayLPCost(tp,700)
+		Duel.RegisterFlagEffect(tp,26067009,RESET_PHASE+PHASE_END,0,1)
+		Duel.RegisterFlagEffect(tp,26067209,RESET_PHASE+PHASE_END,0,1)
+	end
 	if Duel.SendtoDeck(sc,1-tp,0,REASON_EFFECT)~=0 and sc:IsLocation(LOCATION_DECK) then
 		sc:ReverseInDeck()
 		sc:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD &~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
@@ -138,33 +144,22 @@ function c26067004.dkfilter(c,tp)
 	return c:IsSetCard(0x667) and c:GetOwner()==tp
 end
 function c26067004.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c26067004.filter,tp,LOCATION_DECK,LOCATION_DECK,1,nil,tp) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26067004.dkfilter,tp,LOCATION_DECK,LOCATION_DECK,1,nil,tp) end
 end
 function c26067004.activate(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26067004,0))
 	local p=e:GetHandlerPlayer()
 	local g1=Duel.GetMatchingGroup(c26067004.dkfilter,tp,LOCATION_DECK,0,nil,p)
 	local g2=Duel.GetMatchingGroup(c26067004.dkfilter,tp,0,LOCATION_DECK,nil,p)
-	local ops,opval,off={},{},1
-	if #g1>0 then
-		ops[off]=aux.Stringid(26067004,3)
-		opval[off-1]=1
-		off=off+1
-	end
-	if #g2>0 then
-		ops[off]=aux.Stringid(26067004,4)
-		opval[off-1]=2
-		off=off+1
-	end
-	if #g1>0 and #g2>0 then
-		ops[off]=aux.Stringid(26067004,5)
-		opval[off-1]=3
-		off=off+1
-	end
-	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26067004,6))
-	local op=Duel.SelectOption(tp,table.unpack(ops))
-	if op==nil then return end
-	if opval[op]~=2 then
+	local b1=#g1>0
+	local b2=#g2>0
+	local b3=(b1 and b2)
+	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26067004,2))
+	local op=Duel.SelectEffect(tp,
+		{b1,aux.Stringid(26067004,3)},
+		{b2,aux.Stringid(26067004,4)},
+		{b3,aux.Stringid(26067004,5)})
+	if op~=2 then
 		local tc1=g1:Select(tp,1,1,nil):GetFirst()
 		Duel.ShuffleDeck(tp)
 		Duel.MoveSequence(tc1,0)
@@ -172,8 +167,9 @@ function c26067004.activate(e,tp,eg,ep,ev,re,r,rp)
 		tc1:ReverseInDeck()
 		tc1:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD&~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
 	end
-	if opval[op]~=1 then
-	   local tc2=g2:Select(tp,1,1,nil):GetFirst()
+	if op~=1 then
+		Duel.ConfirmCards(tp,g2)
+		local tc2=g2:Select(tp,1,1,nil):GetFirst()
 		Duel.ShuffleDeck(1-tp)
 		Duel.MoveSequence(tc2,0)
 		Duel.ConfirmDecktop(1-tp,1)

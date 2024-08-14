@@ -32,24 +32,16 @@ function c26067010.initial_effect(c)
 	e3:SetTarget(c26067010.txtg)
 	e3:SetOperation(c26067010.txop)
 	c:RegisterEffect(e3)
-	--create pendulum scales
+	--cannot ss from exta
 	local e4=Effect.CreateEffect(c)
-	e4:SetDescription(aux.Stringid(26067010,2))
-	e4:SetCategory(CATEGORY_DRAW)
-	e4:SetType(EFFECT_TYPE_IGNITION)
-	e4:SetProperty(EFFECT_FLAG_NO_TURN_RESET+EFFECT_FLAG_BOTH_SIDE)
+	e4:SetType(EFFECT_TYPE_FIELD)
+	e4:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e4:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
 	e4:SetRange(LOCATION_SZONE)
-	e4:SetCountLimit(1,0,EFFECT_COUNT_CODE_SINGLE)
-	e4:SetTarget(c26067010.detg)
-	e4:SetOperation(c26067010.deop)
+	e4:SetTargetRange(0,1)
+	e4:SetTarget(c26067010.sumlimit)
+	e4:SetValue(1)
 	c:RegisterEffect(e4)
-	local e5=Effect.CreateEffect(c)
-	e5:SetType(EFFECT_TYPE_FIELD)
-	e5:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e5:SetCode(26067010)
-	e5:SetRange(LOCATION_SZONE)
-	e5:SetTargetRange(1,0)
-	c:RegisterEffect(e5)
 end
 function c26067010.redir1(e,tp,eg,ep,ev,re,r,rp)
 	local tc=e:GetLabelObject()
@@ -69,14 +61,16 @@ end
 function c26067010.redir2(e,tp,eg,ep,ev,re,r,rp)
 	local tc=e:GetLabelObject()
 	local lab=e:GetLabel()
-	local dc=Duel.GetFieldGroup(tp,0,LOCATION_DECK)
-	if tc and #dc<lab and dc:IsContains(tc) then
-		--Duel.Hint(HINT_CARD,tp,26067010)
-		Duel.MoveSequence(e:GetLabelObject(),#dc)
+	local dg=Duel.GetFieldGroup(tp,0,LOCATION_DECK)
+	local dc=Duel.GetFieldCard(1-tp,LOCATION_DECK,#dg-1)
+	if tc and dc~=tc and #dg~=lab and dg:IsContains(tc) then
+		Duel.Hint(HINT_CARD,1-tp,26067010)
+		Duel.MoveSequence(e:GetLabelObject(),#dg-1)
 	else
 		nc=Duel.GetDecktopGroup(1-tp,1):GetFirst()
 		if nc and nc:IsSetCard(0x667) and nc:GetOwner()==tp and nc:IsFaceup() then
 			e:SetLabelObject(nc)
+			e:SetLabel(#dg)
 		else
 			e:SetLabelObject(nil)
 		end
@@ -98,46 +92,17 @@ function c26067010.txop(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e) and tc:IsControler(tp) then
 		Duel.SendtoExtraP(tc,1-tp,REASON_EFFECT)
-		e:GetHandler():SetCardTarget(tc)
-		e:SetLabelObject(tc)
-		--cannot ss from exta
-		local e1=Effect.CreateEffect(c)
-		e1:SetType(EFFECT_TYPE_FIELD)
-		e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
-		e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
-		e1:SetRange(LOCATION_SZONE)
-		e1:SetDescription(aux.Stringid(26067010,4))
-		e1:SetTargetRange(0,1)
-		e1:SetTarget(c26067010.sumlimit)
-		e1:SetLabelObject(e)
-		e1:SetReset(RESET_EVENT+RESETS_STANDARD)
-		c:RegisterEffect(e1)
 	end
 end
+function c26067010.bael(c,g)
+	return c:IsCode(26067007) and c:GetSequence()==g-1
+end
 function c26067010.sumlimit(e,c,sump,sumtype,sumpos,targetp,se)
-	local seq=e:GetLabelObject():GetLabelObject():GetSequence()
-	return c:IsLocation(LOCATION_EXTRA) and c:GetSequence()<seq
+	local tp=1-e:GetHandlerPlayer()
+	local xg=Duel.GetFieldGroupCount(tp,LOCATION_EXTRA,0)
+	local xc=Duel.GetFieldCard(tp,LOCATION_EXTRA,xg-1)
+	return xc and xc:IsFaceup() and xc:IsCode(26067007) and c:GetSequence()<xc:GetSequence() and c:IsLocation(LOCATION_EXTRA)
 end
 function c26067010.pcfilter(c)
 	return c:IsSetCard(0x667) and c:IsType(TYPE_PENDULUM) and c:IsFaceup() and not c:IsForbidden()
-end
-function c26067010.detg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then
-		local g=Duel.GetMatchingGroup(c26067010.pcfilter,tp,LOCATION_EXTRA,LOCATION_EXTRA,nil)
-		return (Duel.CheckLocation(tp,LOCATION_PZONE,0) or Duel.CheckLocation(tp,LOCATION_PZONE,1))
-			and g:GetClassCount(Card.GetCode)>=1
-	end
-end
-function c26067010.deop(e,tp,eg,ep,ev,re,r,rp)
-	local pg=Duel.GetMatchingGroup(c26067010.pcfilter,tp,LOCATION_EXTRA,LOCATION_EXTRA,nil)
-	if #pg>0 then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
-		tc=pg:Select(tp,1,2,nil)
-		local pg=tc:GetFirst()
-		for pg in aux.Next(tc) do
-			Duel.MoveToField(pg,tp,tp,LOCATION_PZONE,POS_FACEUP,false)
-			pg:SetStatus(STATUS_EFFECT_ENABLED,true)
-		end
-		Duel.Draw(1-tp,#tc,REASON_EFFECT)
-	end
 end

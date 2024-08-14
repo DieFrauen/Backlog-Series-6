@@ -1,8 +1,7 @@
 --Entrophys Marshall Opus - Yliaster
 function c26065006.initial_effect(c)
-	c:EnableCounterPermit(0xb5)
 	c:EnableReviveLimit()
-	Link.AddProcedure(c,nil,4)
+	Link.AddProcedure(c,c26065006.mfilter,4)
 	--Material check
 	local e0=Effect.CreateEffect(c)
 	e0:SetType(EFFECT_TYPE_SINGLE)
@@ -62,18 +61,30 @@ function c26065006.initial_effect(c)
 	e4:SetTarget(c26065006.thtg)
 	e4:SetOperation(c26065006.thop)
 	c:RegisterEffect(e4)
-	--search
+	--Spirit monster do not have to return to the hand
 	local e5=Effect.CreateEffect(c)
-	e5:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e5:SetCode(EVENT_PREDRAW)
+	e5:SetType(EFFECT_TYPE_FIELD)
+	e5:SetCode(EFFECT_SPIRIT_MAYNOT_RETURN)
 	e5:SetRange(LOCATION_MZONE)
+	e5:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
 	e5:SetLabel(ATTRIBUTE_DARK)
 	e5:SetCondition(c26065006.condition)
-	e5:SetOperation(c26065006.search)
 	c:RegisterEffect(e5)
+	--search
+	local e6=Effect.CreateEffect(c)
+	e6:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e6:SetCode(EVENT_PREDRAW)
+	e6:SetRange(LOCATION_MZONE)
+	e6:SetLabel(ATTRIBUTE_DARK+ATTRIBUTE_WIND+ATTRIBUTE_EARTH+ATTRIBUTE_FIRE)
+	e6:SetCondition(c26065006.condition)
+	e6:SetOperation(c26065006.search)
+	c:RegisterEffect(e6)
+end
+function c26065006.mfilter(c,lc,sumtype,tp)
+	return c:IsSetCard(0x665,lc,sumtype,tp)
 end
 function c26065006.matcheck(e,c)
-	local g=c:GetMaterial():Filter(Card.IsCode,nil,26065101,26065102,26065103,26065100)
+	local g=c:GetMaterial()
 	local att=0
 	if g:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_EARTH)>0 then
 		att=att+ATTRIBUTE_EARTH 
@@ -124,16 +135,16 @@ function c26065006.addcon(e,tp,eg,ep,ev,re,r,rp)
 	e:SetLabel(0)
 end
 function c26065006.condition(e,tp,eg,ep,ev,re,r,rp)
+	local lb=e:GetLabel()
 	local ct=e:GetHandler():GetAttribute()
-	return ct&e:GetLabel()~=0
+	return ct&lb==lb
 end
-
 function c26065006.attfilter(c)
 	return c:IsSetCard(0x665) and c:IsFaceup()
 end
 function c26065006.val(e,c)
 	local ct=Duel.GetMatchingGroup(c26065006.attfilter,0,LOCATION_MZONE,LOCATION_MZONE,nil):GetBinClassCount(Card.GetAttribute)
-	return ct*500
+	return ct*250
 end
 function c26065006.efilter(e,te)
 	return te:GetHandler():IsSetCard(0x665) and te:GetHandlerPlayer()~=e:GetHandlerPlayer()
@@ -153,17 +164,18 @@ function c26065006.rescon(sg,e,tp,mg)
 	  or #sg:Filter(Card.IsType,nil,TYPE_TRAP)==2)
 end
 function c26065006.tcost(c)
-	return c:IsCode(26065101)
+	return c:IsSetCard(0x665) and c:IsType(TYPE_TOKEN) and c:IsReleasable()
 end
 function c26065006.thcost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.CheckReleaseGroupCost(tp,c26065006.tcost,1,false,nil,nil) end
-	local g=Duel.SelectReleaseGroupCost(tp,c26065006.tcost,1,1,false,nil,nil)
-	Duel.Release(g,REASON_COST)
+	local g=Duel.GetMatchingGroup(c26065006.tcost,tp,LOCATION_MZONE,LOCATION_MZONE,nil):Filter(Card.IsReleasable,nil)
+	if chk==0 then return #g>0 end
+	local sg=g:Select(tp,1,1,nil)
+	Duel.Release(sg,REASON_COST)
 end
 function c26065006.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local rg=Duel.GetMatchingGroup(Card.IsAbleToHand,tp,LOCATION_ONFIELD+LOCATION_GRAVE,LOCATION_ONFIELD+LOCATION_GRAVE,nil)
 	if chk==0 then return aux.SelectUnselectGroup(rg,e,tp,2,2,c26065006.rescon,0) end
-	Duel.SetOperationInfo(0,CATEGORY_DESTROY,rg,2,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,rg,2,0,0)
 end
 function c26065006.thop(e,tp,eg,ep,ev,re,r,rp)
 	local rg=Duel.GetMatchingGroup(aux.NecroValleyFilter(Card.IsAbleToHand),tp,LOCATION_ONFIELD+LOCATION_GRAVE,LOCATION_ONFIELD+LOCATION_GRAVE,nil)

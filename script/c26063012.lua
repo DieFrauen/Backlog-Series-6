@@ -89,18 +89,15 @@ function c26063012.tdcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SendtoDeck(c,nil,1,REASON_COST)
 end
 function c26063012.refilter(c,e,tp,tid)
-	return c:GetTurnID()==tid
-		and c:IsType(TYPE_XYZ)
-		--and (c:GetReason()&REASON_BATTLE)~=0
+	return c:IsType(TYPE_XYZ) and c:GetRank()==4
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function c26063012.sptg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	local tid=Duel.GetTurnCount()
-	if chkc then return chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) and c26063012.filter(chkc,e,tp,tid) end
+	if chkc then return chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) and c26063012.filter(chkc,e,tp) end
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and Duel.IsExistingTarget(c26063012.refilter,tp,LOCATION_GRAVE,0,1,nil,e,tp,tid) end
+		and Duel.IsExistingTarget(c26063012.refilter,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local g=Duel.SelectTarget(tp,c26063012.refilter,tp,LOCATION_GRAVE,0,1,1,nil,e,tp,tid)
+	local g=Duel.SelectTarget(tp,c26063012.refilter,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 end
 function c26063012.spop(e,tp,eg,ep,ev,re,r,rp)
@@ -108,11 +105,15 @@ function c26063012.spop(e,tp,eg,ep,ev,re,r,rp)
 	local sum=sum1-sum2
 	local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e)
-	and Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
+	and Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP_DEFENSE)~=0
 	and sum>0
 	and Duel.SelectYesNo(tp,aux.Stringid(26063012,3)) then
 		local mg=Duel.SelectMatchingCard(tp,Card.IsSetCard,tp,LOCATION_HAND+LOCATION_GRAVE,0,1,sum,nil,0x663)
 		Duel.Overlay(tc,mg)
+		if tc:IsType(TYPE_GEMINI) then
+			Duel.Hint(HINT_CARD,tp,tc:GetCode())
+			tc:EnableGeminiState()
+		end
 	end
 end
 function c26063012.hcond(e,tp,eg,ep,ev,re,r,rp)

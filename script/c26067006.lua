@@ -40,6 +40,7 @@ function c26067006.initial_effect(c)
 	e4:SetTarget(c26067006.tgtg)
 	e4:SetValue(1)
 	c:RegisterEffect(e4)
+	--disable deckdes
 	local e5=Effect.CreateEffect(c)
 	e5:SetType(EFFECT_TYPE_FIELD)
 	e5:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
@@ -58,7 +59,6 @@ function c26067006.initial_effect(c)
 	e6:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e6:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e6:SetProperty(EFFECT_FLAG_DELAY)
-	--e6:SetCountLimit(1,{26067006,1})
 	e6:SetCondition(c26067006.condition)
 	e6:SetTarget(c26067006.target)
 	e6:SetOperation(c26067006.activate)
@@ -73,11 +73,11 @@ function c26067006.decon(e,tp,eg,ep,ev,re,r,rp)
 	return false
 end
 function c26067006.defilter(c)
-	return not c:IsForbidden() and c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and (c:IsFaceup() or not c:IsLocation(LOCATION_EXTRA)) 
+	return not c:IsForbidden() and c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and (c:IsFaceup() or not c:IsLocation(LOCATION_EXTRA)) and c:IsAbleToChangeControler()
 end
 function c26067006.detg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local loc=LOCATION_HAND+LOCATION_EXTRA 
-	if Duel.IsPlayerAffectedByEffect(tp,26067010) and Duel.CheckLPCost(tp,700) then
+	if Duel.IsPlayerAffectedByEffect(tp,26067009) and Duel.CheckLPCost(tp,700) then
 		loc=loc+LOCATION_DECK 
 	end
 	if chk==0 then return Duel.IsExistingMatchingCard(c26067003.defilter,tp,loc,0,1,e:GetHandler()) and (e:GetLabel()==0 or Duel.CheckPendulumZones(tp)) end
@@ -90,21 +90,30 @@ function c26067006.deop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.BreakEffect()
 	local g=Duel.GetMatchingGroup(c26067006.defilter,tp,LOCATION_HAND+LOCATION_EXTRA,0,1,nil)
 	local g2=Duel.GetMatchingGroup(c26067006.defilter,tp,LOCATION_DECK,0,1,nil)
-	if Duel.IsPlayerAffectedByEffect(tp,26067010) and Duel.CheckLPCost(tp,700) then
+	if Duel.IsPlayerAffectedByEffect(tp,26067009) and Duel.CheckLPCost(tp,700) then
 		g:Merge(g2)
 	end
 	local sg=g:Select(tp,1,1,nil)
 	if #sg==0 then return end
 	local sc=sg:GetFirst()
+	if sc:IsLocation(LOCATION_DECK) then
+		Duel.PayLPCost(tp,700)
+		Duel.RegisterFlagEffect(tp,26067009,RESET_PHASE+PHASE_END,0,1)
+		Duel.RegisterFlagEffect(tp,26067209,RESET_PHASE+PHASE_END,0,1)
+	end
 	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26067006,3))
-	local opt=Duel.SelectOption(tp,aux.Stringid(26067006,4),aux.Stringid(26067006,5))
+	local b1=sc:IsAbleToDeck()
+	local b2=sc:IsAbleToExtra()
+	local op=Duel.SelectEffect(tp,
+		{b1,aux.Stringid(26067006,4)},
+		{b2,aux.Stringid(26067006,5)})
 	if sc:IsLocation(LOCATION_DECK) then Duel.PayLPCost(tp,700) end
-	if opt==0 then
+	if opt==1 then
 		if Duel.SendtoDeck(sc,1-tp,0,REASON_EFFECT)~=0 and sc:IsLocation(LOCATION_DECK) then
 			sc:ReverseInDeck()
 			sc:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD &~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
 		end
-	elseif opt==1 then
+	elseif opt==2 then
 		Duel.SendtoExtraP(sc,1-tp,REASON_EFFECT)
 	end
 end
@@ -127,18 +136,16 @@ function c26067006.spop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function c26067006.tgtg(e,c)
-	local tp=e:GetHandlerPlayer()
-	if e:GetLabel()==2 then tp=1-tp end
-	local md1=Duel.GetDecktopGroup(tp,1):GetFirst()
-	local md2=Duel.GetDecktopGroup(1-tp,1):GetFirst()
-	local xd1=Duel.GetFieldGroupCount(tp,LOCATION_EXTRA,0)
-	local xd2=Duel.GetFieldGroupCount(1-tp,LOCATION_EXTRA,0)
-	local xdk1=Duel.GetFieldCard(tp,LOCATION_EXTRA,xd1)
-	local xdk2=Duel.GetFieldCard(1-tp,LOCATION_EXTRA,xd2)
-	return (md1 and md1:IsFaceup() and md1:IsSetCard(0x667) and c:IsLocation(LOCATION_DECK))
-	or   (md2 and md2:IsFaceup() and md2:IsSetCard(0x667) and c:IsLocation(LOCATION_DECK))
-	or   (xdk1 and xdk1:IsFaceup() and xdk1:IsSetCard(0x667) and c:IsLocation(LOCATION_EXTRA))
-	or   (xdk2 and xdk2:IsFaceup() and xdk2:IsSetCard(0x667) and c:IsLocation(LOCATION_EXTRA))
+	local p=c:GetControler()
+	local mc=Duel.GetDecktopGroup(p,1):GetFirst()
+	local xd=Duel.GetFieldGroupCount(p,LOCATION_EXTRA,0)
+	local xc=Duel.GetFieldCard(p,LOCATION_EXTRA,xd-1)
+	return 
+	(c:IsLocation(LOCATION_DECK) and mc and mc:IsFaceup()
+	and mc:IsSetCard(0x667))
+	or
+	(c:IsLocation(LOCATION_EXTRA) and xc and xc:IsFaceup()
+	and xc:IsSetCard(0x667))
 end
 function c26067006.tgcon(e,tp,eg,ep,ev,re,r,rp)
 	local tp=e:GetHandlerPlayer()

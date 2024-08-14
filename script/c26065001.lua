@@ -1,4 +1,4 @@
---Entrophys Albis
+--Entrophys Alembis
 function c26065001.initial_effect(c)
 	--cannot special summon
 	local e0=Effect.CreateEffect(c)

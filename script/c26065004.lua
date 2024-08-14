@@ -31,6 +31,9 @@ function c26065004.matfilter(c,lc,sumtype,tp)
 	c:IsSummonCode(lc,sumtype,tp,26068017)
 end
 c26065004.listed_series={0x665}
+c26065004.material={26065001,26065002,26065003,26068017}
+c26065004.listed_names={26065001,26065002,26065003,26068017}
+c26065004.material_setcode=0x665
 function c26065004.limit(e,c)
 	return c:IsFaceup() and c:IsType(TYPE_MONSTER)
 end

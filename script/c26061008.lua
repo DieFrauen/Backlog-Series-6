@@ -43,7 +43,7 @@ function c26061008.initial_effect(c)
 	c:RegisterEffect(e5)
 end
 function c26061008.drcon(e,tp,eg,ep,ev,re,r,rp)
-	return ev>=2000
+	return ev>=2000 and ep==e:GetHandlerPlayer()
 end
 function c26061008.drop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_CARD,0,26061008)
@@ -54,18 +54,21 @@ function c26061008.rdcon(e,tp,eg,ep,ev,re,r,rp)
 	if not dc then return end
 	local val=1
 	local lpv=math.abs(Duel.GetLP(ep)-Duel.GetLP(1-ep))
-	local eqc=ac:GetEquipGroup():FilterCount(Card.IsType,nil,TYPE_UNION)+dc:GetEquipGroup():FilterCount(Card.IsType,nil,TYPE_UNION)+2
-	while (ev*val)<lpv and eqc>1 do
-		val=val*2
-		eqc=eqc-2
-	end
+	if lpv>ev then val=2 end 
+	local g1=ac:GetEquipGroup():Filter(Card.IsType,nil,TYPE_UNION)
+	g1:AddCard(ac)
+	local g2=dc:GetEquipGroup():Filter(Card.IsType,nil,TYPE_UNION)
+	g2:AddCard(dc)
+	if (g1:GetClassCount(Card.GetCode)>4 or g2:GetClassCount(Card.GetCode)>4) and (ev*2)<lpv then val=4 end
 	e:SetLabel(val)
 	return ev>0
 end
 function c26061008.rdop(e,tp,eg,ep,ev,re,r,rp)
-	Duel.ChangeBattleDamage(ep,ev*e:GetLabel())
-	Duel.Hint(HINT_CARD,tp,26061008)
-	Duel.RaiseEvent(e:GetHandler(),EVENT_CUSTOM+26061008,e,REASON_EFFECT,tp,ep,ev*2)
+	local lb=e:GetLabel()
+	if lb>1 then
+		Duel.ChangeBattleDamage(ep,ev*lb)
+		Duel.Hint(HINT_CARD,tp,26061008)
+	end
 end
 function c26061008.lptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end

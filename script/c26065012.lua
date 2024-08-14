@@ -30,19 +30,19 @@ function c26065012.tgfilter(c)
 end
 function c26065012.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	local g1=Duel.GetMatchingGroup(c26065012.tgfilter,tp,LOCATION_ONFIELD+LOCATION_HAND,0,nil)
-	local g2=Duel.GetMatchingGroup(c26065012.tgfilter,tp,0,LOCATION_ONFIELD,nil)
-	local tc=g2:GetFirst()
+	local g1=Duel.GetMatchingGroup(c26065012.tgfilter,tp,LOCATION_ONFIELD,0,nil)
 	if chk==0 then return aux.SelectUnselectGroup(g1,e,tp,1,99,aux.dncheck,0) and Duel.IsExistingMatchingCard(Card.IsReleasable,tp,0,LOCATION_MZONE,1,nil) end
 	local dg=Duel.GetMatchingGroup(aux.TRUE,tp,0,LOCATION_MZONE,nil)
-	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,g,1,0,LOCATION_ONFIELD+LOCATION_HAND)
+	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,g,1,0,LOCATION_ONFIELD)
 	Duel.SetOperationInfo(0,CATEGORY_RELEASE,dg,1,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,0,0)
 end
 function c26065012.activate(e,tp,eg,ep,ev,re,r,rp)
-	local g1=Duel.GetMatchingGroup(c26065012.tgfilter,tp,LOCATION_ONFIELD+LOCATION_HAND,0,nil)
+	local g1=Duel.GetMatchingGroup(c26065012.tgfilter,tp,LOCATION_ONFIELD,0,nil)
 	local g2=Duel.GetMatchingGroup(nil,tp,0,LOCATION_MZONE,nil)
-	local sg=aux.SelectUnselectGroup(g1,e,tp,1,#g1,aux.dncheck,1,tp,HINTMSG_TOGRAVE)
+	local ct=g2:GetClassCount(Card.GetAttribute)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATTRIBUTE)
+	local sg=aux.SelectUnselectGroup(g1,e,tp,1,ct,aux.dncheck,1,tp,HINTMSG_TOGRAVE)
 	if #sg>0 and Duel.SendtoGrave(sg,REASON_EFFECT)>0 and #g2>0 then
 		local tc=g2:GetFirst()
 		local attr=0
@@ -115,21 +115,27 @@ function c26065012.tkop(e,tp,eg,ep,ev,re,r,rp)
 	if tc:IsRelateToEffect(e) and tc:IsFaceup() and Duel.GetLocationCount(1-tp,LOCATION_MZONE)>0 and c26065012.tkfilter(tc,tp) then
 	local att=tc:GetAttribute()
 	code=26065206
-	if   att|ATTRIBUTE_LIGHT ==ATTRIBUTE_LIGHT then
+	if   att&ATTRIBUTE_LIGHT ==ATTRIBUTE_LIGHT then
 		code=26065200
-	elseif att|ATTRIBUTE_DARK  ==ATTRIBUTE_DARK  then
+	elseif att&ATTRIBUTE_DARK  ==ATTRIBUTE_DARK  then
 		code=26065201
-	elseif att|ATTRIBUTE_WIND  ==ATTRIBUTE_WIND  then
+	elseif att&ATTRIBUTE_WIND  ==ATTRIBUTE_WIND  then
 		code=26065202
-	elseif att|ATTRIBUTE_EARTH ==ATTRIBUTE_EARTH then
+	elseif att&ATTRIBUTE_EARTH ==ATTRIBUTE_EARTH then
 		code=26065203
-	elseif att|ATTRIBUTE_FIRE  ==ATTRIBUTE_FIRE  then
+	elseif att&ATTRIBUTE_FIRE  ==ATTRIBUTE_FIRE  then
 		code=26065204
-	elseif att|ATTRIBUTE_WATER ==ATTRIBUTE_WATER then
+	elseif att&ATTRIBUTE_WATER ==ATTRIBUTE_WATER then
 		code=26065205
 	end
 	local token=Duel.CreateToken(tp,code)
 	Duel.SpecialSummonStep(token,0,tp,1-tp,false,false,POS_FACEUP_DEFENSE)
+	local e5=Effect.CreateEffect(c)
+	e5:SetType(EFFECT_TYPE_SINGLE)
+	e5:SetCode(EFFECT_CHANGE_ATTRIBUTE)
+	e5:SetValue(att)
+	e5:SetReset(RESET_EVENT+RESETS_STANDARD-RESET_TOFIELD)
+	token:RegisterEffect(e5,true)
 	Duel.SpecialSummonComplete()
 	end
 end

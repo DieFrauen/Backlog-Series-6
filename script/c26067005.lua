@@ -52,7 +52,7 @@ function c26067005.initial_effect(c)
 	e6:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e6:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e6:SetProperty(EFFECT_FLAG_DELAY)
-	e6:SetCountLimit(1,{26067005,1})
+	--e6:SetCountLimit(1,{26067005,1})
 	e6:SetCondition(c26067005.condition)
 	e6:SetTarget(c26067005.target)
 	e6:SetOperation(c26067005.activate)
@@ -70,7 +70,7 @@ function c26067005.defilter(c)
 end
 function c26067005.detg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local loc=LOCATION_HAND+LOCATION_EXTRA 
-	if Duel.IsPlayerAffectedByEffect(tp,26067010) then
+	if Duel.IsPlayerAffectedByEffect(tp,26067009) then
 		loc=loc+LOCATION_DECK 
 	end
 	if chk==0 then return Duel.IsExistingMatchingCard(c26067005.defilter,tp,loc,0,1,e:GetHandler()) and (e:GetLabel()==0 or Duel.CheckPendulumZones(tp)) end
@@ -83,20 +83,29 @@ function c26067005.deop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.BreakEffect()
 	local g=Duel.GetMatchingGroup(c26067005.defilter,tp,LOCATION_HAND+LOCATION_EXTRA,0,1,nil)
 	local g2=Duel.GetMatchingGroup(c26067005.defilter,tp,LOCATION_DECK,0,1,nil)
-	if Duel.IsPlayerAffectedByEffect(tp,26067010) then
+	if Duel.IsPlayerAffectedByEffect(tp,26067009) and Duel.CheckLPCost(tp,700) then
 		g:Merge(g2)
 	end
 	local sg=g:Select(tp,1,1,nil)
 	if #sg==0 then return end
 	local sc=sg:GetFirst()
+	if sc:IsLocation(LOCATION_DECK) then
+		Duel.PayLPCost(tp,700)
+		Duel.RegisterFlagEffect(tp,26067009,RESET_PHASE+PHASE_END,0,1)
+		Duel.RegisterFlagEffect(tp,26067209,RESET_PHASE+PHASE_END,0,1)
+	end
+	local b1=sc:IsAbleToDeck() or sc:IsAbleToChangeControler()
+	local b2=sc:IsAbleToGrave()
 	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26067005,3))
-	local opt=Duel.SelectOption(tp,aux.Stringid(26067005,4),aux.Stringid(26067005,5))
-	if opt==0 then
+	local op=Duel.SelectEffect(tp,
+		{b1,aux.Stringid(26067005,4)},
+		{b2,aux.Stringid(26067005,5)})
+	if op==1 then
 		if Duel.SendtoDeck(sc,1-tp,0,REASON_EFFECT)~=0 and sc:IsLocation(LOCATION_DECK) then
 			sc:ReverseInDeck()
 			sc:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD &~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
 		end
-	elseif opt==1 then
+	elseif op==2 then
 		Duel.SendtoGrave(sc,REASON_EFFECT,1-tp)
 	end
 end

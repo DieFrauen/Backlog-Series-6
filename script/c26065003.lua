@@ -1,4 +1,4 @@
---Entrophys Rubito
+--Entrophys Rubetort
 function c26065003.initial_effect(c)
 	--cannot special summon
 	local e0=Effect.CreateEffect(c)

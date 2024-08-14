@@ -72,7 +72,7 @@ function c26062003.sptg(e,tp,eg,ep,ev,re,r,rp,c)
 	if #g3>0 and Duel.IsPlayerAffectedByEffect(tp,26062007) and Duel.GetFlagEffect(tp,26062007)==0
 	then g1:Merge(g3) end
 	local sc=nil
-	if g2:GetCount()>0 and (g1:GetCount()==0 or Duel.SelectYesNo(tp,aux.Stringid(26062011,3))) then
+	if g2:GetCount()>0 and Duel.GetLocationCount(tp,LOCATION_MZONE,0)>0 and (g1:GetCount()==0 or Duel.SelectYesNo(tp,aux.Stringid(26062011,3))) then
 		sc=g2:Select(tp,1,1,nil):GetFirst()
 	else 
 		sc=aux.SelectUnselectGroup(g1,e,tp,1,1,aux.ChkfMMZ(1),1,tp,HINTMSG_RELEASE,nil,nil,true):GetFirst()
@@ -100,7 +100,7 @@ function c26062003.condition(e,tp,eg,ep,ev,re,r,rp)
 	local rc=re:GetHandler()
 	return rc and rc:IsSetCard(0x662)
 end
---effect/add from field/gy to hand
+--effect/add from gy to hand
 function c26062003.filter(c)
 	return c:IsSetCard(0x662) and c:IsAbleToHand()
 end
@@ -115,6 +115,11 @@ function c26062003.operation(e,tp,eg,ep,ev,re,r,rp)
 		Duel.SendtoHand(g,nil,REASON_EFFECT)
 		Duel.ConfirmCards(1-tp,g)
 	end
+end
+
+function c26062003.regop(e,tp,eg,ep,ev,re,r,rp)
+	e:GetLabelObject():Reset()
+	e:Reset()
 end
 
 function c26062003.grfilter(c)

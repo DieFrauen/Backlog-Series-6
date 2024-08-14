@@ -21,38 +21,39 @@ end
 function c26067107.pcfilter(c)
 	return c:IsSetCard(0x667) and c:GetType()&TYPE_EFFECT|TYPE_PENDULUM ==TYPE_EFFECT|TYPE_PENDULUM and c:IsFaceup() and not c:IsForbidden()
 end
-function c26067107.mfilter(c,e)
-	return c:IsMonster() and c:IsFaceup() and c:IsCanBeFusionMaterial() and c:IsAbleToGrave() and not c:IsImmuneToEffect(e)
-end
-function c26067107.fusion(c,e,tp,m)
-	return c:IsType(TYPE_FUSION) and c:CheckFusionMaterial(m) and Duel.GetLocationCountFromEx(tp,tp,nil,c)>0
-		and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_FUSION,tp,false,false) and c:CheckFusionMaterial()
+function c26067107.thfilter(c)
+	return c:IsSetCard(0x667) and not c:IsCode(26067007) and c:IsAbleToHand()
 end
 function c26067107.deop(e,tp,eg,ep,ev,re,r,rp)
+	local cost1=math.min(Duel.GetLP(tp),1400)
+	local c=e:GetHandler()
 	local g=Duel.GetFieldGroup(tp,LOCATION_PZONE,LOCATION_PZONE)
 	local ct=Duel.Destroy(g,REASON_EFFECT)
 	local pg=Duel.GetMatchingGroup(c26067107.pcfilter,tp,LOCATION_EXTRA,0,nil)
-	local mg=Duel.GetMatchingGroup(c26067107.mfilter,tp,LOCATION_EXTRA,0,nil,e)
-	local cond1=Duel.CheckPendulumZones(tp) and #pg>=2
-	local cond2=Duel.IsExistingMatchingCard(c26067107.fusion,tp,LOCATION_EXTRA,0,1,nil,e,tp,mg)
-	if #pg>0 and (cond1 or cond2) and Duel.SelectYesNo(tp,aux.Stringid(26067107,0)) then
+	local hg=Duel.GetMatchingGroup(c26067107.thfilter,tp,LOCATION_DECK,0,nil)
+	local cond1=Duel.CheckPendulumZones(tp) and #pg>0 and Duel.GetFlagEffect(tp,26067007)==0
+	local cond2=#hg>0 and Duel.GetFlagEffect(tp,26067107)==0 and Duel.CheckLPCost(tp,cost1)
+	if (cond1 or cond2) and Duel.SelectYesNo(tp,aux.Stringid(26067007,0)) then
 		local op=Duel.SelectEffect(tp,
 		{cond1,aux.Stringid(26067107,1)},
 		{cond2,aux.Stringid(26067107,2)})
 		if op==1 then
+			Duel.PayLPCost(tp,cost1)
 			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
-			tc=pg:Select(tp,2,2,nil)
+			tc=pg:Select(tp,1,2,nil)
 			local pg=tc:GetFirst()
 			for pg in aux.Next(tc) do
 				Duel.MoveToField(pg,tp,tp,LOCATION_PZONE,POS_FACEUP,false)
 				pg:SetStatus(STATUS_EFFECT_ENABLED,true)
 			end
+			Duel.RegisterFlagEffect(tp,26067007,RESET_PHASE+PHASE_END,0,1)
 		elseif op==2 then
-			local fc=Duel.SelectMatchingCard(tp,c26067107.fusion,tp,LOCATION_EXTRA,0,1,1,nil,e,tp,mg):GetFirst()
-			local mat=Duel.SelectFusionMaterial(tp,fc,mg)
-			fc:SetMaterial(mat)
-			Duel.SendtoGrave(mat,REASON_EFFECT+REASON_MATERIAL+REASON_FUSION)
-			Duel.SpecialSummon(fc,SUMMON_TYPE_FUSION,tp,tp,false,false,POS_FACEUP)
+			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+			local sg=hg:Select(tp,1,1,nil)
+			Duel.BreakEffect()
+			Duel.SendtoHand(sg,nil,REASON_EFFECT)
+			Duel.ConfirmCards(1-tp,sg)
+			Duel.RegisterFlagEffect(tp,26067107,RESET_PHASE+PHASE_END,0,1)
 		end
 	end
 end

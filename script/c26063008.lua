@@ -11,139 +11,56 @@ function c26063008.initial_effect(c)
 	e1:SetRange(LOCATION_MZONE)
 	e1:SetCondition(Gemini.NormalStatusCondition)
 	c:RegisterEffect(e1)
-	--special summon
+	--gemini
 	local e0=Effect.CreateEffect(c)
-	e0:SetType(EFFECT_TYPE_FIELD)
-	e0:SetCode(EFFECT_SPSUMMON_PROC)
-	e0:SetProperty(EFFECT_FLAG_SPSUM_PARAM+EFFECT_FLAG_UNCOPYABLE)
-	e0:SetTargetRange(POS_FACEUP_ATTACK,0)
-	e0:SetRange(LOCATION_MZONE)
-	e0:SetCondition(c26063008.xcond)
-	e0:SetTarget(c26063008.xtg)
-	e0:SetValue(1)
+	e0:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+	e0:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_IMMEDIATELY_APPLY)
+	e0:SetCode(EVENT_SPSUMMON_SUCCESS)
+	e0:SetCondition(c26063008.spcon)
+	e0:SetOperation(c26063008.spop)
 	c:RegisterEffect(e0)
-	--gain effects
+	--geminize
+	local e2=Effect.CreateEffect(c)
+	e2:SetType(EFFECT_TYPE_SINGLE)
+	e2:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+	e2:SetRange(LOCATION_MZONE)
+	e2:SetCondition(Gemini.EffectStatusCondition)
+	e2:SetCode(26063008)
+	c:RegisterEffect(e2)
+	--geminize
 	local e3=Effect.CreateEffect(c)
-	e3:SetType(EFFECT_TYPE_SINGLE)
-	e3:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e3:SetProperty(EFFECT_FLAG_IMMEDIATELY_APPLY)
+	e3:SetCode(EVENT_SUMMON_SUCCESS)
 	e3:SetRange(LOCATION_MZONE)
-	e3:SetCondition(Gemini.EffectStatusCondition)
-	e3:SetCode(EFFECT_UPDATE_ATTACK)
-	e3:SetValue(c26063008.stat)
+	e3:SetCondition(c26063008.gemcon)
+	e3:SetOperation(c26063008.gemop)
 	c:RegisterEffect(e3)
-	local e3b=e3:Clone()
-	e3b:SetCode(EFFECT_UPDATE_DEFENSE)
-	c:RegisterEffect(e3b)
-	--Alum
-		local e71=Effect.CreateEffect(c)
-		e71:SetType(EFFECT_TYPE_SINGLE)
-		e71:SetCode(EFFECT_IMMUNE_EFFECT)
-		e71:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-		e71:SetRange(LOCATION_MZONE)
-		e71:SetLabel(26063002)
-		e71:SetValue(c26063008.protval)
-		c:RegisterEffect(e71)
-	--Cypra
-		local e72=Effect.CreateEffect(c)
-		e72:SetType(EFFECT_TYPE_SINGLE)
-		e72:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-		e72:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
-		e72:SetRange(LOCATION_MZONE)
-		e72:SetValue(aux.tgoval)
-		e72:SetLabel(26063003)
-		e72:SetCondition(c26063008.gcond)
-		e72:SetValue(aux.tgoval)
-		c:RegisterEffect(e72)
-	--Ferrix
-		local e73=Effect.CreateEffect(c)
-		e73:SetType(EFFECT_TYPE_SINGLE)
-		e73:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
-		e73:SetRange(LOCATION_MZONE)
-		e73:SetLabel(26063004)
-		e73:SetCondition(c26063008.gcond)
-		e73:SetValue(1)
-		c:RegisterEffect(e73)
-	--Niclas
-		local e74=Effect.CreateEffect(c)
-		e74:SetType(EFFECT_TYPE_SINGLE)
-		e74:SetCode(EFFECT_UNRELEASABLE_SUM)
-		e74:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-		e74:SetRange(LOCATION_MZONE)
-		e74:SetLabel(26063005)
-		e74:SetCondition(c26063008.gcond)
-		e74:SetValue(1)
-		c:RegisterEffect(e74)
-		local e74a=e74:Clone()
-		e74a:SetCode(EFFECT_UNRELEASABLE_NONSUM)
-		c:RegisterEffect(e74a)
-		local e74b=Effect.CreateEffect(c)
-		e74b:SetType(EFFECT_TYPE_SINGLE)
-		e74b:SetCode(EFFECT_CANNOT_REMOVE)
-		e74b:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-		e74b:SetRange(LOCATION_MZONE)
-		e74b:SetLabel(26063003)
-		e74b:SetTargetRange(1,1)
-		e74b:SetCondition(c26063008.gcond)
-		e74b:SetTarget(c26063008.rmlimit)
-		c:RegisterEffect(e74b)
-	--turn Gemini
-	local e4=Effect.CreateEffect(c)
-	e4:SetType(EFFECT_TYPE_FIELD)
-	e4:SetCode(EFFECT_ADD_TYPE)
-	e4:SetValue(TYPE_GEMINI)
-	e4:SetRange(LOCATION_MZONE)
-	e4:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
-	e4:SetTarget(c26063008.geminize)
-	e4:SetCondition(Gemini.EffectStatusCondition)
+	local e4=e3:Clone()
+	e3:SetCode(EVENT_FLIP_SUMMON_SUCCESS)
 	c:RegisterEffect(e4)
-	local e4b=e4:Clone()
-	e4b:SetCode(EFFECT_REMOVE_TYPE)
-	e4b:SetValue(TYPE_EFFECT)
-	c:RegisterEffect(e4b)
-	local e5=Effect.CreateEffect(c)
-	e5:SetType(EFFECT_TYPE_FIELD)
-	e5:SetCode(EFFECT_CANNOT_TRIGGER)
-	e5:SetRange(LOCATION_MZONE)
-	e5:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
-	e5:SetTarget(c26063008.gturn)
-	e5:SetCondition(Gemini.EffectStatusCondition)
+	local e5=e3:Clone()
+	e5:SetCode(EVENT_SPSUMMON_SUCCESS)
 	c:RegisterEffect(e5)
-	local e5b=e5:Clone()
-	e5b:SetCode(EFFECT_DISABLE)
-	c:RegisterEffect(e5b)
-	local e5c=e5:Clone()
-	e5c:SetCode(EFFECT_GEMINI_SUMMONABLE)
-	c:RegisterEffect(e5c)
 end
-function c26063008.gturn(e,c)
-	return c:IsFaceup()
-	and c:IsType(TYPE_GEMINI) 
-	and (c:GetOriginalType()&TYPE_GEMINI)==0
-	and c:IsSummonableCard()
-	and not c:IsGeminiStatus()
+c26063008.StelloyEff1=true
+function c26063008.spcon(e,tp,eg,ep,ev,re,r,rp)
+	return e:GetHandler():GetOverlayGroup():IsExists(Card.IsCode,1,nil,26063001)
 end
-function c26063008.geminize(e,c)
-	return c:IsFaceup()
-	and (c:GetOriginalType()&TYPE_EFFECT)==TYPE_EFFECT 
-	and (c:GetOriginalType()&TYPE_GEMINI)==0
+function c26063008.spop(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	Duel.Hint(HINT_CARD,tp,26063008)
+	c:EnableGeminiStatus()
+	c:RegisterFlagEffect(0,RESET_EVENT+RESETS_STANDARD,EFFECT_FLAG_CLIENT_HINT,1,0,64)
+end
+function c26063008.ovmtg(e,c)
+	return c==e:GetHandler() or not c:IsType(TYPE_EFFECT)
+end
+function c26063008.gemcon(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.IsPlayerAffectedByEffect(0,26063008) or Duel.IsPlayerAffectedByEffect(1,26063008)
 end
 function c26063008.distg(e,c)
 	return not c==e:GetHandler()
-end
-
-function c26063008.stat(e,c)
-	local g=e:GetHandler():GetOverlayGroup()
-	local v,v1,v2,v3,v4=0,0,0,0,0
-	local gf=g:GetFirst()
-	while gf do
-	   if Card.GetCode(gf)==26063002 then v1=v1+1 end
-	   if Card.GetCode(gf)==26063003 then v2=v2+3 end
-	   if Card.GetCode(gf)==26063004 then v3=v3+4 end
-	   if Card.GetCode(gf)==26063005 then v4=v4+2 end
-	   gf=g:GetNext()
-	end
-	v=(v1+v2+v3+v4)*100
-	return v
 end
 function c26063008.xyzcheck(g,tp,xyz)
 	return g:GetClassCount(Card.GetCode)==#g
@@ -159,13 +76,59 @@ end
 function c26063008.ovfilter(c)
 	return c:IsType(TYPE_NORMAL+TYPE_GEMINI)
 end
-function c26063008.protval(e,te,tp)
-	return te:GetOwner()~=e:GetHandler() and te:IsActivated() and not te:IsHasProperty(EFFECT_FLAG_CARD_TARGET) and not te:IsHasCategory(CATEGORY_DESTROY)
-end
-function c26063008.rmlimit(e,c,tp,r)
-	return c==e:GetHandler() and r==REASON_EFFECT
-end
 function c26063008.xtg(e,tp,eg,ep,ev,re,r,rp,c)
 	e:GetHandler():EnableGeminiState()
 	return true
+end
+function c26063008.gemfilter(c)
+	return c:IsFaceup()
+	and (c:GetOriginalType()&TYPE_EFFECT)==TYPE_EFFECT 
+	and (c:GetOriginalType()&TYPE_GEMINI)==0
+	and c:IsSummonableCard()
+	and not c:IsGeminiStatus()
+end
+function c26063008.gemcon(e,tp,eg,ep,ev,re,r,rp)
+	return eg:IsExists(c26063008.gemfilter,1,nil) and e:GetHandler():IsGeminiStatus()
+end
+function c26063008.gemop(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	local g=eg:Filter(c26063008.gemfilter,nil)
+	for tc in g:Iter() do
+		--turn Gemini
+		local e1=Effect.CreateEffect(c)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_ADD_TYPE)
+		e1:SetValue(TYPE_GEMINI)
+		e1:SetReset(RESET_EVENT|RESETS_STANDARD)
+		tc:RegisterEffect(e1)
+		local e2=e1:Clone()
+		e2:SetCode(EFFECT_REMOVE_TYPE)
+		e2:SetValue(TYPE_EFFECT)
+		tc:RegisterEffect(e2)
+		local e3=Effect.CreateEffect(c)
+		e3:SetType(EFFECT_TYPE_SINGLE)
+		e3:SetCode(EFFECT_CANNOT_TRIGGER)
+		e3:SetCondition(Gemini.NormalStatusCondition)
+		e3:SetReset(RESET_EVENT|RESETS_STANDARD)
+		tc:RegisterEffect(e3)
+		local e4=e3:Clone()
+		e4:SetCode(EFFECT_DISABLE)
+		tc:RegisterEffect(e4)
+		local e5=e3:Clone()
+		e5:SetCode(EFFECT_DISABLE_EFFECT)
+		tc:RegisterEffect(e5)
+		local e6=Effect.CreateEffect(c)
+		e6:SetType(EFFECT_TYPE_SINGLE)
+		e6:SetCode(EFFECT_GEMINI_SUMMONABLE)
+		e6:SetReset(RESET_EVENT|RESETS_STANDARD)
+		tc:RegisterEffect(e6)
+	end
+	if #g>0 then Duel.Hint(HINT_CARD,1-tp,26063008) end
+end
+function c26063008.gturn(e,c)
+	return c:IsFaceup()
+	and c:IsType(TYPE_GEMINI) 
+	and (c:GetOriginalType()&TYPE_GEMINI)==0
+	and c:IsSummonableCard()
+	and not c:IsGeminiStatus()
 end

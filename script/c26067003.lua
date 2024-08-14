@@ -40,7 +40,7 @@ function c26067003.initial_effect(c)
 	e4:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
 	e4:SetRange(LOCATION_PZONE)
 	e4:SetTargetRange(LOCATION_DECK+LOCATION_GRAVE+LOCATION_EXTRA,0)
-	e4:SetTarget(c26067003.tgtg)
+	e4:SetTarget(c26067003.sumtg)
 	e4:SetValue(1)
 	e4:SetLabel(0)
 	c:RegisterEffect(e4)
@@ -61,8 +61,12 @@ function c26067003.initial_effect(c)
 	c:RegisterEffect(e6)
 end
 function c26067003.decon(e,tp,eg,ep,ev,re,r,rp)
-	local ex1,g1,gc1,dp1,dv1=Duel.GetOperationInfo(ev,CATEGORY_SPECIAL_SUMMON)
-	if ex1 and re:GetHandlerPlayer()~=e:GetHandlerPlayer() then return true end
+	local LOC =LOCATION_DECK+LOCATION_GRAVE 
+	local ex1,g1,gc1,dp1,loc1=Duel.GetOperationInfo(ev,CATEGORY_SPECIAL_SUMMON)
+	local ex2,g2,gc2,dp2,loc2=Duel.GetPossibleOperationInfo(ev,CATEGORY_SPECIAL_SUMMON)
+	if re:GetHandlerPlayer()==e:GetHandlerPlayer() then return false end
+	if ex1 and (loc1&LOC)~=0 then return true
+	elseif ex2 and (loc2&LOC)~=0 then return true end
 	return false
 end
 function c26067003.defilter(c)
@@ -70,7 +74,7 @@ function c26067003.defilter(c)
 end
 function c26067003.detg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local loc=LOCATION_HAND+LOCATION_EXTRA 
-	if Duel.IsPlayerAffectedByEffect(tp,26067010) then
+	if Duel.IsPlayerAffectedByEffect(tp,26067009) and Duel.CheckLPCost(tp,700) then
 		loc=loc+LOCATION_DECK 
 	end
 	if chk==0 then return Duel.IsExistingMatchingCard(c26067003.defilter,tp,loc,0,1,nil) and (e:GetLabel()==0 or Duel.CheckPendulumZones(tp)) end
@@ -83,12 +87,17 @@ function c26067003.deop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.BreakEffect()
 	local g=Duel.GetMatchingGroup(c26067003.defilter,tp,LOCATION_HAND+LOCATION_EXTRA,0,1,nil)
 	local g2=Duel.GetMatchingGroup(c26067003.defilter,tp,LOCATION_DECK,0,1,nil)
-	if Duel.IsPlayerAffectedByEffect(tp,26067010) then
+	if Duel.IsPlayerAffectedByEffect(tp,26067009) and Duel.CheckLPCost(tp,700) then
 		g:Merge(g2)
 	end
 	local sg=g:Select(tp,1,1,nil)
 	if #sg==0 then return end
 	local sc=sg:GetFirst()
+	if sc:IsLocation(LOCATION_DECK) then
+		Duel.PayLPCost(tp,700)
+		Duel.RegisterFlagEffect(tp,26067009,RESET_PHASE+PHASE_END,0,1)
+		Duel.RegisterFlagEffect(tp,26067209,RESET_PHASE+PHASE_END,0,1)
+	end
 	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26067003,3))
 	local opt=Duel.SelectOption(tp,aux.Stringid(26067003,4),aux.Stringid(26067003,5))
 	if opt==0 then
@@ -115,7 +124,7 @@ function c26067003.spop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.SpecialSummon(c,1,op,op,false,false,POS_FACEUP)
 	end
 end
-function c26067003.tgtg(e,c,sump,sumtype,sumpos,targetp,se)
+function c26067003.sumtg(e,c,sump,sumtype,sumpos,targetp,se)
 	local tp=e:GetHandlerPlayer()
 	--if c:IsSetCard(0x667) then return end
 	if sumtype==SUMMON_TYPE_PENDULUM then return false end

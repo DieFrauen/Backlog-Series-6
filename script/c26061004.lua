@@ -1,6 +1,5 @@
 --Fulmiknight Labrys
 function c26061004.initial_effect(c)
-	c:SetUniqueOnField(1,0,aux.FilterBoolFunction(Card.IsCode,26061004),LOCATION_ONFIELD)
 	--equip
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(1068)
@@ -96,7 +95,7 @@ function c26061004.initial_effect(c)
 	e5:SetType(EFFECT_TYPE_EQUIP)
 	e5:SetCode(EFFECT_UPDATE_ATTACK)
 	e5:SetValue(2400)
-	e5:SetCondition(aux.IsUnionState)
+	e5:SetCondition(c26061004.eqcond)
 	c:RegisterEffect(e5)
 	--cut ATK
 	local e6=Effect.CreateEffect(c)
@@ -111,8 +110,8 @@ function c26061004.initial_effect(c)
 	local e6a=e6:Clone()
 	e6a:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e6a:SetRange(LOCATION_SZONE)
+	e6a:SetCondition(aux.IsUnionState)
 	e6a:SetLabel(0)
-	e6a:SetCondition(c26061004.eqcond)
 	c:RegisterEffect(e6a)
 	--cut battle damage
 	local e7=Effect.CreateEffect(c)
@@ -130,15 +129,7 @@ function c26061004.initial_effect(c)
 end
 function c26061004.UnionLimit(e,c)
 	local tp=e:GetHandlerPlayer()
-	return e:GetHandler():CheckUniqueOnField(tp)
-end
-function c26061004.spcon(e,c)
-	if c==nil then return true end
-	return Duel.GetLocationCount(c:GetControler(),LOCATION_MZONE)>0 and
-		Duel.CheckLPCost(c:GetControler(),2400)
-end
-function c26061004.spop(e,tp,eg,ep,ev,re,r,rp,c)
-	Duel.PayLPCost(tp,2400)
+	return true
 end
 function c26061004.eqcost(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.CheckLPCost(tp,2400) end
@@ -224,7 +215,7 @@ end
 function c26061004.desreptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local ac,dc=Duel.GetAttacker(),Duel.GetAttackTarget()
 	local c=e:GetHandler()
-	if chk==0 then return ac and dc and dc:IsReason(REASON_BATTLE) and (ac==c or ac==c:GetEquipTarget()) and not dc:IsImmuneToEffect(e) and dc:IsCanChangePosition() end
+	if chk==0 then return ac and dc and dc:IsReason(REASON_BATTLE) and (ac==c or ac==c:GetEquipTarget()) and not dc:IsImmuneToEffect(e) end
 	return e:GetLabel()~=0
 end
 function c26061004.desrepop(e,tp,eg,ep,ev,re,r,rp)
@@ -237,11 +228,10 @@ function c26061004.eqcond(e)
 end
 function c26061004.rdcon(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	local tc=Duel.GetAttacker()
-	local dc=Duel.GetAttackTarget()
-	if c~=tc and c:GetEquipTarget()~=tc then return end
-	local g=Duel.GetMatchingGroup(nil,tp,LOCATION_MZONE,0,nil)
-	return ep~=tp and tc and tc==g:GetFirst() and dc and not dc:IsImmuneToEffect(e) and Duel.IsExistingMatchingCard(c26061004.cuttg,e:GetHandlerPlayer(),0,LOCATION_MZONE,1,nil,e) 
+	local ac,dc=Duel.GetAttacker(),Duel.GetAttackTarget()
+	return ep~=tp and ac
+	and (ac==c or ac==c:GetEquipTarget())
+	and dc and not dc:IsImmuneToEffect(e) and Duel.IsExistingMatchingCard(c26061004.cuttg,e:GetHandlerPlayer(),0,LOCATION_MZONE,1,nil,e) 
 end
 function c26061004.cuttg(c,e)
 	return c:IsFaceup()
@@ -255,18 +245,13 @@ function c26061004.rdop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.ChangeBattleDamage(ep,0)
 		e:GetLabelObject():SetLabel(1)
 		local tg=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,nil)
-		local tc=tg:GetFirst()
-		while tc do
+		for tc in tg:Iter() do
 			local e1=Effect.CreateEffect(e:GetHandler())
 			e1:SetType(EFFECT_TYPE_SINGLE)
 			e1:SetCode(EFFECT_UPDATE_ATTACK)
 			e1:SetReset(RESET_EVENT+RESETS_STANDARD)
-			e1:SetValue(val*-1)
+			e1:SetValue(tc:GetAttack()*-0.5)
 			tc:RegisterEffect(e1)
-			local e2=e1:Clone()
-			e2:SetCode(EFFECT_UPDATE_DEFENSE)
-			tc:RegisterEffect(e2)
-			tc=tg:GetNext()
 		end
 	end
 end

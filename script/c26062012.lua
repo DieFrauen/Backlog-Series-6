@@ -68,8 +68,10 @@ function c26062012.actcon(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetCurrentChain()>=3
 end
 function c26062012.cost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return true end
+	local c=e:GetHandler()
+	if chk==0 then return c:GetFlagEffect(26062012)==0 end
 	Duel.Hint(HINT_OPSELECTED,1-tp,e:GetDescription())
+	c:RegisterFlagEffect(26062012,RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1)
 end
 function c26062012.thfilter(c,lv)
 	return c:IsLevelBelow(lv) and c:IsAttribute(ATTRIBUTE_FIRE) and c:IsAbleToHand()
@@ -77,9 +79,8 @@ end
 function c26062012.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	local lv=Duel.GetCurrentChain()
-	if chk==0 then return Duel.IsExistingMatchingCard(c26062012.thfilter,tp,LOCATION_DECK,0,1,nil,lv) and c:GetFlagEffect(26062012)==0 end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26062012.thfilter,tp,LOCATION_DECK,0,1,nil,lv) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_GRAVE)
-	c:RegisterFlagEffect(26062012,RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1)
 end
 function c26062012.thop(e,tp,eg,ep,ev,re,r,rp)
 	local lv=Duel.GetCurrentChain()
@@ -97,9 +98,8 @@ function c26062012.tgtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
 	local lv=Duel.GetCurrentChain()
 	local gg=Duel.GetMatchingGroup(c26062012.tgfilter,tp,LOCATION_DECK,0,nil)
-	if chk==0 then return gg:CheckWithSumEqual(Card.GetLevel,lv,1,99,c) and c:GetFlagEffect(26062012)==0 end
+	if chk==0 then return gg:CheckWithSumEqual(Card.GetLevel,lv,1,99,c) end
 	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,0,tp,LOCATION_DECK)
-	c:RegisterFlagEffect(26062012,RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1)
 end
 function c26062012.tgop(e,tp,eg,ep,ev,re,r,rp)
 	local lv=Duel.GetCurrentChain()
@@ -118,9 +118,8 @@ function c26062012.tftg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	local lv=Duel.GetCurrentChain()
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and Duel.IsExistingMatchingCard(c26062012.nsfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil,lv) and c:GetFlagEffect(26062012)==0 end
+		and Duel.IsExistingMatchingCard(c26062012.nsfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil,lv) end
 	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,0,0)
-	c:RegisterFlagEffect(26062012,RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1)
 end
 function c26062012.tfop(e,tp,eg,ep,ev,re,r,rp)
 	local lv=Duel.GetCurrentChain()

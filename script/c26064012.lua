@@ -52,23 +52,14 @@ function c26064012.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local TRAP =TYPE_TRAP+TYPE_CONTINUOUS 
 	if tc and tc:IsRelateToEffect(e) then
 		if tc:IsType(TYPE_FLIP) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-			and tc:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP+POS_FACEDOWN_DEFENSE) then
-			Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP+POS_FACEDOWN_DEFENSE)
+			and tc:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_DEFENSE) then
+			Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_DEFENSE)
 			Duel.ConfirmCards(1-tp,tc)
 		elseif (tc:GetType()&TRAP ==TRAP and Duel.GetLocationCount(tp,LOCATION_SZONE)>0) then
-			Duel.SSet(tp,tc,tp,false)
-			Duel.ConfirmCards(1-tp,tc)
-			local e1=Effect.CreateEffect(e:GetHandler())
-			e1:SetType(EFFECT_TYPE_SINGLE)
-			e1:SetCode(EFFECT_TRAP_ACT_IN_SET_TURN)
-			e1:SetProperty(EFFECT_FLAG_SET_AVAILABLE)
-			e1:SetReset(RESET_PHASE+PHASE_END)
-			tc:RegisterEffect(e1)
+			Duel.MoveToField(tc,tp,tp,LOCATION_SZONE,POS_FACEUP,true)
 		elseif tc:IsCode(26064007) then
 			Duel.ActivateFieldSpell(tc,e,tp,eg,ep,ev,re,r,rp)
-			Duel.BreakEffect()
-			local trn=Duel.GetTurnCount(tp)+Duel.GetTurnCount(1-tp)
-			tc:AddCounter(0x1b,trn)
+			tc:AddCounter(12,trn)
 		end
 	end
 end
@@ -121,7 +112,7 @@ function c26064012.settg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local g=Duel.GetMatchingGroup(c26064012.setfilter,tp,LOCATION_ONFIELD+LOCATION_HAND,0,nil)
 	local g2=Duel.GetMatchingGroup(c26064012.setfilter2,tp,LOCATION_GRAVE,0,nil,tid)
 	g:Merge(g2)
-	if chk==0 then return aux.SelectUnselectGroup(rg,e,tp,1,3,c26064012.rescon2,0) end
+	if chk==0 then return aux.SelectUnselectGroup(g,e,tp,1,3,c26064012.rescon2,0) end
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,g,0,tp,1)
 end
 function c26064012.setop(e,tp,eg,ep,ev,re,r,rp)

@@ -69,8 +69,8 @@ function c26064004.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
 	Duel.Draw(p,d,REASON_EFFECT)
 	local phase=Duel.GetCurrentPhase()
-	if phase==(PHASE_DRAW|PHASE_STANDBY|PHASE_END) then return end
-	if (gp~=tp and Duel.SelectYesNo(tp,aux.Stringid(26064004,1))) or (Duel.SelectYesNo(tp,aux.Stringid(26064004,1)) and Duel.SelectYesNo(tp,aux.Stringid(26064004,2))) then 
+	if phase==PHASE_DRAW or phase==PHASE_STANDBY or phase==PHASE_END then return end
+	if (gp~=tp and Duel.SelectYesNo(tp,aux.Stringid(26064004,1))) or (gp==tp and Duel.SelectYesNo(tp,aux.Stringid(26064004,1)) and Duel.SelectYesNo(tp,aux.Stringid(26064004,2))) then 
 		if phase==PHASE_MAIN1 then
 			Duel.SkipPhase(gp,PHASE_MAIN1,RESET_PHASE+PHASE_END,1) return
 		elseif phase>=PHASE_BATTLE_START and Duel.GetCurrentPhase()<=PHASE_BATTLE then

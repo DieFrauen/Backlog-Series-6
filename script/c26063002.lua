@@ -8,7 +8,7 @@ function c26063002.initial_effect(c)
 	local e0a=Effect.CreateEffect(c)
 	e0a:SetType(EFFECT_TYPE_SINGLE)
 	e0a:SetProperty(EFFECT_FLAG_SINGLE_RANGE+EFFECT_FLAG_IGNORE_IMMUNE)
-	e0a:SetRange(LOCATION_MZONE+LOCATION_HAND)
+	e0a:SetRange(LOCATION_MZONE|LOCATION_HAND)
 	e0a:SetCode(EFFECT_ADD_TYPE)
 	e0a:SetCondition(c26063002.gemini)
 	e0a:SetValue(TYPE_NORMAL)
@@ -17,7 +17,7 @@ function c26063002.initial_effect(c)
 	e0b:SetCode(EFFECT_REMOVE_TYPE)
 	e0b:SetValue(TYPE_EFFECT)
 	c:RegisterEffect(e0b)
-	--change base attack
+	--change base attack/defense
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
@@ -29,6 +29,18 @@ function c26063002.initial_effect(c)
 	local e2=e1:Clone()
 	e2:SetCode(EFFECT_UPDATE_DEFENSE)
 	c:RegisterEffect(e2)
+	--Material effects
+		local e1m=Effect.CreateEffect(c)
+		e1m:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_FIELD)
+		e1m:SetCode(EFFECT_UPDATE_ATTACK)
+		e1m:SetCondition(c26063002.xmcond)
+		e1m:SetTargetRange(LOCATION_MZONE,0)
+		e1m:SetValue(100)
+		e1m:SetTarget(c26063002.xmtg)
+		c:RegisterEffect(e1m)
+		local e2m=e1m:Clone()
+		e2m:SetCode(EFFECT_UPDATE_DEFENSE)
+		c:RegisterEffect(e2m)
 	--immune
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_SINGLE)
@@ -38,6 +50,15 @@ function c26063002.initial_effect(c)
 	e3:SetCondition(Gemini.EffectStatusCondition)
 	e3:SetValue(c26063002.protval)
 	c:RegisterEffect(e3)
+	--material effects
+		local e3m=e3:Clone()
+		e3m:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_FIELD)
+		e3m:SetCode(EFFECT_IMMUNE_EFFECT)
+		e3m:SetCondition(c26063002.xmcond)
+		e3m:SetTargetRange(LOCATION_MZONE,0)
+		e3m:SetTarget(c26063002.xmtg)
+		e3m:SetValue(c26063002.protval)
+		c:RegisterEffect(e3m)
 	--normal summon
 	local e4=Effect.CreateEffect(c)
 	e4:SetDescription(aux.Stringid(26063002,0))
@@ -67,17 +88,27 @@ function c26063002.initial_effect(c)
 	e5b:SetCode(EVENT_SPSUMMON_SUCCESS)
 	c:RegisterEffect(e5b)
 end
-function c26063002.gxys(e)
-	local c=e:GetHandler()
-	return Gemini.NormalStatusCondition(e) and c:IsHasEffect(26063007)
+function c26063002.xmcond(e,tp,eg,ep,ev,re,r,rp)
+	local c,tp=e:GetHandler(),e:GetHandlerPlayer()
+	if Duel.IsPlayerAffectedByEffect(tp,26068010) and c:IsType(TYPE_EFFECT) then return c==e:GetHandler() end
+	return c:IsGeminiStatus() and c.StelloyEff1~=nil 
+end
+function c26063002.xmtg(e,c)
+	local ec,tp=e:GetHandler(),e:GetHandlerPlayer()
+	if Duel.IsPlayerAffectedByEffect(tp,26068010) and c:IsType(TYPE_EFFECT) then return c==e:GetHandler() end
+	if ec.StelloyEff1~=nil and ec:IsGeminiStatus() then
+	return ec.ovmtg(e,c) end
 end
 function c26063002.protval(e,te)
 	local tc=te:GetHandler()
-	return te:GetOwner()~=e:GetHandler() and te:IsActivated() and not te:IsHasProperty(EFFECT_FLAG_CARD_TARGET) and not te:IsHasCategory(CATEGORY_DESTROY)
+	if te:IsActivated()
+	and te:GetOwner()~=e:GetHandler()
+	and tc:IsSummonType(SUMMON_TYPE_SPECIAL)
+	and te:IsActiveType(TYPE_MONSTER) then return true end
 end
 function c26063002.gemini(e)
 	local c=e:GetHandler()
-	return c:IsLocation(LOCATION_HAND) or Gemini.NormalStatusCondition(e) 
+	return c:IsLocation(LOCATION_HAND) or not c:IsGeminiStatus()
 end
 function c26063002.gfilter(c)
 	return c:IsSummonable(true,nil) and c:IsType(TYPE_NORMAL)
@@ -96,12 +127,13 @@ function c26063002.gop(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function c26063002.thfilter(c)
-	return c:IsType(TYPE_GEMINI) and not c:IsCode(26063002) and c:IsAbleToHand() and c:IsAbleToGrave()
+	return c:IsSetCard(0x663) and c:IsMonster() and c:IsAbleToHand() and c:IsAbleToGrave()
 end
 function c26063002.target(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and Duel.IsExistingMatchingCard(c26063005.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil) end
-	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,tp,LOCATION_DECK)
+	local rg=Duel.GetMatchingGroup(c26063002.thfilter,tp,LOCATION_DECK,0,nil,e,tp)
+	if chk==0 then return rg:GetClassCount(Card.GetCode)>=2 end
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
+	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
 end
 function c26063002.operation(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()

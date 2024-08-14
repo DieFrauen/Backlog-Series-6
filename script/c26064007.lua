@@ -81,7 +81,7 @@ function c26064007.tdfilter(c)
 end
 function c26064007.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==2 or chk==0 then return Duel.IsExistingMatchingCard(c26064007.tdfilter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,c) end
+	if chk==2 or chk==0 then return Duel.IsExistingMatchingCard(c26064007.tdfilter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,c) and Duel.IsPlayerCanDraw(tp) end
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,tp,LOCATION_HAND+LOCATION_ONFIELD)
 end
 function c26064007.flipop(e,tp,eg,ep,ev,re,r,rp)
@@ -90,8 +90,11 @@ function c26064007.flipop(e,tp,eg,ep,ev,re,r,rp)
 	if #g>0 then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
 		local sg=g:Select(tp,1,1,c):GetFirst()
-		Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26064007,3))
-		local opt=Duel.SelectOption(tp,aux.Stringid(26064007,4),aux.Stringid(26064007,5))
+		local opt=0
+		if Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)>0 then
+			Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26064007,3))
+			opt=Duel.SelectOption(tp,aux.Stringid(26064007,4),aux.Stringid(26064007,5))
+		end
 		Duel.ConfirmCards(tp,sg)
 		if sg and Duel.SendtoDeck(sg,nil,opt,REASON_EFFECT) then
 			Duel.ShuffleHand(tp)
@@ -103,18 +106,17 @@ function c26064007.ctop(e,tp,eg,ep,ev,re,r,rp)
 	local ct=eg:GetCount()
 	e:GetHandler():AddCounter(0x1b,ct)
 end
-function c26064007.lvfilter(c,tc)
+function c26064007.lvfilter(c,ct)
 	return c:IsFaceup()
 	and c:IsType(TYPE_FLIP)
 	and c:HasLevel()
-	and (c:IsLevelAbove(2)
-	or tc:GetCounter(0x1b)>1)
+	and (c:IsLevelAbove(2) or (ct>1))
 end
 function c26064007.lvtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and c26062007.lvfilter(chkc,c) end
-	local g=Duel.GetMatchingGroup(c26064007.lvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil,c)
-	if chk==0 then return c:IsCanRemoveCounter(tp,0x1b,1,REASON_EFFECT) end
+	local ct=c:GetCounter(0x1b)
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and c26062007.lvfilter(chkc,ct) end
+	if chk==0 then return c:IsCanRemoveCounter(tp,0x1b,1,REASON_EFFECT) and Duel.IsExistingTarget(c26064007.lvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil,ct) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
 	Duel.SelectTarget(tp,c26064007.lvfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil,ct)
 end

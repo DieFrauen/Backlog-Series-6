@@ -3,7 +3,7 @@ function c26067001.initial_effect(c)
 	--pendulum summon
 	Pendulum.AddProcedure(c)
 	Duel.EnableGlobalFlag(GLOBALFLAG_DECK_REVERSE_CHECK)
-	--place in opponent deck
+	--play Towerbridge of Lemegeton
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e1:SetCode(EVENT_CHAIN_SOLVED)
@@ -13,6 +13,7 @@ function c26067001.initial_effect(c)
 	e1:SetTarget(c26067001.detg1)
 	e1:SetOperation(c26067001.deop1)
 	c:RegisterEffect(e1)
+	--tamper draw effect
 	local e1a=Effect.CreateEffect(c)
 	e1a:SetType(EFFECT_TYPE_QUICK_O)
 	e1a:SetCode(EVENT_CHAINING)
@@ -66,20 +67,7 @@ function c26067001.deop1(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not c:IsRelateToEffect(e) then return end
 	local tc=Duel.GetFirstMatchingCard(c26067001.defilter,tp,LOCATION_DECK,0,nil,tp)
-	if Duel.ActivateFieldSpell(tc,e,tp,eg,ep,ev,re,r,rp) then
-		Duel.ShuffleDeck(tp)
-		local pg=Duel.GetFieldGroup(tp,LOCATION_PZONE,0)
-		local tc1=pg:Select(1-tp,1,1,nil):GetFirst()
-		if tc1 and Duel.SendtoDeck(tc1,1-tp,0,REASON_EFFECT)~=0 and c:IsLocation(LOCATION_DECK) then
-			tc1:ReverseInDeck()
-			tc1:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD&~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
-			local tc2=pg:Select(tp,1,1,tc1):GetFirst()
-			if tc2 and Duel.SendtoDeck(tc2,tp,0,REASON_EFFECT)~=0 and c:IsLocation(LOCATION_DECK) then
-				tc2:ReverseInDeck()
-				tc2:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD&~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
-			end
-		end
-	end
+	Duel.ActivateFieldSpell(tc,e,tp,eg,ep,ev,re,r,rp) 
 end
 function c26067001.decon2(e,tp,eg,ep,ev,re,r,rp)
 	local ex2=(Duel.GetOperationInfo(ev,CATEGORY_DRAW) or re:IsHasCategory(CATEGORY_DRAW))
@@ -89,24 +77,28 @@ function c26067001.defilter2(c)
 	return not c:IsForbidden() and c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and c:IsAbleToDeck()
 end
 function c26067001.detg2(e,tp,eg,ep,ev,re,r,rp,chk)
-	local loc=LOCATION_HAND+LOCATION_EXTRA 
-	if Duel.IsPlayerAffectedByEffect(tp,26067010) and Duel.CheckLPCost(tp,700) then
+	local loc=LOCATION_HAND+LOCATION_EXTRA+LOCATION_GRAVE 
+	if Duel.IsPlayerAffectedByEffect(tp,26067009) and Duel.CheckLPCost(tp,700) then
 		loc=loc+LOCATION_DECK 
 	end
 	local c=e:GetHandler()
 	if chk==0 then return Duel.IsExistingMatchingCard(c26067001.defilter2,tp,loc,0,1,e:GetHandler()) and not (c:IsLocation(LOCATION_HAND) and c:IsPublic()) end
-	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,0,loc)
 end
 function c26067001.deop2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsLocation(LOCATION_PZONE) and not c:IsRelateToEffect(e) then return end
-	local  g=Duel.GetFieldGroup(tp,LOCATION_HAND,0)
+	local g=Duel.GetMatchingGroup(c26067006.defilter,tp,LOCATION_HAND+LOCATION_GRAVE+LOCATION_EXTRA,0,1,nil)
 	local g2=Duel.GetMatchingGroup(c26067006.defilter,tp,LOCATION_DECK,0,1,nil)
-	if Duel.IsPlayerAffectedByEffect(tp,26067010) and Duel.CheckLPCost(tp,700) then
+	if Duel.IsPlayerAffectedByEffect(tp,26067009) and Duel.CheckLPCost(tp,700) then
 		g:Merge(g2)
 	end
-	local tc=g:Select(tp,1,1,nil):GetFirst()
-	if tc:IsLocation(LOCATION_DECK) then Duel.PayLPCost(tp,700) end
+	local tc=g:GetFirst()
+	if tc:IsLocation(LOCATION_DECK) then
+		Duel.PayLPCost(tp,700)
+		Duel.RegisterFlagEffect(tp,26067009,RESET_PHASE+PHASE_END,0,1)
+		Duel.RegisterFlagEffect(tp,26067209,RESET_PHASE+PHASE_END,0,1)
+	end
 	if tc and Duel.SendtoDeck(tc,1-tp,0,REASON_EFFECT)~=0 and tc:IsLocation(LOCATION_DECK) then
 		tc:ReverseInDeck()
 		tc:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD &~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
@@ -147,6 +139,16 @@ function c26067001.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,PLAYER_ALL,1)
 end
 function c26067001.activate(e,tp,eg,ep,ev,re,r,rp)
+	local d1,d2=Duel.GetDecktopGroup(0,1):GetFirst(),Duel.GetDecktopGroup(1,1):GetFirst()
+	if Duel.GetFlagEffect(0,26067001)>0 and not (
+	(d1 and d1:IsSetCard(0x667) and d1:IsFaceup()) or
+	(d2 and d2:IsSetCard(0x667) and d2:IsFaceup())) then
+		if Duel.IsChainDisablable(0) then
+			Duel.NegateEffect(0)
+			return
+		end
+	end
 	Duel.Draw(tp,1,REASON_EFFECT)
 	Duel.Draw(1-tp,1,REASON_EFFECT)
+	Duel.RegisterFlagEffect(0,26067001,RESET_PHASE+PHASE_END,0,1)
 end

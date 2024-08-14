@@ -9,7 +9,7 @@ function c26064005.initial_effect(c)
 	c:RegisterEffect(e0)
 --flip
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(26064005,0))
+	e1:SetDescription(aux.Stringid(26064005,2))
 	e1:SetCategory(CATEGORY_POSITION)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_FLIP)
 	e1:SetProperty(EFFECT_FLAG_DELAY)
@@ -52,8 +52,11 @@ c26064005.TURN=true
 function c26064005.splimit(e,se,sp,st)
 	return (st&SUMMON_TYPE_RITUAL)==SUMMON_TYPE_RITUAL
 end
-function c26064005.ritual_custom_check(e,tp,g,c)
-	return g:FilterCount(Card.IsType,nil,TYPE_FLIP)>0
+	--function c26064005.ritual_custom_check(e,tp,g,c)
+		--return g:FilterCount(Card.IsType,nil,TYPE_FLIP)>0
+	--end
+function c26064005.bfilter(c,e,sp)
+	return c:IsCode(26064006,26064008) and c:IsAbleToRemove()
 end
 function c26064005.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetMatchingGroup(Card.IsCanTurnSet,tp,LOCATION_MZONE,LOCATION_MZONE,e:GetHandler())
@@ -66,22 +69,35 @@ function c26064005.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local gp=Duel.GetTurnPlayer()
 	local g1=Duel.GetMatchingGroup(Card.IsCanTurnSet,tp,LOCATION_MZONE,LOCATION_MZONE,c)
 	Duel.ChangePosition(g1,POS_FACEDOWN_DEFENSE)
-	if Duel.GetFlagEffect(tp,26064005)~=0 then return end
-	if (gp~=tp and Duel.SelectYesNo(tp,aux.Stringid(26064005,0)))
-	or (Duel.SelectYesNo(tp,aux.Stringid(26064005,0)) and Duel.SelectYesNo(tp,aux.Stringid(26064005,1) and Duel.SelectYesNo(tp,aux.Stringid(26064005,2)))) then 
-		Duel.RegisterFlagEffect(tp,26064005,0,0,1)
-		local e1=Effect.CreateEffect(c)
-		e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-		e1:SetType(EFFECT_TYPE_FIELD)
-		e1:SetCode(EFFECT_CANNOT_BP)
-		e1:SetTargetRange(1,1)
-		e1:SetReset(RESET_PHASE+PHASE_END)
-		Duel.RegisterEffect(e1,tp)
-		Duel.SkipPhase(gp,PHASE_DRAW,RESET_PHASE+PHASE_END,1)
-		Duel.SkipPhase(gp,PHASE_STANDBY,RESET_PHASE+PHASE_END,1)
-		Duel.SkipPhase(gp,PHASE_MAIN1,RESET_PHASE+PHASE_END,1)
-		Duel.SkipPhase(gp,PHASE_BATTLE,RESET_PHASE+PHASE_END,1,1)
-		Duel.SkipPhase(gp,PHASE_MAIN2,RESET_PHASE+PHASE_END,1)
+	local g2=Duel.GetMatchingGroup(c26064005.bfilter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,c)
+	if #g2>0 then
+		local eff=false
+		if gp~=tp then 
+			if (Duel.SelectYesNo(tp,aux.Stringid(26064005,0))) then
+				eff=true
+			end
+		else
+			if (Duel.SelectYesNo(tp,aux.Stringid(26064005,0)) and Duel.SelectYesNo(tp,aux.Stringid(26064005,1))) then
+				eff=true
+			end
+		end
+		if eff then
+			local tc=g2:Select(tp,1,1,nil)
+			Duel.ConfirmCards(1-tp,tc)
+			Duel.Remove(tc,POS_FACEUP,REASON_EFFECT)
+			local e1=Effect.CreateEffect(c)
+			e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+			e1:SetType(EFFECT_TYPE_FIELD)
+			e1:SetCode(EFFECT_CANNOT_BP)
+			e1:SetTargetRange(1,1)
+			e1:SetReset(RESET_PHASE+PHASE_END)
+			Duel.RegisterEffect(e1,tp)
+			Duel.SkipPhase(gp,PHASE_DRAW,RESET_PHASE+PHASE_END,1)
+			Duel.SkipPhase(gp,PHASE_STANDBY,RESET_PHASE+PHASE_END,1)
+			Duel.SkipPhase(gp,PHASE_MAIN1,RESET_PHASE+PHASE_END,1)
+			Duel.SkipPhase(gp,PHASE_BATTLE,RESET_PHASE+PHASE_END,1,1)
+			Duel.SkipPhase(gp,PHASE_MAIN2,RESET_PHASE+PHASE_END,1)
+		end
 	end
 end
 function c26064005.setcon1(e,tp,eg,ep,ev,re,r,rp)

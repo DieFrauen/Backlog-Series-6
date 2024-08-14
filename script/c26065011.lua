@@ -1,73 +1,100 @@
 --Entrophys Reaction
 function c26065011.initial_effect(c)
-	--negate
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(26065011,0))
-	e1:SetCategory(CATEGORY_NEGATE+CATEGORY_REMOVE)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_CHAINING)
-	e1:SetCountLimit(1,26065011,EFFECT_COUNT_CODE_OATH)
-	e1:SetCondition(c26065011.negcon)
-	e1:SetTarget(c26065011.negtg)
-	e1:SetOperation(c26065011.negop)
+	e1:SetTarget(c26065011.target)
+	e1:SetOperation(c26065011.activate)
 	c:RegisterEffect(e1)
-	--negate
-	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(26065011,1))
-	e2:SetType(EFFECT_TYPE_ACTIVATE)
-	e2:SetCode(EVENT_CHAINING)
-	e2:SetCountLimit(1,{26065011,1},EFFECT_COUNT_CODE_OATH)
-	e2:SetCondition(c26065011.condition)
-	e2:SetTarget(c26065011.target)
-	e2:SetOperation(c26065011.activate)
-	c:RegisterEffect(e2)
 end
-function c26065011.negcon(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.IsChainNegatable(ev) and (re:IsActiveType(TYPE_MONSTER) or re:IsHasType(EFFECT_TYPE_ACTIVATE)) and re:GetHandler():IsSetCard(0x665)
-end
-
-function c26065011.condition(e,tp,eg,ep,ev,re,r,rp)
-	return (re:IsActiveType(TYPE_MONSTER) or re:IsHasType(EFFECT_TYPE_ACTIVATE)) and re:GetHandler():IsSetCard(0x665) and re:GetCode()~=26065011
-end
-function c26065011.negtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return re:GetHandler():IsAbleToRemove() end
-	Duel.SetOperationInfo(0,CATEGORY_NEGATE,eg,1,0,0)
-	if re:GetHandler():IsRelateToEffect(re) then
-		Duel.SetOperationInfo(0,CATEGORY_TOHAND,eg,1,0,re:GetHandler():GetLocation())
-	else
-		Duel.SetOperationInfo(0,CATEGORY_TOHAND,eg,1,0,re:GetHandler():GetPreviousLocation())
-	end
-end
-function c26065011.negop(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	local rc=re:GetHandler()
-	if not Duel.NegateActivation(ev) and not rc:IsRelateToEffect(re) then return end
-	local g=Group.FromCards(c,rc)
-	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26065011,2))
-	local opt=Duel.SelectEffect(tp,
-		{true,aux.Stringid(26065011,3)},
-		{true,aux.Stringid(26065011,4)})
-	if opt==1 then
-		c:CancelToGrave(true)
-		Duel.SendtoHand(c,nil,REASON_EFFECT)
-	elseif opt==2 then
-		rc:CancelToGrave(true)
-		Duel.SendtoHand(rc,nil,REASON_EFFECT)
-	end
+function c26065011.reg(c)
+	return c:IsSetCard(0x1665) and c:IsFaceup()
 end
 function c26065011.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if re:GetHandler():IsCode(26065011) then return false end
+	local c,rc=e:GetHandler(),re:GetHandler()
+	local g=Duel.GetMatchingGroup(c26065011.reg,tp,LOCATION_ONFIELD,0,nil)
+	local sg=g:GetClassCount(Card.GetCode)
+	sg=math.min(sg,3)
 	local ftg=re:GetTarget()
-	if chkc then return ftg(e,tp,eg,ep,ev,re,r,rp,chk,chkc) end
-	if chk==0 then return not ftg or ftg(e,tp,eg,ep,ev,re,r,rp,chk) end
-	if re:IsHasProperty(EFFECT_FLAG_CARD_TARGET) then
-		e:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	local b1=(c26065011.copy(e,tp,eg,ep,ev,re,r,rp,0,ftg)
+	and Duel.GetFlagEffect(tp,26065011)==0)
+	local b2=(Duel.IsChainNegatable(ev)
+	and Duel.GetFlagEffect(tp,26065111)==0)
+	local b3=(Duel.IsPlayerCanSendtoHand(tp,c)
+	and Duel.GetFlagEffect(tp,26065211)==0)
+	local b4=false
+	if chkc then return ftg(e,tp,eg,ep,ev,re,r,rp,chk,chkc) or b2 or b3 end
+	if chk==0 then
+		e:SetLabel(0)
+		return sg>0 and re:GetHandler():IsSetCard(0x665) and (b1 or b2 or b3)
+		and (re:IsActiveType(TYPE_MONSTER)
+		or re:IsHasType(EFFECT_TYPE_ACTIVATE))
+		and (b1 or b2 or b3)
 	end
-	if ftg then
-		ftg(e,tp,eg,ep,ev,re,r,rp,chk)
+	local lab=0
+	while (b1 or b2 or b3) and sg>0 do
+		Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26065011,3+sg))
+		local op=Duel.SelectEffect(tp,
+			{b1,aux.Stringid(26065011,0)},
+			{b2,aux.Stringid(26065011,1)},
+			{b3,aux.Stringid(26065011,2)},
+			{b4,aux.Stringid(26065011,3)})
+		if op==1 then
+			if re:IsHasProperty(EFFECT_FLAG_CARD_TARGET) then
+				e:SetProperty(EFFECT_FLAG_CARD_TARGET)
+			end
+			c26065011.copy(e,tp,eg,ep,ev,re,r,rp,1,ftg)
+			lab=lab+100
+			Duel.Hint(HINT_MESSAGE,1-tp,aux.Stringid(26065011,0))
+			Duel.RegisterFlagEffect(tp,26065011,RESET_PHASE+PHASE_END,0,1)
+			b1=false
+		elseif op==2 then
+			Duel.SetOperationInfo(0,CATEGORY_NEGATE,eg,1,0,0)
+			lab=lab+10
+			b4=false
+			Duel.Hint(HINT_MESSAGE,1-tp,aux.Stringid(26065011,1))
+			Duel.RegisterFlagEffect(tp,26065111,RESET_PHASE+PHASE_END,0,1)
+			b2=false
+		elseif op==3 then
+			Duel.SetOperationInfo(0,CATEGORY_TOHAND,c,1,0,0)
+			lab=lab+1
+			Duel.Hint(HINT_MESSAGE,1-tp,aux.Stringid(26065011,2))
+			Duel.RegisterFlagEffect(tp,26065211,RESET_PHASE+PHASE_END,0,1)
+			b3=false
+		elseif op==4 then
+			b1=false;b2=false;b3=false
+		end
+		b4=true
+		sg=sg-1
 	end
+	Duel.SetChainLimit(function(te,rp,tp) return not te:GetHandler():IsCode(26065011) end)
+	e:SetLabel(lab)
+end
+function c26065011.copy(e,tp,eg,ep,ev,re,r,rp,chk,ftg)
+	if ftg then 
+		if ftg(e,tp,eg,ep,ev,re,r,rp,chk) then return true
+		end
+	else return true end
 end
 function c26065011.activate(e,tp,eg,ep,ev,re,r,rp)
+	local lab=e:GetLabel()
 	local fop=re:GetOperation()
-	fop(e,tp,eg,ep,ev,re,r,rp)
+	if e:GetLabel()>99 then
+		fop(e,tp,eg,ep,ev,re,r,rp)
+		lab=lab-100
+	end
+	if lab>9 then
+		local rc=re:GetHandler()
+		if Duel.NegateActivation(ev) and rc:IsRelateToEffect(re) then 
+			rc:CancelToGrave(true)
+			Duel.SendtoHand(rc,nil,REASON_EFFECT)
+		end
+		lab=lab-10
+	end
+	local c=e:GetHandler()
+	if lab==1 and c:IsRelateToEffect(e) then
+		c:CancelToGrave(true)
+		Duel.SendtoHand(c,nil,REASON_EFFECT)
+	end
 end

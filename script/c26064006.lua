@@ -26,32 +26,6 @@ end
 function c26064006.forcedgroup(c,e,tp)
 	return c:IsFaceup() and c:IsCanTurnSet() and not c:IsImmuneToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE,0)>0
 end
-function c26064006.flipop(e,tp,eg,ep,ev,re,r,rp)
-	local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
-	local mg=Duel.GetMatchingGroup(c26064006.setfilter,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,nil,c)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local tg=Duel.SelectMatchingCard(tp,c26064006.filter,tp,LOCATION_HAND,0,1,1,nil,e,tp,mg)
-	local tc=tg:GetFirst()
-	if tc then
-		mg=mg:Filter(Card.IsCanBeRitualMaterial,tc,tc)
-		local mat=nil
-		if ft>0 then
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RELEASE)
-			mat=mg:SelectWithSumGreater(tp,Card.GetRitualLevel,tc:GetLevel(),tc)
-			tc:SetMaterial(mat)
-			Duel.ChangePosition(mat,POS_FACEDOWN_DEFENSE)
-			Duel.BreakEffect()
-			local pos=Duel.SelectPosition(tp,tc,POS_FACEUP+POS_FACEDOWN_DEFENSE)
-			Duel.SpecialSummon(tc,SUMMON_TYPE_RITUAL,tp,tp,false,true,pos)
-			if pos==POS_FACEDOWN_DEFENSE then
-				Duel.ConfirmCards(1-tp,tc)
-				local sg=Duel.GetMatchingGroup(Card.IsFacedown,tp,LOCATION_MZONE,0,nil)
-				Duel.ShuffleSetCard(sg)
-			end
-			tc:CompleteProcedure()
-		end
-	end
-end
 function c26064006.stage2(mg,e,tp,eg,ep,ev,re,r,rp,sc)
 	if sc:IsFacedown() then
 		local sg=Duel.GetMatchingGroup(Card.IsFacedown,tp,LOCATION_MZONE,0,nil)
@@ -82,6 +56,9 @@ function c26064006.drop(e,tp,eg,ep,ev,re,r,rp)
 		else
 			Duel.SpecialSummon(tc,0,tp,tp,false,false,pos)
 		end
-		c26064006.stage2(nil,e,tp,eg,ep,ev,re,r,rp,tc)
+		if tc:IsOnField() and tc:IsFacedown() then
+			Duel.ConfirmCards(1-tp,tc)
+			c26064006.stage2(nil,e,tp,eg,ep,ev,re,r,rp,tc)
+		end
 	end
 end
