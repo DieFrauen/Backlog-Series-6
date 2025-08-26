@@ -48,12 +48,13 @@ end
 function c26061001.eqtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
 	local g1=Duel.GetMatchingGroup(c26061001.union,tp,LOCATION_SZONE,0,c,c,tp,1):Filter(Card.IsFaceup,c)
+	g1:Sub(c:GetEquipGroup())
 	local g2=Duel.GetMatchingGroup(c26061001.union,tp,LOCATION_MZONE,0,nil,c,tp,1)
 	local g3=Duel.GetMatchingGroup(c26061001.ofilter,tp,LOCATION_HAND+LOCATION_GRAVE+LOCATION_DECK,0,nil,c,tp,1)
 	local ft=Duel.GetLocationCount(tp,LOCATION_SZONE)
 	g1:Sub(c:GetEquipGroup())
 	if chk==0 then
-		return #g1>0 or (#g2>0 and ft>0) or  (#g3>0 and ft>0)
+		return #g1>0 or (#g2>0 and ft>0) or  (#g3>0 and ft>0 and Duel.CheckLPCost(tp,2000))
 	end
 	Duel.SetPossibleOperationInfo(0,CATEGORY_LEAVE_GRAVE,nil,0,tp,LOCATION_GRAVE)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_EQUIP,nil,1,tp,LOCATION_ONFIELD+LOCATION_HAND+LOCATION_GRAVE+LOCATION_DECK)

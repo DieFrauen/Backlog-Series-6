@@ -50,14 +50,12 @@ function c26066007.initial_effect(c)
 	c:RegisterEffect(e4)
 end
 function c26066007.trfilter(c,tid)
-	return c:GetTurnID()==tid and c:IsLocation(LOCATION_GRAVE) and (c:GetReason()&REASON_RELEASE)~=0
+	return c:GetTurnID()==tid and c:IsLocation(LOCATION_GRAVE)
 end
 function c26066007.trtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local tid=Duel.GetTurnCount()
 	if chkc then return chkc:IsLocation(LOCATION_GRAVE) and c26066007.trfilter(chkc,tid) end
-	if chk==0 then return Duel.IsExistingTarget(c26066007.trfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil,tid) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-	local g=Duel.SelectTarget(tp,c26066007.trfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,3,nil,tid)
+	if chk==0 then return Duel.IsExistingMatchingCard(c26066007.trfilter,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil,tid) end
 	Duel.SetPossibleOperationInfo(0,CATEGORY_DRAW,1,1,0,0)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
 end
@@ -74,11 +72,16 @@ function c26066007.thfilter(c,eg)
 	(c:IsTrap() and b3))
 end
 function c26066007.trop(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS)
-	local sg=g:Filter(Card.IsRelateToEffect,nil,e)
-	if sg then
-		local mg=Duel.GetMatchingGroup(aux.NecroValleyFilter(c26066007.thfilter),tp,LOCATION_DECK+LOCATION_GRAVE,0,nil,sg)
-		mg:Sub(sg)
+	local tid=Duel.GetTurnCount()
+	local g=Duel.GetMatchingGroup(aux.NecroValleyFilter(c26066007.trfilter),tp,LOCATION_GRAVE,LOCATION_GRAVE,nil,tid)
+	local sg=g:Select(tp,1,3,nil)
+	if #sg>0 then
+		Duel.HintSelection(sg)
+		for pc in sg:Iter() do
+			pc:RegisterFlagEffect(26066007,RESET_EVENT+RESETS_STANDARD,0,1)
+			Duel.MoveSequence(pc,1)
+		end
+		local mg=Duel.GetMatchingGroup(c26066007.thfilter,tp,LOCATION_DECK,0,nil,sg)
 		if #mg>0 and Duel.SelectYesNo(tp,aux.Stringid(26066007,0)) then
 			local ec=mg:Select(tp,1,1,nil)
 			Duel.SendtoHand(ec,nil,REASON_EFFECT)
@@ -97,7 +100,7 @@ end
 function c26066007.discon(e,tp,eg,ep,ev,re,r,rp)
 	local rc=re:GetHandler()
 	local code1,code2=re:GetHandler():GetOriginalCodeRule()
-	return (rc:GetFlagEffect(26066007)~=0 or Duel.IsExistingMatchingCard(c26066007.code,tp,0,LOCATION_GRAVE,1,nil,true,code1,code2)) and not rc:IsSetCard(0x666) and code2~=26066006
+	return ((rc:IsLocation(LOCATION_GRAVE) and rc:GetFlagEffect(26066007)~=0) or Duel.IsExistingMatchingCard(c26066007.code,tp,0,LOCATION_GRAVE,1,rc,true,code1,code2)) and not rc:IsSetCard(0x666) and code2~=26066006
 end
 function c26066007.disop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_CARD,0,26066007)

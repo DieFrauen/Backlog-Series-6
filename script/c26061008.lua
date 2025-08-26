@@ -4,6 +4,7 @@ function c26061008.initial_effect(c)
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
+	e1:SetProperty(EFFECT_FLAG_DAMAGE_STEP)
 	c:RegisterEffect(e1)
 	--draw
 	local e2=Effect.CreateEffect(c)
@@ -31,9 +32,11 @@ function c26061008.initial_effect(c)
 	e4:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
 	e4:SetRange(LOCATION_FZONE)
 	e4:SetCode(EVENT_BATTLE_DAMAGE)
+	e4:SetCost(Cost.SelfToGrave)
 	e4:SetTarget(c26061008.lptg)
 	e4:SetOperation(c26061008.lpop)
 	c:RegisterEffect(e4)
+	--fulmiknight siege (enable quick effects)
 	local e5=Effect.CreateEffect(c)
 	e5:SetType(EFFECT_TYPE_FIELD)
 	e5:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
@@ -42,6 +45,7 @@ function c26061008.initial_effect(c)
 	e5:SetTargetRange(1,1)
 	c:RegisterEffect(e5)
 end
+c26061008.listed_names={26061007}
 function c26061008.drcon(e,tp,eg,ep,ev,re,r,rp)
 	return ev>=2000 and ep==e:GetHandlerPlayer()
 end
@@ -70,6 +74,9 @@ function c26061008.rdop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.Hint(HINT_CARD,tp,26061008)
 	end
 end
+function c26061008.tffilter(c,tp)
+	return c:IsCode(26061007) and c:GetActivateEffect():IsActivatable(tp,true,true)
+end
 function c26061008.lptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
 	Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,ep,ev)
@@ -78,5 +85,16 @@ end
 function c26061008.lpop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Recover(ep,ev,REASON_EFFECT)
 	Duel.Recover(1-ep,ev,REASON_EFFECT)
+	Duel.BreakEffect()
 	Duel.SkipPhase(Duel.GetTurnPlayer(),PHASE_BATTLE,RESET_PHASE+PHASE_BATTLE_STEP,1)
+	local tg=Duel.GetMatchingGroup(aux.NecroValleyFilter(c26061008.tffilter),tp,LOCATION_DECK+LOCATION_GRAVE,0,nil,tp)
+	local tc=0
+	if #tg==0 or not Duel.SelectYesNo(tp,aux.Stringid(26061008,3)) then return end
+	Duel.BreakEffect()
+	if #tg==tg:FilterCount(Card.IsLocation,nil,LOCATION_DECK) then
+		tc=tg:GetFirst()
+	else
+		tc=tg:Select(tp,1,1,nil):GetFirst()
+	end
+	Duel.ActivateFieldSpell(tc,e,tp,eg,ep,ev,re,r,rp)
 end

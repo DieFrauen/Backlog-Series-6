@@ -8,68 +8,52 @@ function c26064011.initial_effect(c)
 	e1:SetHintTiming(0,TIMING_END_PHASE)
 	e1:SetTarget(c26064011.cost)
 	c:RegisterEffect(e1)
-	--uncounterable flip summons
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_CANNOT_INACTIVATE)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetValue(c26064011.efilter)
-	--c:RegisterEffect(e2)
-	local e3=Effect.CreateEffect(c)
-	e3:SetType(EFFECT_TYPE_FIELD)
-	e3:SetCode(EFFECT_CANNOT_DISABLE_FLIP_SUMMON)
-	e3:SetRange(LOCATION_SZONE)
-	e3:SetProperty(EFFECT_FLAG_IGNORE_RANGE+EFFECT_FLAG_SET_AVAILABLE)
-	e3:SetTarget(aux.TargetBoolFunction(Card.IsType,TYPE_MONSTER))
-	--c:RegisterEffect(e3)
 	--rewrite and draw
-	local e4=Effect.CreateEffect(c)
-	e4:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
-	e4:SetRange(LOCATION_SZONE)
-	e4:SetCode(EVENT_CHAIN_SOLVING)
-	e4:SetCondition(c26064011.recon)
-	e4:SetOperation(c26064011.reop)
-	c:RegisterEffect(e4)
+	local e2=Effect.CreateEffect(c)
+	e2:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
+	e2:SetRange(LOCATION_SZONE)
+	e2:SetCode(EVENT_CHAIN_SOLVING)
+	e2:SetCondition(c26064011.recon)
+	e2:SetOperation(c26064011.reop)
+	c:RegisterEffect(e2)
 	--when drawn
-	local e5=Effect.CreateEffect(c)
-	e5:SetDescription(aux.Stringid(26064011,5))
-	e5:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e5:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
-	e5:SetCode(EVENT_DRAW)
-	e5:SetCost(c26064011.thcost)
-	--e5:SetTarget(c26064011.drtg)
-	e5:SetOperation(c26064011.drop)
-	c:RegisterEffect(e5)
+	local e3=Effect.CreateEffect(c)
+	e3:SetDescription(aux.Stringid(26064011,5))
+	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+	e3:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
+	e3:SetCode(EVENT_DRAW)
+	e3:SetCost(c26064011.thcost)
+	e3:SetTarget(c26064011.drtg)
+	e3:SetOperation(c26064011.drop)
+	c:RegisterEffect(e3)
 	--leave field
-	local e6=Effect.CreateEffect(c)
-	e6:SetDescription(aux.Stringid(26064011,6))
-	e6:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-	e6:SetProperty(EFFECT_FLAG_DELAY)
-	e6:SetCode(EVENT_LEAVE_FIELD)
-	e6:SetCondition(c26064011.setcon)
-	e6:SetTarget(c26064011.settg)
-	e6:SetOperation(c26064011.setop)
-	c:RegisterEffect(e6)
-	local e6a=e6:Clone()
-	e6a:SetCode(EVENT_TO_GRAVE)
-	e6a:SetCondition(c26064011.setcon2)
-	c:RegisterEffect(e6a)
+	local e4=Effect.CreateEffect(c)
+	e4:SetDescription(aux.Stringid(26064011,6))
+	e4:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
+	e4:SetProperty(EFFECT_FLAG_DELAY)
+	e4:SetCode(EVENT_LEAVE_FIELD)
+	e4:SetCondition(c26064011.setcon)
+	e4:SetTarget(c26064011.settg)
+	e4:SetOperation(c26064011.setop)
+	c:RegisterEffect(e4)
+	local e5=e4:Clone()
+	e5:SetCode(EVENT_TO_GRAVE)
+	e5:SetCondition(c26064011.setcon2)
+	c:RegisterEffect(e5)
 end
 c26064011.FLIP=true
 c26064011.DRAW=true
 c26064011.TURN=true
 function c26064011.cost(e,tp,eg,ep,ev,re,r,rp,chk)
-	local b=c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,2)
 	if chk==0 then return true end
-	if b and Duel.SelectYesNo(tp,aux.Stringid(26064011,0)) then 
+	if c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,0) and Duel.SelectYesNo(tp,aux.Stringid(26064011,0)) then 
 		e:SetCategory(CATEGORY_SPECIAL_SUMMON)
 		e:SetOperation(c26064011.flipop)
 		c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
 	end
 end
 function c26064011.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return true end
-	if chk==2 then return Duel.IsExistingMatchingCard(c26064011.spfilter,tp,LOCATION_DECK,0,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26064011.spfilter,tp,LOCATION_DECK,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,0,tp,LOCATION_DECK)
 end
 function c26064011.spfilter(c)
@@ -123,16 +107,17 @@ function c26064011.drfilter(c,e,tp)
 	return c:IsType(TYPE_TRAP) and c:IsSetCard(0x664) and not c:IsPublic()
 end
 function c26064011.drtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetFlagEffect(tp,26064011)==0 end
+	if chk==0 then return Duel.GetFlagEffect(tp,26064011)==0 and not e:GetHandler():IsPublic() end
 end
 function c26064011.drop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if Duel.GetFlagEffect(tp,26064011)==0 then
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_FIELD)
-		e1:SetCode(EFFECT_TRAP_ACT_IN_HAND)
+		e1:SetCode(EFFECT_TRAP_ACT_IN_SET_TURN)
+		e1:SetProperty(EFFECT_FLAG_SET_AVAILABLE)
+		e1:SetTargetRange(LOCATION_SZONE,0)
 		e1:SetDescription(aux.Stringid(26064011,1))
-		e1:SetTargetRange(LOCATION_HAND,0)
 		e1:SetReset(RESET_PHASE+PHASE_END)
 		e1:SetCondition(c26064011.handcon)
 		e1:SetValue(c26064011.handvalue)
@@ -152,25 +137,47 @@ function c26064011.drop(e,tp,eg,ep,ev,re,r,rp)
 end
 function c26064011.handcon(e)
 	local tp=e:GetHandlerPlayer()
-	return Duel.IsExistingMatchingCard(c26064011.costfilter,tp,LOCATION_SZONE,0,1,nil)
+	return Duel.IsExistingMatchingCard(c26064011.costfilter,tp,LOCATION_SZONE,0,1,nil,e:GetHandlerPlayer())
+end
+function c26064011.costfilter(c,tp)
+	local ag=c26064011.adjacent(c:GetSequence(),tp)
+	return c:IsSetCard(0x664) and #ag>0
 end
 function c26064011.handvalue(e,rc,re)
-	local rc=re:GetHandler()
-	if rc:IsSetCard(0x664) then rc:RegisterFlagEffect(26064011,RESET_CHAIN,0,0,e:GetHandler():GetFieldID()) end
+	local ag=c26064011.adjacent(rc:GetSequence(),e:GetHandlerPlayer())
+	if rc:IsSetCard(0x664) and #ag>0 then
+		rc:RegisterFlagEffect(26064011,RESET_CHAIN,0,0,e:GetHandler():GetFieldID()) 
+		return true
+	end
+end
+function c26064011.adjacent(seq,tp)
+	local g=Group.CreateGroup()
+	local function optadd(loc,seq,player)
+		if not player then player=tp end
+		local c=Duel.GetFieldCard(player,loc,seq)
+		if c and c:IsFacedown() and c:IsAbleToHandAsCost() then
+			g:AddCard(c)
+		end
+	end
+	if seq+1<=4 then optadd(LOCATION_SZONE,seq+1) end
+	if seq-1>=0 then optadd(LOCATION_SZONE,seq-1) end
+	if seq<5 then
+		optadd(LOCATION_MZONE,seq)
+	end
+	return g
 end
 function c26064011.costtg(e,te,tp)
 	local tc=te:GetHandler()
-	return tc:IsLocation(LOCATION_HAND) and tc:IsSetCard(0x664) and tc:GetFlagEffect(26064011)>0 and tc:GetFlagEffectLabel(26064011)==e:GetHandler():GetFieldID()
+	e:SetLabelObject(tc)
+	local g=c26064011.adjacent(tc:GetSequence(),tp)
+	return tc:GetFlagEffect(26064011)>0 and tc:GetFlagEffectLabel(26064011)==e:GetHandler():GetFieldID() and #g>0
 end
 function c26064011.costop(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetLabelObject()
 	Duel.Hint(HINT_CARD,0,26064011)
-	local g=Duel.SelectMatchingCard(tp,c26064011.costfilter,tp,LOCATION_SZONE,0,1,1,nil,e,tp)
-	Duel.SendtoHand(g,nil,REASON_COST)
-end
-function c26064011.costfilter(c)
-	return c:IsFacedown()
-	and c:IsAbleToHandAsCost()
-	--and c:GetSequence()<4
+	local g=c26064011.adjacent(c:GetSequence(),tp)
+	local sg=g:Select(tp,1,1,c)
+	Duel.SendtoHand(sg,nil,REASON_COST)
 end
 function c26064011.tdfilter(c)
 	return c:IsFaceup() and c:IsAbleToDeck() and (c:IsStatus(STATUS_SUMMON_TURN) or c:IsStatus(STATUS_FLIP_SUMMON_TURN) or c:IsStatus(STATUS_SPSUMMON_TURN))

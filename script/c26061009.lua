@@ -20,14 +20,15 @@ function c26061009.initial_effect(c)
 	c:RegisterEffect(e4)
 end
 function c26061009.filter(c)
-	return c:IsSetCard(0x661) and c:IsAbleToGrave()
+	return c:IsSetCard(0x661) and (c:IsAbleToGrave() or c:IsAbleToDeck())
 end
 function c26061009.rescon1(sg,e,tp,mg)
-	return sg:IsExists(Card.IsSetCard,1,nil,0x661)
+	return sg:IsExists(Card.IsSetCard,1,nil,0x661) and Duel.IsPlayerCanDraw(tp,#sg)
 end
 function c26061009.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26061009.filter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,e:GetHandler()) and Duel.IsPlayerCanDraw(tp,1) end
-	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,0,tp,1)
+	Duel.SetPossibleOperationInfo(0,CATEGORY_TOGRAVE,nil,0,tp,1)
+	Duel.SetPossibleOperationInfo(0,CATEGORY_TODECK,nil,0,tp,1)
 	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
 	Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,tp,0)
 end
@@ -40,15 +41,24 @@ function c26061009.activate(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26061009.filter,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,c) end
 	local g=Duel.GetMatchingGroup(Card.IsAbleToGrave,tp,LOCATION_HAND+LOCATION_ONFIELD,0,c)
 	local sg=aux.SelectUnselectGroup(g,e,tp,1,2,c26061009.rescon1,1,tp,HINTMSG_TOGRAVE)
-	Duel.SendtoGrave(sg,REASON_EFFECT)
+	local b1,b2=sg:FilterCount(Card.IsAbleToGrave,nil)==#sg,sg:FilterCount(Card.IsAbleToDeck,nil)==#sg
+	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26061009,0))
+	local op=Duel.SelectEffect(tp,
+		{b1,aux.Stringid(26061009,1)},
+		{b2,aux.Stringid(26061009,2)})
 	local eqg=sg:Filter(c26061009.eqfilter,nil)
-	lpv=sg:GetSum(Card.GetBaseAttack)+sg:GetSum(Card.GetBaseDefense)
-	Duel.Draw(tp,#sg,REASON_EFFECT)
+	lpv=eqg:GetSum(Card.GetBaseAttack)+eqg:GetSum(Card.GetBaseDefense)
 	Duel.Recover(tp,lpv,REASON_EFFECT)
-	if lpv==5000 then
-		Duel.BreakEffect()
-		Duel.Draw(tp,1,REASON_EFFECT)
+	if op==1 then
+		Duel.SendtoGrave(sg,REASON_EFFECT)
 	end
+	if op==2 then
+		Duel.SendtoDeck(sg,nil,1,REASON_EFFECT)
+		Duel.ShuffleDeck(tp)
+	end
+	local val=#sg
+	if lpv==5000 then val=val+1 end
+	Duel.Draw(tp,val,REASON_EFFECT)
 end
 function c26061009.tbfilter(c,reas)
 	return c:IsAbleToRemoveAsCost() and c:GetOriginalCode()==26061009

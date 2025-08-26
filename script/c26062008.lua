@@ -1,4 +1,4 @@
---Blazon - Argela the Ardent
+--Blazon - Argent the Ardent
 function c26062008.initial_effect(c)
 	--synchro summon
 	Synchro.AddProcedure(c,nil,1,1,Synchro.NonTunerEx(Card.IsAttribute,ATTRIBUTE_FIRE),1,99)

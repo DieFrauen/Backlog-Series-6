@@ -1,8 +1,17 @@
 --Over-wind Astrolabe
 function c26064006.initial_effect(c)
-	local e1=Ritual.CreateProc({handler=c,lvtype=RITPROC_GREATER,extrafil=c26064006.extrafil,extraop=c26064006.extraop,matfilter=c26064006.forcedgroup,sumpos=POS_FACEUP+POS_FACEDOWN_DEFENSE,stage2=c26064006.stage2})
+	local e1=Ritual.CreateProc({handler=c,
+				filter=aux.FilterBoolFunction(Card.IsType,TYPE_FLIP),
+				lvtype=RITPROC_GREATER,
+				extrafil=c26064006.extrafil,
+				extraop=c26064006.extraop,
+				matfilter=c26064006.matfilter,
+				sumpos=POS_FACEUP+POS_FACEDOWN_DEFENSE,
+				stage2=c26064006.stage2})
 	e1:SetCategory(e1:GetCategory()|CATEGORY_POSITION)
 	c:RegisterEffect(e1)
+	c26064006.fliptg=e1:GetTarget()
+	c26064006.flipop=e1:GetOperation()
 	--DRAW effect
 	local e2=Effect.CreateEffect(c)
 	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
@@ -16,20 +25,20 @@ function c26064006.initial_effect(c)
 end
 c26064006.listed_names={26064004}
 c26064006.DRAW=true
-c26064006.ACTV=true
+c26064006.RITU=true
 function c26064006.extrafil(e,tp,eg,ep,ev,re,r,rp,chk)
 	return Duel.GetFieldGroup(tp,LOCATION_MZONE,LOCATION_MZONE)
 end
 function c26064006.extraop(mat,e,tp,eg,ep,ev,re,r,rp,tc)
 	return Duel.ChangePosition(mat,POS_FACEDOWN_DEFENSE)
 end
-function c26064006.forcedgroup(c,e,tp)
-	return c:IsFaceup() and c:IsCanTurnSet() and not c:IsImmuneToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE,0)>0
+function c26064006.matfilter(c,e,tp)
+	return c:IsFaceup() and c:HasLevel() and c:IsCanTurnSet() and not c:IsImmuneToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE,0)>0
 end
 function c26064006.stage2(mg,e,tp,eg,ep,ev,re,r,rp,sc)
 	if sc:IsFacedown() then
 		local sg=Duel.GetMatchingGroup(Card.IsFacedown,tp,LOCATION_MZONE,0,nil)
-		Duel.ShuffleSetCard(sg)
+		if #sg>1 then Duel.ShuffleSetCard(sg) end
 	end
 end
 function c26064006.spcost(e,tp,eg,ep,ev,re,r,rp,chk)

@@ -91,36 +91,36 @@ end
 function c26063003.xmcond(e,tp,eg,ep,ev,re,r,rp)
 	local c,tp=e:GetHandler(),e:GetHandlerPlayer()
 	if Duel.IsPlayerAffectedByEffect(tp,26068010) and c:IsType(TYPE_EFFECT) then return c==e:GetHandler() end
-	return c:IsGeminiStatus() and c.StelloyEff1~=nil 
+	return c.StelloyEff1~=nil 
 end
 function c26063003.xmtg(e,c)
 	local ec,tp=e:GetHandler(),e:GetHandlerPlayer()
 	if Duel.IsPlayerAffectedByEffect(tp,26068010) and c:IsType(TYPE_EFFECT) then return c==e:GetHandler() end
-	if ec:IsGeminiStatus() and ec.StelloyEff1~=nil  then
-	return ec.ovmtg(e,c) end
+	return ec.StelloyEff1~=nil and ec.ovmtg(e,c)
 end
 function c26063003.gemini(e)
 	local c=e:GetHandler()
 	return c:IsLocation(LOCATION_HAND) or Gemini.NormalStatusCondition(e)
 end
-function c26063003.gfilter(c)
-	return c:IsSummonable(true,nil) and c:IsType(TYPE_NORMAL)
+function c26063003.gfilter(c,tp)
+	return c:IsSummonable(true,nil)
+	and c:IsType(TYPE_NORMAL)
+	and (c:IsOnField() or Duel.GetLocationCount(tp,LOCATION_MZONE)>0)
 end
 function c26063003.gtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and Duel.IsExistingMatchingCard(c26063003.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26063003.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,0,0)
 end
 function c26063003.gop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SUMMON)
-	local g=Duel.SelectMatchingCard(tp,c26063003.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,c26063003.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,1,nil,tp)
 	local tc=g:GetFirst()
 	if tc then
 		Duel.Summon(tp,tc,true,nil)
 	end
 end
 function c26063003.cfilter(c)
-	return c:IsSetCard(0x1663) and not c:IsCode(26063003) and (c:IsAbleToHand() or c:IsAbleToGrave())
+	return c:IsSetCard(0x663) and not c:IsCode(26063003) and (c:IsAbleToHand() or c:IsAbleToGrave())
 end
 function c26063003.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26063003.cfilter,tp,LOCATION_DECK,0,1,nil) end
@@ -131,4 +131,10 @@ function c26063003.operation(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26063003,2))
 	local tc=Duel.SelectMatchingCard(tp,c26063003.cfilter,tp,LOCATION_DECK,0,1,1,nil):GetFirst()
 	aux.ToHandOrElse(tc,tp)
+end
+function c26063003.aclimit(e,re,tp)
+	return re:IsActiveType(TYPE_MONSTER) and
+	(e:IsCode(EVENT_SUMMON_SUCCESS) or
+	e:IsCode(EVENT_SPSUMMON_SUCCESS) or
+	e:IsCode(EVENT_FLIP_SUMMON_SUCCESS))
 end

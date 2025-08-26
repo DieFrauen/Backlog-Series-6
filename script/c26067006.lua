@@ -80,7 +80,7 @@ function c26067006.detg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if Duel.IsPlayerAffectedByEffect(tp,26067009) and Duel.CheckLPCost(tp,700) then
 		loc=loc+LOCATION_DECK 
 	end
-	if chk==0 then return Duel.IsExistingMatchingCard(c26067003.defilter,tp,loc,0,1,e:GetHandler()) and (e:GetLabel()==0 or Duel.CheckPendulumZones(tp)) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26067006.defilter,tp,loc,0,1,e:GetHandler()) and (e:GetLabel()==0 or Duel.CheckPendulumZones(tp)) end
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,0,0)
 end
 function c26067006.deop(e,tp,eg,ep,ev,re,r,rp)
@@ -102,18 +102,13 @@ function c26067006.deop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.RegisterFlagEffect(tp,26067209,RESET_PHASE+PHASE_END,0,1)
 	end
 	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26067006,3))
-	local b1=sc:IsAbleToDeck()
-	local b2=sc:IsAbleToExtra()
-	local op=Duel.SelectEffect(tp,
-		{b1,aux.Stringid(26067006,4)},
-		{b2,aux.Stringid(26067006,5)})
-	if sc:IsLocation(LOCATION_DECK) then Duel.PayLPCost(tp,700) end
-	if opt==1 then
+	local opt=Duel.SelectOption(tp,aux.Stringid(26067006,4),aux.Stringid(26067006,5))
+	if opt==0 then
 		if Duel.SendtoDeck(sc,1-tp,0,REASON_EFFECT)~=0 and sc:IsLocation(LOCATION_DECK) then
 			sc:ReverseInDeck()
 			sc:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD &~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
 		end
-	elseif opt==2 then
+	elseif opt==1 then
 		Duel.SendtoExtraP(sc,1-tp,REASON_EFFECT)
 	end
 end

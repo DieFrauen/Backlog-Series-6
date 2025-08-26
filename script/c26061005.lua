@@ -1,6 +1,5 @@
 --Fulmiknight Leonais
 function c26061005.initial_effect(c)
-	c:SetUniqueOnField(1,0,aux.FilterBoolFunction(Card.IsCode,26061005),LOCATION_ONFIELD)
 	--equip
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(1068)
@@ -89,7 +88,7 @@ function c26061005.initial_effect(c)
 	e4:SetType(EFFECT_TYPE_SINGLE)
 	e4:SetCode(EFFECT_UNION_LIMIT)
 	e4:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e4:SetValue(c26061005.UnionLimit)
+	e4:SetValue(aux.TRUE)
 	c:RegisterEffect(e4)
 	--def up
 	local e5=Effect.CreateEffect(c)
@@ -125,10 +124,6 @@ function c26061005.initial_effect(c)
 	e7a:SetRange(LOCATION_SZONE)
 	c:RegisterEffect(e7a)
 end
-function c26061005.UnionLimit(e,c)
-	local tp=e:GetHandlerPlayer()
-	return e:GetHandler():CheckUniqueOnField(tp)
-end
 function c26061005.spcon(e,c)
 	if c==nil then return true end
 	return Duel.GetLocationCount(c:GetControler(),LOCATION_MZONE)>0 and
@@ -146,7 +141,7 @@ function c26061005.UnionTarget(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local code=c:GetOriginalCode()
 	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) end
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0
-		and Duel.IsExistingMatchingCard(Card.IsFaceup,tp,LOCATION_MZONE,0,1,c) and c:CheckUniqueOnField(tp) end
+		and Duel.IsExistingMatchingCard(Card.IsFaceup,tp,LOCATION_MZONE,0,1,c) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
 	Duel.SetOperationInfo(0,CATEGORY_EQUIP,g,1,0,0)
 	Duel.Hint(HINT_OPSELECTED,tp,e:GetDescription())
@@ -180,9 +175,10 @@ end
 function c26061005.UnionSumOperation(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not c:IsRelateToEffect(e) then return end
-	if Duel.SpecialSummon(c,0,tp,tp,true,false,POS_FACEUP)==0 and Duel.GetLocationCount(tp,LOCATION_MZONE)<=0
+	if Duel.SpecialSummon(c,0,tp,tp,true,false,POS_FACEUP)==0 then
+		if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0
 		and c:IsCanBeSpecialSummoned(e,0,tp,true,false,POS_FACEUP) then
-		Duel.SendtoGrave(c,REASON_RULE)
+			Duel.SendtoGrave(c,REASON_RULE) end
 		return
 	end
 	local eg=Duel.GetMatchingGroup(c26061002.union,tp,LOCATION_ONFIELD,0,c,c)

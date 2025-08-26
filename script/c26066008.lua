@@ -36,7 +36,7 @@ function c26066008.initial_effect(c)
 	e4a:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_GRANT)
 	e4a:SetRange(LOCATION_SZONE)
 	e4a:SetTargetRange(LOCATION_HAND,0)
-	e4a:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,0x666))
+	e4a:SetTarget(c26066008.efilter)
 	e4a:SetLabelObject(e4)
 	c:RegisterEffect(e4a)
 	--magic drain
@@ -54,7 +54,13 @@ function c26066008.initial_effect(c)
 	c:RegisterEffect(e5a)
 end
 function c26066008.cfilter(e,c)
-	return c:IsSpell() and (c:IsFaceup() or c:GetControler()==e:GetHandlerPlayer())
+	local tp=e:GetHandlerPlayer()
+	if not c:IsSpell() then return false end
+	if c:IsLocation(LOCATION_HAND) then return Duel.IsPlayerAffectedByEffect(tp,26066007) end
+	return (c:IsFaceup() or c:GetControler()==tp)
+end
+function c26066008.efilter(e,c)
+	return c:IsRace(RACE_FIEND) and c:IsAttribute(ATTRIBUTE_DARK)
 end
 function c26066008.sumtrcon(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():IsReason(REASON_SUMMON)

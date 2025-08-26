@@ -19,12 +19,12 @@ function c26066011.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,g,1,0,0)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_TOGRAVE,nil,1,0,LOCATION_DECK)
 end
-function c26066011.gfilter1(c,typ,code)
-	return c:IsType(typ) and c:IsCode(code)
+function c26066011.gfilter1(c,tp,tc,ct)
+	local code=c:GetCode()
+	return not Duel.IsExistingMatchingCard(c26066011.code,tp,LOCATION_ONFIELD+LOCATION_GRAVE,LOCATION_ONFIELD+LOCATION_GRAVE,1,nil,code) and c:IsType(ct)
 end
-function c26066011.gfilter2(c,tc,ct)
-	local code=tc:GetCode()
-	return not Duel.IsExistingMatchingCard(c26066011.code,tp,LOCATION_ONFIELD+LOCATION_GRAVE,LOCATION_ONFIELD+LOCATION_GRAVE,1,nil,code) and c:IsType(ct) and c:IsCode(tc:GetCode())
+function c26066011.gfilter2(c,typ,code)
+	return c:IsType(typ) and c:IsCode(code)
 end
 function c26066011.code(c,code)
 	return c:IsFaceup() and c:IsCode(code)
@@ -33,15 +33,15 @@ function c26066011.activate(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
 	if tc and tc:IsFaceup() and tc:IsRelateToEffect(e) then
-		local ct,b1,b2,b3,code=0,true,false,true,tc:GetCode()
+		local ct,b1,b2,b3,code=0,false,false,true,tc:GetCode()
 		if tc:IsMonster() then ct=TYPE_MONSTER 
 		elseif tc:IsSpell() then ct=TYPE_SPELL
 		elseif tc:IsSpell() then ct=TYPE_TRAP
 		end
-		local tg1=Duel.GetMatchingGroup(c26066011.gfilter1,tp,0,LOCATION_HAND+LOCATION_DECK,nil,ct,code)
-		local tg2=Duel.GetMatchingGroup(c26066011.gfilter2,tp,0,LOCATION_HAND+LOCATION_DECK,nil,tp,tc,ct)
-		if #tg1>1 then b1=true end
-		if #tg2>2 then b2=true end
+		local tg1=Duel.GetMatchingGroup(c26066011.gfilter1,tp,0,LOCATION_DECK,nil,tp,tc,ct)
+		local tg2=Duel.GetMatchingGroup(c26066011.gfilter2,tp,0,LOCATION_HAND+LOCATION_DECK+LOCATION_EXTRA,nil,ct,code)
+		if #tg1>2 and tg1:GetClassCount(Card.GetCode)>2 then b1=true end
+		if #tg2>1 then b2=true end
 		local sg=nil
 		Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26066011,1))
 		local op=Duel.SelectEffect(1-tp,
@@ -49,19 +49,19 @@ function c26066011.activate(e,tp,eg,ep,ev,re,r,rp)
 			{b2,aux.Stringid(26066011,3)},
 			{b3,aux.Stringid(26066011,4)})
 		if op==1 then
-			sg=tg1:Select(1-tp,2,2,nil)
-			Duel.SendtoGrave(sg,REASON_EFFECT)
+			sg=aux.SelectUnselectGroup(tg1,e,1-tp,3,3,aux.dncheck,1,1-tp,HINTMSG_TOGRAVE)
+			Duel.SendtoGrave(sg,REASON_EFFECT+REASON_RELEASE)
 			for tc in aux.Next(sg) do
 				tc:RegisterFlagEffect(26066007,RESET_EVENT+RESETS_STANDARD,0,1)
 			end
 		elseif op==2 then
-			sg=aux.SelectUnselectGroup(tg2,e,1-tp,3,3,aux.dncheck,1,1-tp,HINTMSG_TOGRAVE)
-			Duel.SendtoGrave(sg,REASON_EFFECT)
+			sg=tg2:Select(1-tp,2,2,nil)
+			Duel.SendtoGrave(sg,REASON_EFFECT+REASON_RELEASE)
 			for tc in aux.Next(sg) do
 				tc:RegisterFlagEffect(26066007,RESET_EVENT+RESETS_STANDARD,0,1)
 			end
 		elseif op==3 then
-			Duel.SendtoGrave(tc,REASON_EFFECT)
+			Duel.SendtoGrave(tc,REASON_EFFECT+REASON_RELEASE)
 			tc:RegisterFlagEffect(26066007,RESET_EVENT+RESETS_STANDARD,0,1)
 			local e2=Effect.CreateEffect(c)
 			e2:SetType(EFFECT_TYPE_SINGLE)

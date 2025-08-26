@@ -1,7 +1,7 @@
 --Entrophys Marshall Opus - Yliaster
 function c26065006.initial_effect(c)
 	c:EnableReviveLimit()
-	Link.AddProcedure(c,c26065006.mfilter,4)
+	Link.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsSetCard,0x665),4,4)
 	--Material check
 	local e0=Effect.CreateEffect(c)
 	e0:SetType(EFFECT_TYPE_SINGLE)
@@ -85,26 +85,27 @@ function c26065006.mfilter(c,lc,sumtype,tp)
 end
 function c26065006.matcheck(e,c)
 	local g=c:GetMaterial()
+	local sg=g:Filter(Card.IsSetCard,nil,0x2665)
 	local att=0
-	if g:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_EARTH)>0 then
+	if sg:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_EARTH)>0 then
 		att=att+ATTRIBUTE_EARTH 
 	end
-	if g:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_WATER)>0 then
+	if sg:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_WATER)>0 then
 		att=att+ATTRIBUTE_WATER 
 	end
-	if g:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_WIND)>0 then
+	if sg:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_WIND)>0 then
 		att=att+ATTRIBUTE_WIND 
 	end
-	if g:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_FIRE)>0 then
+	if sg:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_FIRE)>0 then
 		att=att+ATTRIBUTE_FIRE 
 	end
-	if g:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_LIGHT)>0 then
+	if sg:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_LIGHT)>0 then
 		att=att+ATTRIBUTE_LIGHT 
 	end
-	if g:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_DARK)>0 then
+	if sg:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_DARK)>0 then
 		att=att+ATTRIBUTE_DARK 
 	end
-	if g:FilterCount(Card.IsAttribute,nil,0x40)>0 then
+	if sg:FilterCount(Card.IsAttribute,nil,0x40)>0 then
 		att=att+0x40
 	end
 	e:SetLabel(att)

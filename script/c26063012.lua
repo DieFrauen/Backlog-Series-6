@@ -60,13 +60,14 @@ function c26063012.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local sum2=Duel.GetFlagEffect(1-tp,26063013)
 	local sum=sum1-sum2
 	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and c26063012.filter(chkc,e,tp) end
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>1 and sum>=1
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>1 
 		and Duel.IsExistingMatchingCard(c26063012.filter,tp,LOCATION_HAND+LOCATION_GRAVE,0,1,nil,e,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,2,tp,LOCATION_GRAVE)
 end
 function c26063012.activate(e,tp,eg,ep,ev,re,r,rp)
 	local sum1,sum2=Duel.GetFlagEffect(1-tp,26063012),Duel.GetFlagEffect(1-tp,26063013)
 	local sum=sum1-sum2
+	if sum<1 then sum=1 end
 	local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
 	if sum>ft then sum=ft end
 	local g=Duel.GetMatchingGroup(c26063012.filter,tp,LOCATION_HAND+LOCATION_GRAVE,0,nil,e,tp,tc)
@@ -77,8 +78,8 @@ function c26063012.activate(e,tp,eg,ep,ev,re,r,rp)
 		local g=Duel.GetMatchingGroup(Card.IsXyzSummonable,tp,LOCATION_EXTRA,0,nil)
 		if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(26063012,3)) then
 			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-			local tg=g:Select(tp,1,1,nil)
-			Duel.XyzSummon(tp,tg:GetFirst())
+			local tc=g:Select(tp,1,1,nil):GetFirst()
+			Duel.XyzSummon(tp,tc)
 		end
 	end
 end
@@ -110,10 +111,6 @@ function c26063012.spop(e,tp,eg,ep,ev,re,r,rp)
 	and Duel.SelectYesNo(tp,aux.Stringid(26063012,3)) then
 		local mg=Duel.SelectMatchingCard(tp,Card.IsSetCard,tp,LOCATION_HAND+LOCATION_GRAVE,0,1,sum,nil,0x663)
 		Duel.Overlay(tc,mg)
-		if tc:IsType(TYPE_GEMINI) then
-			Duel.Hint(HINT_CARD,tp,tc:GetCode())
-			tc:EnableGeminiState()
-		end
 	end
 end
 function c26063012.hcond(e,tp,eg,ep,ev,re,r,rp)

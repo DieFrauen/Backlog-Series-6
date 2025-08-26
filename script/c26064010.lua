@@ -10,31 +10,13 @@ function c26064010.initial_effect(c)
 	c:RegisterEffect(e1)
 	--destroy replace
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetProperty(EFFECT_FLAG_SET_AVAILABLE+EFFECT_FLAG_IGNORE_IMMUNE)
-	e2:SetCode(EFFECT_BATTLE_DESTROY_REDIRECT)
-	e2:SetValue(LOCATION_HAND)
+	e2:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
+	e2:SetCode(EFFECT_DESTROY_REPLACE)
 	e2:SetRange(LOCATION_SZONE)
-	e2:SetTargetRange(LOCATION_ONFIELD,LOCATION_ONFIELD)
-	e2:SetTarget(c26064010.bttg)
+	e2:SetTarget(c26064010.destg)
+	e2:SetValue(c26064010.desval)
+	e2:SetOperation(c26064010.desop)
 	c:RegisterEffect(e2)
-	local e2a=Effect.CreateEffect(c)
-	e2a:SetType(EFFECT_TYPE_FIELD)
-	e2a:SetProperty(EFFECT_FLAG_SET_AVAILABLE+EFFECT_FLAG_IGNORE_IMMUNE)
-	e2a:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
-	e2a:SetRange(LOCATION_SZONE)
-	e2a:SetValue(LOCATION_HAND)
-	e2a:SetTargetRange(LOCATION_ONFIELD,LOCATION_ONFIELD)
-	e2a:SetTarget(c26064010.eftg)
-	c:RegisterEffect(e2a)
-	aux.GlobalCheck(c26064010,function()
-		local ge1=Effect.CreateEffect(c)
-		ge1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-		ge1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-		ge1:SetCode(EVENT_LEAVE_FIELD_P)
-		ge1:SetOperation(c26064010.checkop)
-		Duel.RegisterEffect(ge1,0)
-	end)
 	--when drawn
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(26064005,5))
@@ -76,36 +58,38 @@ function c26064010.efffilter(e,ct)
 	local te=Duel.GetChainInfo(ct,CHAININFO_TRIGGERING_EFFECT)
 	return te:GetHandler():IsType(TYPE_FLIP)
 end
-function c26064010.bttg(e,c)
-	local tp=e:GetHandlerPlayer()
-	return c:IsSetCard(0x664) and Duel.GetAttacker():IsControler(1-tp)
-end
-function c26064010.eftg(e,c)
-	local tp=e:GetHandlerPlayer()
-	return c:IsFaceup() and c:IsSetCard(0x664) and Duel.IsPlayerCanSendtoHand(tp,c) and c:IsReason(REASON_DESTROY) and c:GetFlagEffect(26064011-tp)>0 and c~=e:GetHandler()
-end
-function c26064010.checkop(e,tp,eg,ep,ev,re,r,rp)
-	for tc in eg:Iter() do
-		if re~=nil then
-			tc:RegisterFlagEffect(26064010+rp,RESET_EVENT+RESETS_STANDARD,0,1)
-		end
-	end
-end
 function c26064010.cost(e,tp,eg,ep,ev,re,r,rp,chk)
-	local b=c26064010.fliptg(e,tp,eg,ep,ev,re,r,rp,2)
 	if chk==0 then return true end
-	if b and Duel.SelectYesNo(tp,aux.Stringid(26064010,0)) then 
+	if c26064010.fliptg(e,tp,eg,ep,ev,re,r,rp,0)
+	and Duel.SelectYesNo(tp,aux.Stringid(26064010,0)) then 
 		e:SetTarget(c26064010.fliptg)
 		e:SetCategory(CATEGORY_POSITION)
 		e:SetOperation(c26064010.flipop)
 	end
 end
+function c26064010.desfilter(c)
+	return (c:IsSetCard(0x664) or c:IsFacedown()) and c:IsOnField() and not c:IsReason(REASON_REPLACE)
+end
+function c26064010.destg(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then
+		local count=eg:FilterCount(c26064010.desfilter,c)*2
+		e:SetLabel(count)
+		return count>0 and Duel.IsCanRemoveCounter(tp,1,0,0x1b,count,REASON_COST)
+	end
+	return Duel.SelectEffectYesNo(tp,e:GetHandler(),96)
+end
+function c26064010.desval(e,c)
+	return c26064010.desfilter(c,e:GetHandlerPlayer())
+end
+function c26064010.desop(e,tp,eg,ep,ev,re,r,rp)
+	local count=e:GetLabel()
+	Duel.RemoveCounter(tp,1,0,0x1b,count,REASON_COST)
+end
 function c26064010.flfilter(c)
 	return c:IsFacedown() and c:IsSetCard(0x664)
 end
 function c26064010.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return true end
-	if chk==2 then return Duel.IsExistingMatchingCard(c26064010.flfilter,tp,LOCATION_MZONE,0,1,nil)
+	if chk==0 then return Duel.IsExistingMatchingCard(c26064010.flfilter,tp,LOCATION_MZONE,0,1,nil)
 	and Duel.IsExistingMatchingCard(Card.IsCanTurnSet,tp,0,LOCATION_MZONE,1,nil)end
 	Duel.SetOperationInfo(0,CATEGORY_POSITION,g,2,0,0)
 end
@@ -140,18 +124,20 @@ end
 function c26064010.drop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetMatchingGroup(c26064010.drfilter,tp,LOCATION_SZONE,LOCATION_SZONE,nil)
 	if #g>0 and Duel.SendtoHand(g,nil,REASON_EFFECT) then
-		Duel.BreakEffect()
 		local tc=nil
 		local g=Duel.GetMatchingGroup(c26064010.setfilter,tp,LOCATION_HAND,0,nil)
 		local sz=Duel.GetLocationCount(tp,LOCATION_SZONE)
 		Duel.Hint(HINT_SELECTMSG,tp,527)
-		local sg=g:Select(tp,1,sz,nil)
-		Duel.ShuffleHand(tp)
-		Duel.SSet(tp,sg,tp,false)
+		if #g>0 and sz>0 and Duel.SelectYesNo(tp,aux.Stringid(26064010,3)) then
+			local sg=g:Select(tp,1,sz,nil)
+			Duel.BreakEffect()
+			Duel.ShuffleHand(tp)
+			Duel.SSet(tp,sg,tp,false)
+		end
 	end
 end
-function c26064010.tdfilter(c)
-	return (not c:IsOnField() or c:GetSequence()<4) and c:IsAbleToDeck()
+function c26064010.remfilter(c)
+	return c:IsSpellTrap() and c:IsAbleToRemove()
 end
 function c26064010.setcon(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
@@ -162,13 +148,15 @@ function c26064010.setcon2(e,tp,eg,ep,ev,re,r,rp)
 	return c:IsReason(REASON_EFFECT) and not (c:GetPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEUP))
 end
 function c26064010.settg(e,tp,eg,ep,ev,re,r,rp,chk)
-	local g=Duel.GetMatchingGroup(c26064010.tdfilter,rp,LOCATION_SZONE,0,nil)
+	local g=Duel.GetMatchingGroup(c26064010.remfilter,rp,LOCATION_ONFIELD+LOCATION_GRAVE,0,nil)
 	if chk==0 then return e:GetType()&EFFECT_TYPE_TRIGGER_F ~=0 or #g>0 end
 	Duel.SetTargetPlayer(rp)
-	Duel.SetOperationInfo(0,CATEGORY_TODECK,g,#g,rp,1)
+	Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,#g,0,0)
 end
 function c26064010.setop(e,tp,eg,ep,ev,re,r,rp)
 	local p=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER)
-	local g=Duel.GetMatchingGroup(c26064010.tdfilter,p,LOCATION_SZONE,0,nil)
-	Duel.SendtoDeck(g,p,2,REASON_EFFECT)
+	local g=Duel.GetMatchingGroup(c26064010.remfilter,p,LOCATION_ONFIELD+LOCATION_GRAVE,0,nil)
+	if #g>0 then
+		Duel.Remove(g,POS_FACEUP,REASON_EFFECT)
+	end
 end

@@ -35,15 +35,15 @@ function c26064008.initial_effect(c)
 	e4:SetCondition(c26064008.setcon2)
 	c:RegisterEffect(e4)
 end
-function c26064008.filter1(c,e,tp,eg,ep,ev,re,r,rp,tid)
-	if c:IsSetCard(0x664) and c:IsFaceup() and c:IsCanBeEffectTarget(e) and (c:IsOnField() or c:GetTurnID()==tid) then
-		return ((c.FLIP and c.fliptg(e,tp,eg,ep,ev,re,r,rp,2))
-		or (c.ACTV and c:GetActivateEffect():IsActivatable(tp)))
+function c26064008.filter1(c,e,tp,eg,ep,ev,re,r,rp)
+	if c:IsSetCard(0x664) and c:IsFaceup()
+	and c:IsCanBeEffectTarget(e)  then
+		return ((c.FLIP and c.fliptg(e,tp,eg,ep,ev,re,r,rp,0))
+		or (c.RITU and c.fliptg(e,tp,eg,ep,ev,re,r,rp,0)))
 	else return false end
 end
 function c26064008.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	local tid=Duel.GetTurnCount()
-	local g1=Duel.GetMatchingGroup(c26064008.filter1,tp,LOCATION_ONFIELD+LOCATION_GRAVE,0,nil,e,tp,eg,ep,ev,re,r,rp,tid)
+	local g1=Duel.GetMatchingGroup(c26064008.filter1,tp,LOCATION_ONFIELD+LOCATION_GRAVE,0,nil,e,tp,eg,ep,ev,re,r,rp)
 	if chk==0 then
 		e:SetLabelObject(nil)
 		return #g1>0
@@ -55,7 +55,7 @@ function c26064008.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if tc.ACTV then
 		local eff=tc:GetActivateEffect()
 		e:SetCategory(eff:GetCategory())
-	elseif tc.FLIP then
+	elseif tc.FLIP or tc.RITU then
 		tc.fliptg(e,tp,eg,ep,ev,re,r,rp,1)
 	end
 end
@@ -65,7 +65,7 @@ function c26064008.activate1(e,tp,eg,ep,ev,re,r,rp)
 		if tc.ACTV then
 			local eff=tc:CheckActivateEffect(true,true,false)
 			if eff then eff(e,tp,eg,ep,ev,re,r,rp) end
-		elseif tc.FLIP then
+		elseif tc.FLIP or tc.RITU then
 			tc.flipop(e,tp,eg,ep,ev,re,r,rp,1)
 		end
 	end
@@ -73,7 +73,7 @@ function c26064008.activate1(e,tp,eg,ep,ev,re,r,rp)
 	if c:IsRelateToEffect(e) and e:IsHasType(EFFECT_TYPE_ACTIVATE) then
 		Duel.BreakEffect()
 		c:CancelToGrave()
-		local g=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_GRAVE,0,nil,26064008)
+		local g=Duel.GetMatchingGroup(Card.IsCode,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,nil,26064008)
 		if #g>0 then Duel.HintSelection(g) end
 		g:AddCard(c)
 		Duel.SendtoDeck(g,nil,1,REASON_EFFECT)
@@ -82,14 +82,13 @@ end
 function c26064008.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return not e:GetHandler():IsPublic() end
 end
-function c26064008.filter2(c,e,tp,eg,ep,ev,re,r,rp,tid)
-	if c:IsSetCard(0x664) and c:IsFaceup() and c:IsCanBeEffectTarget(e) and (c:IsOnField() or c:GetTurnID()==tid) then
+function c26064008.filter2(c,e,tp,eg,ep,ev,re,r,rp)
+	if c:IsSetCard(0x664) and c:IsFaceup() and c:IsCanBeEffectTarget(e)  then
 		return ((c.DRAW and c.drtg(e,tp,eg,ep,ev,re,r,rp,0)))
 	else return false end
 end
 function c26064008.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	local tid=Duel.GetTurnCount()
-	local g1=Duel.GetMatchingGroup(c26064008.filter2,tp,LOCATION_ONFIELD+LOCATION_GRAVE,0,nil,e,tp,eg,ep,ev,re,r,rp,tid)
+	local g1=Duel.GetMatchingGroup(c26064008.filter2,tp,LOCATION_ONFIELD+LOCATION_GRAVE,0,nil,e,tp,eg,ep,ev,re,r,rp)
 	if chk==0 then return #g1>0 end
 	local tc=g1:Select(tp,1,1,nil):GetFirst()
 	Duel.HintSelection(tc)
@@ -115,14 +114,13 @@ function c26064008.setcon2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	return c:IsReason(REASON_EFFECT) and not (c:GetPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEUP))
 end
-function c26064008.filter3(c,e,tp,eg,ep,ev,re,r,rp,tid)
-	if c:IsSetCard(0x664) and c:IsFaceup() and c:IsCanBeEffectTarget(e) and (c:IsOnField() or c:GetTurnID()==tid) then
+function c26064008.filter3(c,e,tp,eg,ep,ev,re,r,rp)
+	if c:IsSetCard(0x664) and c:IsFaceup() and c:IsCanBeEffectTarget(e) then
 		return ((c.TURN and c.settg(e,tp,eg,ep,ev,re,r,rp,0)))
 	else return false end
 end
 function c26064008.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-	local tid=Duel.GetTurnCount()
-	local g1=Duel.GetMatchingGroup(c26064008.filter3,tp,LOCATION_ONFIELD+LOCATION_GRAVE,0,nil,e,tp,eg,ep,ev,re,r,rp,tid)
+	local g1=Duel.GetMatchingGroup(c26064008.filter3,tp,LOCATION_ONFIELD+LOCATION_GRAVE,0,nil,e,tp,eg,ep,ev,re,r,rp)
 	if chk==0 then return #g1>0 end
 	local tc=g1:Select(tp,1,1,nil):GetFirst()
 	Duel.HintSelection(tc)

@@ -42,7 +42,7 @@ function c26066005.initial_effect(c)
 	--return self to hand
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(26066005,2))
-	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e3:SetCategory(CATEGORY_TOHAND)
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e3:SetRange(LOCATION_GRAVE)
 	e3:SetCode(EVENT_CHAIN_SOLVED)
@@ -77,9 +77,9 @@ function c26066005.thfilter(c)
 end
 function c26066005.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return Duel.IsExistingMatchingCard(c26066005.thfilter,tp,LOCATION_DECK,0,1,nil) and c:GetFlagEffect(26066005)==0 end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26066005.thfilter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) and Duel.GetFlagEffect(tp,26066005)==0 end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
-	c:RegisterFlagEffect(26066005,RESET_CHAIN,0,1)
+	Duel.RegisterFlagEffect(tp,26066005,RESET_CHAIN,0,1)
 end
 function c26066005.thop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26066005,4))
@@ -99,9 +99,9 @@ function c26066005.rthcon(e,tp,eg,ep,ev,re,r,rp)
 end
 function c26066005.rthtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return c:IsRelateToEffect(e) and c:GetFlagEffect(26066005)==0 end
+	if chk==0 then return c:IsRelateToEffect(e) and Duel.GetFlagEffect(tp,26066005)==0 end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,e:GetHandler(),1,0,0)
-	c:RegisterFlagEffect(26066005,RESET_CHAIN,0,1)
+	Duel.RegisterFlagEffect(tp,26066005,RESET_CHAIN,0,1)
 end
 function c26066005.rthop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()

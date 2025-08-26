@@ -30,9 +30,10 @@ function c26066003.initial_effect(c)
 	--return self to hand
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(26066003,2))
-	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e3:SetCategory(CATEGORY_TOHAND)
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e3:SetRange(LOCATION_GRAVE)
+	e3:SetProperty(EFFECT_FLAG_DELAY)
 	e3:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e3:SetCountLimit(2,26066003)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
@@ -69,15 +70,15 @@ function c26066003.thfilter(c)
 end
 function c26066003.thtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return Duel.IsExistingMatchingCard(c26066003.thfilter,tp,LOCATION_DECK,0,1,nil) end
-	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
-	c:RegisterFlagEffect(26066003,RESET_CHAIN,0,1)
+	if chk==0 then return Duel.IsExistingMatchingCard(c26066003.thfilter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) and Duel.GetFlagEffect(tp,26066003)==0 end
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
+	Duel.RegisterFlagEffect(tp,26066003,RESET_CHAIN,0,1)
 end
 function c26066003.thop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26066003,3))
 	if c26066003.disable(e,tp) then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local g=Duel.SelectMatchingCard(tp,c26066003.thfilter,tp,LOCATION_DECK,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(c26066003.thfilter),tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
 	if #g>0 then
 		Duel.SendtoHand(g,nil,REASON_EFFECT)
 		Duel.ConfirmCards(1-tp,g)
@@ -91,9 +92,9 @@ function c26066003.rthcon(e,tp,eg,ep,ev,re,r,rp)
 end
 function c26066003.rthtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return c:IsRelateToEffect(e) and c:GetFlagEffect(26066003)==0 end
+	if chk==0 then return c:IsRelateToEffect(e) and Duel.GetFlagEffect(tp,26066003)==0 end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,c,1,0,0)
-	c:RegisterFlagEffect(26066003,RESET_CHAIN,0,1)
+	Duel.RegisterFlagEffect(tp,26066003,RESET_CHAIN,0,1)
 end
 function c26066003.rthop(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()

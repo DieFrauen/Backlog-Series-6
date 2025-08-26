@@ -90,7 +90,7 @@ function c26063005.initial_effect(c)
 	e5:SetDescription(aux.Stringid(26063005,1))
 	e5:SetCategory(CATEGORY_TOHAND+CATEGORY_LEAVE_GRAVE)
 	e5:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e5:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
+	e5:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
 	e5:SetCode(EVENT_SUMMON_SUCCESS)
 	e5:SetCountLimit(1,26063005)
 	e5:SetCondition(Gemini.EffectStatusCondition)
@@ -107,13 +107,12 @@ end
 function c26063005.xmcond(e,tp,eg,ep,ev,re,r,rp)
 	local c,tp=e:GetHandler(),e:GetHandlerPlayer()
 	if Duel.IsPlayerAffectedByEffect(tp,26068010) and c:IsType(TYPE_EFFECT) then return c==e:GetHandler() end
-	return c:IsGeminiStatus() and c.StelloyEff1~=nil 
+	return c.StelloyEff1~=nil 
 end
 function c26063005.xmtg(e,c)
 	local ec,tp=e:GetHandler(),e:GetHandlerPlayer()
 	if Duel.IsPlayerAffectedByEffect(tp,26068010) and c:IsType(TYPE_EFFECT) then return c==e:GetHandler() end
-	if ec:IsGeminiStatus() and ec.StelloyEff1~=nil  then
-	return ec.ovmtg(e,c) end
+	return ec.StelloyEff1~=nil and ec.ovmtg(e,c)
 end
 function c26063005.protval(e,te)
 	return te:GetOwner()~=e:GetHandler() and te:IsActiveType(TYPE_MONSTER)
@@ -122,27 +121,25 @@ function c26063005.gemini(e)
 	local c=e:GetHandler()
 	return c:IsLocation(LOCATION_HAND) or Gemini.NormalStatusCondition(e)
 end
-function c26063005.infilter(c)
-	Card.IsHasEffect(c,26063005)
-end
-function c26063005.gfilter(c)
-	return c:IsSummonable(true,nil) and c:IsType(TYPE_NORMAL)
+function c26063005.gfilter(c,tp)
+	return c:IsSummonable(true,nil)
+	and c:IsType(TYPE_NORMAL)
+	and (c:IsOnField() or Duel.GetLocationCount(tp,LOCATION_MZONE)>0)
 end
 function c26063005.gtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and Duel.IsExistingMatchingCard(c26063005.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26063005.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,0,0)
 end
 function c26063005.gop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SUMMON)
-	local g=Duel.SelectMatchingCard(tp,c26063005.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,c26063005.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,1,nil,tp)
 	local tc=g:GetFirst()
 	if tc then
 		Duel.Summon(tp,tc,true,nil)
 	end
 end
 function c26063005.setfilter(c,e,tp)
-	return c:IsSetCard(0x663) and not c:IsCode(26063005) and
+	return c:IsSetCard(0x663) and
 		((c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsSSetable() or
 		 c:IsType(TYPE_MONSTER) and (c:IsMSetable(true,nil)) or c:IsCanBeSpecialSummoned(e,0,tp,true,true)) or 
 		c:IsAbleToHand())
@@ -160,30 +157,18 @@ function c26063005.operation(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
 	if not tc:IsRelateToEffect(e) then return end 
-	local s1=tc:IsAbleToHand()
-	local s2=(Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and tc:IsType(TYPE_MONSTER) and (tc:IsCanBeSpecialSummoned(e,0,tp,true,true,POS_FACEUP)) or tc:IsMSetable(true,nil))
-	local s3=tc:IsSSetable()
-	local ops,opval,off={},{},1
-	if s1 then
-		ops[off]=aux.Stringid(26063005,2)
-		opval[off-1]=1
-		off=off+1
-	end
-	if s2 then
-		ops[off]=aux.Stringid(26063005,3)
-		opval[off-1]=2
-		off=off+1
-	end
-	if s3 then
-		ops[off]=aux.Stringid(26063005,4)
-		opval[off-1]=3
-		off=off+1
-	end
-	local op=Duel.SelectOption(tp,table.unpack(ops))
-	if opval[op]==1 then
+	local b1=tc:IsAbleToHand()
+	local b2=(Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and tc:IsType(TYPE_MONSTER) and (tc:IsCanBeSpecialSummoned(e,0,tp,true,true,POS_FACEUP)) or tc:IsMSetable(true,nil))
+	local b3=tc:IsSSetable()
+	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26063005,1))
+	local op=Duel.SelectEffect(tp,
+		{b1,aux.Stringid(26063005,2)},
+		{b2,aux.Stringid(26063005,3)},
+		{b3,aux.Stringid(26063005,4)})
+	if op==1 then
 		Duel.SendtoHand(tc,nil,REASON_EFFECT)
 	end
-	if opval[op]==2 then
+	if op==2 then
 		local pos=POS_FACEDOWN_DEFENSE
 		if tc:IsCanBeSpecialSummoned(e,0,tp,true,true) then pos=pos+POS_FACEUP end
 		local pos=Duel.SelectPosition(tp,tc,pos)
@@ -194,7 +179,7 @@ function c26063005.operation(e,tp,eg,ep,ev,re,r,rp)
 		Duel.SpecialSummon(tc,0,tp,tp,true,true,pos)
 		end
 	end
-	if opval[op]==3 then
+	if op==3 then
 		Duel.SSet(tp,tc)
 	end
 end

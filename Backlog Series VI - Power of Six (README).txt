@@ -156,8 +156,8 @@ BL06-EN006 | Fulmiknight Crown Marshal - Damocross (UR)|LIGHT|10|   ?|   ?|Fusio
 BL06-EN007 | Fulmiknight Celestial Vault               |SPELL|FIELD       |                |
 BL06-EN008 | Fulmiknight Siege                     (R )|SPELL|FIELD       |                |
 BL06-EN009 | Fulmiknight Essence                       |SPELL|            |                |
-BL06-EN010 | Fulmiknight Resolution                    |TRAP |            |                |
-BL06-EN011 | Fulmiknight Devotion                      |TRAP |CONTINUOUS  |                |
+BL06-EN010 | Fulmiknight Devotion                      |SPELL|QUICK-PLAY  |                |
+BL06-EN011 | Fulmiknight Resolution                    |TRAP |CONTINUOUS  |                |
 BL06-EN012 | Fulmiknight Decisive Strike               |TRAP |            |                |
 _______________________________________________________|_____|____________|________________|
 BL06-EN013 | Blazon - Regules the Reckless         (R )|FIRE |05|2200| 200|                |
@@ -255,23 +255,25 @@ ___________|___________________________________________|_____|____________|_____
 
 |-OVERVIEW---------------------------------------------------------------------------------|
 
-Fulmiknight draws the opening act for this showcase, being a very particular kind of deck, it centers around lightning fast changes between an overly defensive playstyle with LP regeneration, into a perfect ONE HIT KO strategy. It revolves around using Union Monsters, with several new additions to the overall mechanic to facilitate offensive and defensive compositions alike.
+Fulmiknight formally introduces this series, with a very peculiar playstyle centered around lightning fast formation changes that can provide a bulwark defense or a ruthless offense with a very extreme LP cost and recoup focus. It aims to fulfill a ONE HIT KO strategy by employing all of its Union Monsters, which are each tailored to combine into a juggernaut with cosmic scale stats.
 
 |-DESIGN-----------------------------------------------------------------------------------|
 
-Amongst Union focused decks, the very few there are, Fulmiknight breaks the mold by focusing solely on playing one of their Monsters in play, letting its playmates become additions as Equip cards, each which grant it their own boons. They break away from traditional Union means in at least two ways, the first one is being able to equip themselves outside of the field through several different means, and the second is enabling swift formation changes with its lynchpin card "Fulmiknight Gladius".
+There are few Union decks to speak of, and Fulmiknight already breaks the mold by focusing solely on its own strategies, letting all its playmates become equip addendums to one single fighter, each which shares its many boons, from laser focused offensive prowess, impenetrable defenses, and such boons towards a very fluid playstyle. They break from traditional Union form in at least two ways, the first one being they can equip themselves even from outside of the field, and the second is the ability to swiftly scramble and reassemble all its pieces into the one-man army, owed to its lynchpin card "Fulmiknight Gladius"
 
-Gladius is the core of the deck, and all its winning moves favor its presence. It is a mold breaking Union card which, does not equip itself to other cards directly, but rather enables its partner Union Monsters to quickly gather around and equip all their partners to itself upon summon. This gives them the flexibility the Union mechanic sorely lacked, which presents itself in the ability to dodge interruptions, and depending on the situation, be capable of spread out their attack options as well.
+ This gives them the flexibility the Union mechanic sorely lacked, which presents itself in the ability to dodge interruptions, and depending on the situation, be capable of spread out their attack options as well.
 
-The second pivotal card to the deck is one of two Field spells; "Fulmiknight Siege" which serves two very important purposes. Firstly: It grants the Union monsters a secondary boon, by rendering their effects as Quick activations, letting them scramble even more efficiently than ever before. And Secondly: It presents the deck's win condition, with the ability to severely bolster battle damage, by twice to even FOUR times if you can fulfill the conditions  for it. Fulmiknight's mission statement is not to win the game in one single turn, but to end it in one single blow. For this, Siege enables you to make the most out of a single move, but it will disallow you any second chances of dealing damage every turn...  This also doubles as a defensive measure as well, since the opponent is also forced to deal damage just once as well.
+Gladius is the core of the deck, and winning moves are often favored by its presence. It's a Union Monster like no other, where it is less focused on equipping itself directly to others, and more about directing the way Union operations are performed. It grants its partner Union Monsters the abiity to instantly equip all other Union cards on your field to them, such that there remains only 1 Monster on your field at all times, which is a crucial condition to get the most value out of them. This not only unifies their strategy, but gives them a level of flexibility that the old fashioned templates could never achieve.
+
+Second to it, the greater pivotal cards of the deck is its Field Spell card; "Fulmiknight Siege" brings the entire engine together by granting its Union Monsters the ability to perform their actions at Quick Effect speed, which completely recontextualizes their gameplan. With it and Gladius you can rearrange your Union formations in such a way where you can score multiple attacks at once, not like you will need to do it most of the time, since the goal is to strike the opponent down in one single battle, which they are more than capable of. But even more amazing than that is how it enables that One Hit wonder strategy, as it can enable you to very effortlessly double or even QUADRUPLE any battle damage it inflicts. There is a catch to this, however, as Siege will not be long on the field after using this effect, and this blade cuts both ways so you must use it carefully.
 
 |-PLAYSTYLE--------------------------------------------------------------------------------|
 
-Fulmiknight, in addition to revolving around Union monster, also has a very accentuated focus on LP gain, and hefty LP costs, where it is capable of drastically tallying out different amounts in the blink of an eye, both gaining in copious amounts and, more often than not, expending great amounts too. This, however less than a mitigation risk, is the entire blood system of the deck. Many of its cards reward you for paying large amounts of LP or, conversely, reaching very low thresholds, of LP total in its vacuum, or in relation to your opponent's.
+In addition to a robust focus on Unions, Fulmiknight employs an accentuated focus on LP management, from hefty LP gain to even heftier LP costs, where it is capable of wildly swinging the beads in the abacus in the blonk of an eye, be it gaining copious amounts, which follow just as hefty an expenditure. This is less of a mitigation risk and more the fuel to its engine. Many of its cards reward you for paying handsomely, but it will demand that LP in order to press onward.
 
-Their Spell cards all revolve around gaining LP in some fashion, some more roundabout and others more straightforward. So players may not feel entirely discouraged to slash their LP total in the blink of an eye if it means securing that win condition. In many cases, the only way for Fulmiknight to score a victory, is to edge at the brink of defeat, facing their opponent at their fullest with digits below the 1000s. This would make them appear extremely vulnerable to effect damage, and that may be the case, but the deck is not without means of mitigating damage, be it by express LP gain, actually protecting your LP from such effects, or straight up winning the game on the spot, rendering the entire point moot.
+Most of their spells revolve around gaining LP in some fashion, some are straightforward, others are roundabout. You are encouraged to cut your life total fast as it lives and dies by its LP thresholds, often with you being on the lower end of things, that is. In many ways, the only way for Fulmiknight to achieve its endgame is to navigate by the razor's edge, even below the 1000s. This makes them appear risky and vulnerable to an extreme, and such that may be the case, but the deck is not without means of mitigating damage, be it through that same LP gain that follows the payouts, through protection, or merely by just ending the game in the spot, rendering the point moot.
 
-Fulmiknight's Trump Card, "Crown Marshal - Damocross" a Union Fusion Monster seals this killing machine with an appropriate motif, where it bolsters your strategy by allowing your Union Monsters to extend their reach straight from the GY, and gaining more power the closer the sword dangles on top of your head. With a very easy and consistent way to reach upwards of 10000 ATK, provided you are daring enough to call forth this final option.
+Their trump card, "Crown Marshal - Damocross", a Union Fusion Monster, closes their introduction, as the sword of justice that will delive its judgment, with an appropriate motif as it draws immeasurable strenght by letting a blade dangle atop the bearer's head. Enabling your Union formations to rank and file even from the GY, gaining mor epower the closest your LP are to zero. If played correctly, often through its last resort launch card, it can easily deliver tens of thousands of firepower at the service of those brave enough to call for this ultimate option.
 
 |-STRENGHTS--------------------------------------------------------------------------------|
 
@@ -295,7 +297,7 @@ Fulmiknight's Trump Card, "Crown Marshal - Damocross" a Union Fusion Monster sea
 
 * Inflexible boards. Deck demands you to occupy all your Spell & Trap zones for its equips and to control only one monster. Leaves little to no room for alternative playstyles.
 
-* Some of these cards will literally KILL you if player incorrectly or taken on a choke point. Both field spells can backfire tremendously. Its Fusion enabler will end the game on the spot, be it either player.
+* Some of these cards will literally KILL you if played incorrectly or taken on a choke point. Both field spells can backfire tremendously. Its Fusion enabler will end the game on the spot, be it either player.
 
 * Potentially easy Side Deck answers. Playstyle is well defined to a fault.
 
@@ -339,7 +341,7 @@ All Blazon non-Tuners can easily enter the board as little as discarding another
 
 Cards such as "Field of Command", which generate burns whenever you file and rank your chains, and punishes the opponent's interruptions, or cards like "Crest of the Blazon" which literally help you completely counter your opponent's counters, paint a picture of exactly the type of strategy Blazon pushes, one which goes unimpeded and gets stronger the more your opponent struggles against it.
 
-Blazon monsters generally can only be Special Summoned once each turn, though this is in theory a steep limiter, in practice it means it boasts the ability to ignite its effects more than once if you cast several copies of a single card at once. And it is the only safety check to its abundant means of boarding the field. All Blazons can set off one another in some way, and accruing all of these activations.
+Blazon monsters generally can only be Special Summoned once each turn, though this is in theory a steep limiter, in practice it means it boasts the ability to ignite its effects more than once if you cast several copies of a single card at once through both Normal and Special Summon. And it is the only safety check to its abundant means of boarding the field. All Blazons can set off one another in some way, and accruing all of these activations.
 
 The ideal gamestate for Blazon revolves around stacking your field with monsters for one explosive, limit breaking Synchro Summon that goes well beyond existing parameters, being able to reach stratospheric levels (that is, Monster levels) with "Field Marshal - Or" its Ace in the Hole. The final Blazon Monster seeks to reach a sky high chain link number to set itself off and absolutely consume everything in its wake, creating an absolute powerhouse of a card that can end the game right on the spot. Blazon is at its best when it puts its life on the line, and no card better exemplifies this sentiment that the one which burns through all of your resources for one final blow.
 
@@ -391,7 +393,7 @@ The ideal gamestate for Blazon revolves around stacking your field with monsters
 
 |-OVERVIEW---------------------------------------------------------------------------------|
 
-Astelloy is a humble, unassuming and very resolute Rock deck, with a spin on the Gemini mechanic, aiming to push through its boundaries to truly demonstrate it is, without a shadow of a doubt, a diamond in the rough. It shows its true shine by applying pressure on its Material Monsters for an Xyz Summon which compresses several protection layers into an unstoppable juggernaut.
+Astelloy is a humble, unassuming and very resolute Rock deck, with a spin on the Gemini mechanic, aiming to push through its boundaries to truly demonstrate it is, without a shadow of a doubt, a diamond in the rough. It shows its true mettle by applying pressure on its Material Monsters for an Xyz Summon which compresses several protection layers into an unstoppable colossus.
 
 |-DESIGN-----------------------------------------------------------------------------------|
 
@@ -416,6 +418,7 @@ Stelloy doesn't pull its punches, but those punches are all it has to show. Ther
 |-STRENGHTS--------------------------------------------------------------------------------|
 
 * Contester for the most unoutable boss in the game. Can stack a multitude of defensive boons on a single card and render it impervious to most traditional means of removal.
+
 * Extremelly good mid-range stats. Smaller monsters are well above average in stats, bosses easily reaching massive DEF thresholds to compound their survivability.
 
 * Surprisingly very resistant to removal. Thanks to their extensive Normal Summon usage can set off plays in response to pressure, keeping its resources coming as the opponent gets on the offensive.
@@ -470,7 +473,7 @@ Over-Wind is a very peculiar and unassuming Flip focused deck, which, in many wa
 
 Perhaps more than most decks, Over-Wind takes a particular interest of letting its quirky design dictate its entire playstyle, which manifests in a 3-way system, where each card can set itself up in up to 3 different kinds of ways. The main one is playing your cards, which in the case of your monsters is where FLIP effects come in. Secondly, Over-Wind cards often come with effects that play when they're drawn. And last and for good reason often least, its Turn effects, which set off when your cards are disposed of, which may yield very disastrous results for those foolish enough to set them off.
 
-Its means of Ritual Summoning are not quite as flashy as most other cards of its kind, but what they lack in the visual flair from summoning their Rituals face-down, they more than make up with the very useful perk of not sending cards to the GY as tribute, but rather placing them face-down, essentially rewinding their Flip effects for future plays.
+Its means of Ritual Summoning are not quite as flashy as most other cards of its kind, but what they lack in the visual flair from summoning their Rituals face-down, they more than make up with the very useful perk of not sending cards to the GY as tribute, but rather placing them face-down, essentially rewinding their Flip effects live for future plays.
 
 Beyond the technicals, where Over-Wind excels truly, is in the ability to get ahold of the game's tempo, by flipping, turning and twisting cards from different places to disorient your opponent, be it tampering with their draws, or even completely stopping their advances, with its Ritual's powerful turn skip effects.
 
@@ -554,7 +557,7 @@ Most of its cards and effects are reliant on input of other Entrophys cards, thu
 
 It's not an outrageous assessment to say Entrophys is a very potent control deck, it boasts both the consistency and immediacy in which it ensembles its standard board. With its regulators in play, it can extend the range and potency of their effects. Since all of its Spirit Monsters count towards two bodies there's no shortage of options for Link plays. It can branch off into some alternatives, but due to the commitment to its engine and lack of fallbacks beyond snowballing resources between turns, and the many benefits that entails, it may be more benefitial to stay on the lane.
 
-"Alchemist - Rebis" is the heart of the deck, a card that, not only further extends your plays by reviving the otherwise unsummonable Spriits back into play, letting you amass even more searches with them, while also using them as bodies for opponent attacks holds the deck together, and makes them from a quirky to decent deck into a card advantage powerhouse that can dominate wars of attrition easily. When it also has the ability to cheat out effects from other cards, and even make the opponent's means of disruption backfire tremendously against them.
+"Alchemist - Rebis" is the heart of the deck, a card that, not only further extends your plays by reviving the otherwise unsummonable Spirits back into play, letting you amass even more searches with them, while also using them as bodies for opponent attacks holds the deck together, and makes them from a quirky to decent deck into a card advantage powerhouse that can dominate wars of attrition easily. When it also has the ability to cheat out effects from other cards, and even make the opponent's means of disruption backfire tremendously against them.
 
 The usage of tokens, each which are different from every Monster serves a purpose, using them for Link summons is the first thing that comes to mind, but which Link monster is the more interesting question. Using all these Tokens with different attributes proves to be the deck's main goal, as these are the ingredients to its True Ace card: "Opus Marshal - Yliaster", a very potent Link-4 monster which gains several powerful effects from gathering all of these different materials. A fully realized Yliaster not only has great stats, powerful disruption that doubles as recovery, and full protection from cards under the mantle of its Regulators, but when all 4 elements are compiled, it unlocks the ability to draw any card from your Deck, achieving the apex of consistency.
 
@@ -624,11 +627,11 @@ Siphantom is a particularly devious, Tribute focused build that revolves around 
 
 |-DESIGN-----------------------------------------------------------------------------------|
 
-Siphantom plays an assortment of cards that facilitate, extend and enrich Tribute focused strategies, from enabling you to use non-Monsters, and not just your own cards as tribute fodder. Their smaller monsters, being high level themselves help amassing your resources, and they can trigger each up to twice each turn, the downside to this, and a core aspect to the Siphantom strategy, is that your opponent can pay offerings to negate your advances, while they are designed with this grave setback in mind, in practice it puts the onus on the opponent to dictate the pace of the duel, often to their detriment, as the more they push, the more Siphant can push back.
+Siphantom plays an assortment of cards that facilitate, extend and enrich Tribute focused strategies, from enabling you to use non-Monsters as tribute, and not above taking your opponent's cards as tribute fodder. Their smaller monsters help amassing your resources, despite being high level themselves, they can be fielded very easily, by having more options for tribute, or the option to be summoned without altogether. Their vanguard monsters can trigger any of their two effects up to twice each turn total, the downside to this, and a core aspect to the Siphantom strategy, is that your opponent can pay offerings to negate your advances, while they are designed with this grave setback in mind, in practice it puts the onus on the opponent to dictate the pace of the duel, often to their detriment, as the more they push, the more Siphant can push back.
 
 its end goal is to slowly but steadily pick the opponent apart, going after their deck a few cards at a time, this may raise some concerns as certain decks can pop off from such enablers, let alone ones the opponent may pick at their own discretion, however, the deck is not as foolish as to let them get away with things. many of its cards, their Field spell chiefly among these, can completely stun cards sent to the GY, and as if that weren't enough, they can also stun additional copies they may play. Since they also aim the cards the opponent already has in play, it stands to reason they can start picking up the pressure once they draw enough blood from the opponent.
 
-Siphant has a penchant of going for singular cards at a time, which means they forego redundancies as they pick the opponent's deck apart. They don't allow them to send cards already in stock in the GY that way it can widen its stun range. This means it can punish decks that religiously run 3-ofs the most, punishing safer, less diverse decks the most.
+Siphant has a penchant of going for singular cards at a time, which means they forego redundancies as they pick the opponent's deck apart. They don't allow them to send cards already in stock in the GY that way it can widen its stun range. This means it can punish decks that religiously run 3-ofs the most, punishing safer, less thought out decks the most.
 
 Once enough cards have been discarded, the opponent may soon find each and every single card Siphantoms strip from them to be a greater and greater loss. Siphantoms bide their time, and opponents may soon find out they have lost long before they realized.
 
@@ -644,7 +647,7 @@ The icing on the cake is truly their boss card, "Paradox Marshal - Styxus" which
 
 |-STRENGHTS--------------------------------------------------------------------------------|
 
-* Slow burn style, applying field presence, accruing resources and slowly bleeding the opponent dry of options. Can become very frightening once it picks the pace.
+* Slow burn style, applying field presence, accruing resources and slowly bleeding the opponent dry of options. Can become very frightening once it picks up the pace.
 
 * Effects are resourceful enough, though the opponent can dictate your pace with your own self-negation means, it excels at keeping the neutral game.
 
@@ -698,7 +701,7 @@ The icing on the cake is truly their boss card, "Paradox Marshal - Styxus" which
 
 |-OVERVIEW---------------------------------------------------------------------------------|
 
-Closing this roundup, Desceptim foregoes the visual flair of noisy Extra Deck bosses and suchlike, in favor of egregiously efficient and oppressive means of preventing your opponent from accessing their resources, functionally, and literally gating access to their Main Deck and sometimes GY. It requires the opponent to stumble upon their triggers and one of your agents will stack a card on top of their pile, sealing the access to cards beneath them. A level of lockdown that is, in no uncertain terms, diabolical.
+Closing this roundup, Desceptim foregoes the visual flair of noisy Extra Deck bosses and suchlike, in favor of egregiously efficient and oppressive means of preventing your opponent from accessing their resources, functionally, and literally gating access to their Main Deck and sometimes GY. It requires the opponent to stumble upon their evocations for one of your agents to stack a card on top of their pile, sealing the access to cards beneath them. A level of lockdown that is, in no uncertain terms, diabolical.
 
 |-DESIGN-----------------------------------------------------------------------------------|
 
@@ -728,7 +731,7 @@ However, it doesn't end at Bael itself, as one of its search targets, "Desceptim
 
 * The most flexible, versatile and weirdly interactive engine for hard locking the opponent's plays. Potentially VERY OPPRESSIVE for no good reason.
 
-* its locks can persist against a single chokepoint, needing immediate answers through other channels, which can also be ckhoked to maintain abusive pressure.
+* its locks can persist against a single chokepoint, needing immediate answers through other channels, which can also be choked to maintain abusive pressure.
 
 * Can completely swing tempo in your favor thanks to its deck stacking means. Netting massive momentum and economy gains against helpless opponents. It wins big.
 
@@ -781,7 +784,7 @@ These bad boys have taken an unhealthy amount of my time, for what is basically 
 
 The game has changed quite a lot ever since I first had these things drafted, and i didn't get to properly playtest them until much later on, and the amount of revisions I've given these is something I'm only so proud and embarrased of (And hope i don't have to revise these anytime soon). So I'm very glad I finally brought these seven (originally six, whoops) decks to full realization. I had planned for these to be at the level of Early VRAINS era and now it is up to speed with the worst things from 2023 onward... That is, as far as my testing with Kashtira and Tear AI is anything to go by. Still, I wouldn't be releasing these if i weren't confident enough in their prowess.
 
-Each one of these was an experiment that turned out to also be a very powerful decktype, and I'm hoping the amount spent on them will be worth your time as well. Even if you only get to check the replies and derive some level of amusement I'll be satisfied enough.
+Each one of these was an experiment that turned out to also be a very powerful decktype, and I'm hoping the amount spent on them will be worth your time as well. Even if you only get to check the replays and derive some level of amusement I'll be satisfied enough.
 
 You may notice this is called Backlog Series Six... Yes, I have like 5 more of these arrangements in my drafts, this one is only the most presentable thus far, you could say these are my babies. I have a lot of stuff on my very small plate so idk if I'll be finishing those anytime soon, these already took years of my life as is haha. Comparatively they are less Elite than this set, so they may be more accessible for players... Though again, YGO's learning curve is so rancid these may not be that crazy.
 
@@ -793,7 +796,7 @@ You may notice this is called Backlog Series Six... Yes, I have like 5 more of t
 
 |==========================================================================================|
 
-Backlog Series 2017-2024.
+Backlog Series 2017-2025.
 Die Frauen (Mish)
 
 All stock art cards are not my own and serve only as idealized reference art, credit to all their original owners whose art I stole from Pinterest lol. Maybe one day I'll commit to drawing their artworks myself haha (Doubt it).

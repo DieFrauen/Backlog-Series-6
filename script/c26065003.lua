@@ -108,7 +108,7 @@ function c26065003.sptg(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c26065003.spop(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)<1 
-		or not Duel.IsPlayerCanSpecialSummonMonster(tp,26065103,0,TYPES_TOKEN,2000,0,4,RACE_AQUA,ATTRIBUTE_FIRE) then return end
+		or not Duel.IsPlayerCanSpecialSummonMonster(tp,26065103,0,TYPES_TOKEN+TYPE_SPIRIT,2000,0,4,RACE_AQUA,ATTRIBUTE_FIRE) then return end
 	local token=Duel.CreateToken(tp,26065103)
 	Duel.SpecialSummonStep(token,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
 	Duel.SpecialSummonComplete()

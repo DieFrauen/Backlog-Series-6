@@ -161,11 +161,13 @@ function c26067004.activate(e,tp,eg,ep,ev,re,r,rp)
 		{b3,aux.Stringid(26067004,5)})
 	if op~=2 then
 		local tc1=g1:Select(tp,1,1,nil):GetFirst()
-		Duel.ShuffleDeck(tp)
-		Duel.MoveSequence(tc1,0)
-		Duel.ConfirmDecktop(tp,1)
-		tc1:ReverseInDeck()
-		tc1:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD&~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
+		if tc1 then
+			Duel.ShuffleDeck(tp)
+			Duel.MoveSequence(tc1,0)
+			Duel.ConfirmDecktop(tp,1)
+			tc1:ReverseInDeck()
+			tc1:RegisterFlagEffect(26067001,RESET_EVENT|(RESETS_STANDARD&~RESET_TOHAND),EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(26067001,2))
+		end
 	end
 	if op~=1 then
 		Duel.ConfirmCards(tp,g2)

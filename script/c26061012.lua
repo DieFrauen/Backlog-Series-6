@@ -82,14 +82,15 @@ function c26061012.sstage2(e,tc,tp,sg,chk)
 		if op~=0 then Duel.SetLP(1-tp,8000) end
 	end
 end
-function c26061012.atfilter(c)
+function c26061012.atfilter(c,tp)
+	local val=math.min(Duel.GetLP(tp),3000)
 	return c:IsFaceup() and c:IsAttackAbove(3000)
 end
 function c26061012.setcon(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetTurnPlayer()==tp
 	and Duel.IsMainPhase()
 	and Duel.GetLocationCount(tp,LOCATION_SZONE)>0
-	and Duel.IsExistingMatchingCard(c26061012.atfilter,tp,0,LOCATION_MZONE,1,nil)
+	and Duel.IsExistingMatchingCard(c26061012.atfilter,tp,0,LOCATION_MZONE,1,nil,tp)
 end
 function c26061012.settg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()

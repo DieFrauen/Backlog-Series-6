@@ -68,9 +68,10 @@ function c26064004.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local gp=Duel.GetTurnPlayer()
 	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
 	Duel.Draw(p,d,REASON_EFFECT)
+	if tp==gp or c:GetType()&TYPE_RITUAL ==0 or not e:IsActiveType(EFFECT_TYPE_FLIP) then return end
 	local phase=Duel.GetCurrentPhase()
 	if phase==PHASE_DRAW or phase==PHASE_STANDBY or phase==PHASE_END then return end
-	if (gp~=tp and Duel.SelectYesNo(tp,aux.Stringid(26064004,1))) or (gp==tp and Duel.SelectYesNo(tp,aux.Stringid(26064004,1)) and Duel.SelectYesNo(tp,aux.Stringid(26064004,2))) then 
+	if Duel.SelectYesNo(tp,aux.Stringid(26064004,1)) then 
 		if phase==PHASE_MAIN1 then
 			Duel.SkipPhase(gp,PHASE_MAIN1,RESET_PHASE+PHASE_END,1) return
 		elseif phase>=PHASE_BATTLE_START and Duel.GetCurrentPhase()<=PHASE_BATTLE then
@@ -100,9 +101,6 @@ end
 function c26064004.drtg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26064004.filter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
-	if e:GetHandler():GetFlagEffect(26064004)~=0 then
-		Duel.SetChainLimit(aux.FALSE)
-	end
 end
 function c26064004.drop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
@@ -114,7 +112,7 @@ function c26064004.drop(e,tp,eg,ep,ev,re,r,rp)
 end
 function c26064004.setfilter(c)
 	return c:IsSSetable() or (
-	c:IsType(TYPE_FLIP) and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_RITUAL,tp,false,true))
+	c:IsType(TYPE_FLIP) and c:IsLevelBelow(9) and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_RITUAL,tp,false,true))
 end
 function c26064004.rescon(sg,e,tp,mg)
 	return Duel.IsPlayerCanDraw(tp,#sg)
@@ -148,6 +146,6 @@ function c26064004.setop(e,tp,eg,ep,ev,re,r,rp)
 		drw=#spsg
 	end
 	if drw==0 then return end
-	Duel.Hint(HINT_CARD,0,26064004)
-	Duel.Draw(tp,drw,REASON_EFFECT)
+	Duel.BreakEffect()
+	Duel.Draw(tp,1,REASON_EFFECT)
 end

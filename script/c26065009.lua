@@ -1,5 +1,6 @@
 --Entrophys Projection
 function c26065009.initial_effect(c)
+	c:SetSPSummonOnce(26052009)
 	--summon tokens
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(26065009,0))

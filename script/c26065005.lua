@@ -2,7 +2,7 @@
 function c26065005.initial_effect(c)
 	--Link Summon
 	c:EnableReviveLimit()
-	Link.AddProcedure(c,nil,1,2,c26065005.lcheck)
+	Link.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsSetCard,0x665),2,2)
 	--summon spirits
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(26065005,0))
@@ -43,13 +43,13 @@ function c26065005.initial_effect(c)
 	e4:SetTarget(c26065005.thtgO)
 	c:RegisterEffect(e4)
 end
-function c26065005.lcheck(g,lc,sumtype,tp)
-	return g:IsExists(c26065005.lfilter,1,nil,lc,sumtype,tp)
-end
-function c26065005.lfilter(c,lc,sumtype,tp)
-	return c:IsType(TYPE_SPIRIT,lc,sumtype,tp)
-	and not c:IsCode(26065005)
-end
+--function c26065005.lcheck(g,lc,sumtype,tp)
+	--return g:IsExists(c26065005.lfilter,1,nil,lc,sumtype,tp)
+--end
+--function c26065005.lfilter(c,lc,sumtype,tp)
+	--return c:IsType(TYPE_SPIRIT,lc,sumtype,tp)
+	--and not c:IsCode(26065005)
+--end
 function c26065005.spcond(e,tp,eg,ep,ev,re,r,rp)
 	return re:GetHandler():IsSetCard(0x665) and rp~=tp
 end

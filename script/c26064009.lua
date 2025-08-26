@@ -1,4 +1,4 @@
---Over-wind Leap
+--Over-Wind Leap
 function c26064009.initial_effect(c)
 	--Activate
 	local e1=Effect.CreateEffect(c)
@@ -8,22 +8,35 @@ function c26064009.initial_effect(c)
 	e1:SetHintTiming(0,TIMING_END_PHASE)
 	e1:SetTarget(c26064009.cost)
 	c:RegisterEffect(e1)
-	--direct attack/hand damage/set
+	--direct attack/
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_FIELD)
 	e2:SetCode(EFFECT_DIRECT_ATTACK)
 	e2:SetRange(LOCATION_SZONE)
-	e2:SetValue(1)
 	e2:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
 	e2:SetTarget(aux.TargetBoolFunction(Card.IsType,TYPE_FLIP))
+	e2:SetValue(1)
 	c:RegisterEffect(e2)
+	--damage trans
 	local e2a=Effect.CreateEffect(c)
-	e2a:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e2a:SetType(EFFECT_TYPE_FIELD)
+	e2a:SetCode(EFFECT_CHANGE_BATTLE_DAMAGE)
 	e2a:SetRange(LOCATION_SZONE)
-	e2a:SetCode(EVENT_PRE_BATTLE_DAMAGE)
-	e2a:SetCondition(c26064009.rdcon)
-	e2a:SetOperation(c26064009.rdop)
+	e2a:SetTargetRange(LOCATION_MZONE,0)
+	e2a:SetTarget(c26064009.damtg)
 	c:RegisterEffect(e2a)
+	--deck damage
+	local e2b=Effect.CreateEffect(c)
+	e2b:SetDescription(aux.Stringid(26064009,6))
+	e2b:SetCategory(CATEGORY_DRAW)
+	e2b:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
+	e2b:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_DAMAGE_CAL)
+	e2b:SetRange(LOCATION_SZONE)
+	e2b:SetCode(EVENT_BATTLE_DAMAGE)
+	e2b:SetCondition(c26064009.reccon)
+	e2b:SetTarget(c26064009.rectg)
+	e2b:SetOperation(c26064009.recop)
+	c:RegisterEffect(e2b)
 	--when drawn
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(26064009,4))
@@ -55,9 +68,9 @@ c26064009.FLIP=true
 c26064009.DRAW=true
 c26064009.TURN=true
 function c26064009.cost(e,tp,eg,ep,ev,re,r,rp,chk)
-	local b=c26064009.fliptg(e,tp,eg,ep,ev,re,r,rp,2)
 	if chk==0 then return true end
-	if b and Duel.SelectYesNo(tp,aux.Stringid(26064009,0)) then 
+	if c26064009.fliptg(e,tp,eg,ep,ev,re,r,rp,0)
+	and Duel.SelectYesNo(tp,aux.Stringid(26064009,0)) then 
 		e:SetTarget(c26064009.fliptg)
 		e:SetCategory(CATEGORY_POSITION)
 		e:SetOperation(c26064009.flipop)
@@ -67,8 +80,7 @@ function c26064009.posfilter(c)
 	return c:IsCanChangePosition() and not c:IsPosition(POS_FACEUP_ATTACK)
 end
 function c26064009.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return true end
-	if chk==2 then return Duel.IsExistingMatchingCard(c26064009.posfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26064009.posfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_POSITION,nil,1,0,0)
 end
 function c26064009.flipop(e,tp,eg,ep,ev,re,r,rp)
@@ -77,23 +89,30 @@ function c26064009.flipop(e,tp,eg,ep,ev,re,r,rp)
 	local sg=Duel.SelectMatchingCard(tp,c26064009.posfilter,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
 	Duel.ChangePosition(sg,POS_FACEUP_ATTACK)
 end
-function c26064009.check(c,tp)
-	return c and c:IsType(TYPE_FLIP)
+function c26064009.damtg(e,c)
+	if c and c:IsType(TYPE_FLIP) and c:IsLevelAbove(1) then
+		e:SetValue(c:GetLevel()*100)
+		return true
+	end
 end
-function c26064009.rdcon(e,tp,eg,ep,ev,re,r,rp)
-	local ac=c26064009.check(Duel.GetAttacker(),tp)
-	return ac and ev>0
+function c26064009.reccon(e,tp,eg,ep,ev,re,r,rp)
+	local rc=eg:GetFirst()
+	return rc:IsControler(tp) and rc:IsType(TYPE_FLIP)
 end
-function c26064009.rdop(e,tp,eg,ep,ev,re,r,rp)
-	local c=Duel.GetAttacker()
-	if ev==0 or not c:IsFaceup() or not c:IsType(TYPE_FLIP) --or Duel.GetAttackTarget() 
-	then return end
-	Duel.Hint(HINT_CARD,tp,26064009)
-	Duel.ChangeBattleDamage(ep,0)
-	local val=c:GetLevel()
-	val=Duel.Draw(ep,val,REASON_EFFECT)
+function c26064009.rectg(e,tp,eg,ep,ev,re,r,rp,chk)
+	local rc=eg:GetFirst()
+	local lv=rc:GetLevel()
+	if chk==0 then return rc and lv>=1 end
+	Duel.SetTargetPlayer(ep)
+	Duel.SetTargetParam(lv)
+	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,ev)
+end
+function c26064009.recop(e,tp,eg,ep,ev,re,r,rp)
+	if not e:GetHandler():IsRelateToEffect(e) then return end
+	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
+	val=Duel.Draw(p,d,REASON_EFFECT)
 	local g=Duel.GetFieldGroup(ep,LOCATION_HAND,0)
-	local dg=g:RandomSelect(1-tp,val)
+	local dg=g:RandomSelect(1-tp,d)
 	Duel.SendtoGrave(dg,REASON_EFFECT+REASON_DISCARD)
 end
 function c26064009.thcost(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -144,14 +163,6 @@ function c26064009.setop(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetMatchingGroup(c26064009.thfilter,p,LOCATION_MZONE,0,nil)
 	if #g>0 then
 		Duel.SendtoHand(g,nil,REASON_EFFECT)
-		local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetType(EFFECT_TYPE_FIELD)
-		e1:SetCode(EFFECT_HAND_LIMIT)
-		e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-		e1:SetTargetRange(1,0)
-		e1:SetValue(#g)
-		e1:SetReset(RESET_PHASE+PHASE_DRAW)
-		Duel.RegisterEffect(e1,p)
 	end
 end
 function c26064009.atfilter(e,c)

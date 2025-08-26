@@ -66,7 +66,7 @@ function c26067005.decon(e,tp,eg,ep,ev,re,r,rp)
 	return false
 end
 function c26067005.defilter(c)
-	return not c:IsForbidden() and c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and (c:IsAbleToDeck() or c:IsAbleToGrave())
+	return not c:IsForbidden() and c:IsType(TYPE_PENDULUM) and c:IsSetCard(0x667) and (c:IsAbleToDeck() or c:IsAbleToGrave()) and (not c:IsLocation(LOCATION_EXTRA) or c:IsFaceup())
 end
 function c26067005.detg(e,tp,eg,ep,ev,re,r,rp,chk)
 	local loc=LOCATION_HAND+LOCATION_EXTRA 
@@ -94,7 +94,7 @@ function c26067005.deop(e,tp,eg,ep,ev,re,r,rp)
 		Duel.RegisterFlagEffect(tp,26067009,RESET_PHASE+PHASE_END,0,1)
 		Duel.RegisterFlagEffect(tp,26067209,RESET_PHASE+PHASE_END,0,1)
 	end
-	local b1=sc:IsAbleToDeck() or sc:IsAbleToChangeControler()
+	local b1=sc:IsAbleToDeck() and sc:IsAbleToChangeControler()
 	local b2=sc:IsAbleToGrave()
 	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26067005,3))
 	local op=Duel.SelectEffect(tp,

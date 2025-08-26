@@ -57,7 +57,7 @@ function c26067001.decon1(e,tp,eg,ep,ev,re,r,rp)
 	local loc=Duel.GetChainInfo(ev,CHAININFO_TRIGGERING_LOCATION)
 	local atype=re:GetActiveType()
 	local rc=re:GetHandler()
-	return atype==TYPE_PENDULUM+TYPE_SPELL and (loc&LOCATION_PZONE)~=0 and re:IsHasType(EFFECT_TYPE_ACTIVATE) and rc~=e:GetHandler() and rc:IsSetCard(0x667)
+	return atype==TYPE_PENDULUM+TYPE_SPELL and (loc&LOCATION_PZONE)~=0 and re:IsHasType(EFFECT_TYPE_ACTIVATE) and rc~=e:GetHandler() and rc:IsSetCard(0x667) and rp==tp
 end
 function c26067001.detg1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c26067001.defilter,tp,LOCATION_DECK,0,1,nil,tp,false)and not Duel.IsExistingMatchingCard(c26067001.defilter,tp,LOCATION_FZONE,0,1,nil,tp,true) end
@@ -93,7 +93,7 @@ function c26067001.deop2(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.IsPlayerAffectedByEffect(tp,26067009) and Duel.CheckLPCost(tp,700) then
 		g:Merge(g2)
 	end
-	local tc=g:GetFirst()
+	local tc=g:Select(tp,1,1,nil):GetFirst()
 	if tc:IsLocation(LOCATION_DECK) then
 		Duel.PayLPCost(tp,700)
 		Duel.RegisterFlagEffect(tp,26067009,RESET_PHASE+PHASE_END,0,1)
@@ -139,16 +139,6 @@ function c26067001.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,PLAYER_ALL,1)
 end
 function c26067001.activate(e,tp,eg,ep,ev,re,r,rp)
-	local d1,d2=Duel.GetDecktopGroup(0,1):GetFirst(),Duel.GetDecktopGroup(1,1):GetFirst()
-	if Duel.GetFlagEffect(0,26067001)>0 and not (
-	(d1 and d1:IsSetCard(0x667) and d1:IsFaceup()) or
-	(d2 and d2:IsSetCard(0x667) and d2:IsFaceup())) then
-		if Duel.IsChainDisablable(0) then
-			Duel.NegateEffect(0)
-			return
-		end
-	end
 	Duel.Draw(tp,1,REASON_EFFECT)
 	Duel.Draw(1-tp,1,REASON_EFFECT)
-	Duel.RegisterFlagEffect(0,26067001,RESET_PHASE+PHASE_END,0,1)
 end

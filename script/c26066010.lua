@@ -4,6 +4,7 @@ function c26066010.initial_effect(c)
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
+	e1:SetHintTiming(0,TIMING_END_PHASE)
 	c:RegisterEffect(e1)
 	--place on field after being tributed
 	local e2=Effect.CreateEffect(c)
@@ -17,13 +18,13 @@ function c26066010.initial_effect(c)
 	e2:SetOperation(c26066010.tfop)
 	c:RegisterEffect(e2)
 	--convert damage to deckout
-	local e5=Effect.CreateEffect(c)
-	e5:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e5:SetRange(LOCATION_SZONE)
-	e5:SetCode(EVENT_PRE_BATTLE_DAMAGE)
-	e5:SetCondition(c26066010.damcon)
-	e5:SetOperation(c26066010.damop)
-	c:RegisterEffect(e5)
+	local e3=Effect.CreateEffect(c)
+	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e3:SetRange(LOCATION_SZONE)
+	e3:SetCode(EVENT_PRE_BATTLE_DAMAGE)
+	e3:SetCondition(c26066010.damcon)
+	e3:SetOperation(c26066010.damop)
+	c:RegisterEffect(e3)
 	--extra material
 	local e4=Effect.CreateEffect(c)
 	e4:SetType(EFFECT_TYPE_SINGLE)
@@ -36,10 +37,10 @@ function c26066010.initial_effect(c)
 	e4a:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_GRANT)
 	e4a:SetRange(LOCATION_SZONE)
 	e4a:SetTargetRange(LOCATION_HAND,0)
-	e4a:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,0x666))
+	e4a:SetTarget(c26066010.efilter)
 	e4a:SetLabelObject(e4)
 	c:RegisterEffect(e4a)
-	--magic drain
+	--trap drain
 	local e5=Effect.CreateEffect(c)
 	e5:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e5:SetRange(LOCATION_SZONE)
@@ -55,7 +56,13 @@ function c26066010.initial_effect(c)
 
 end
 function c26066010.cfilter(e,c)
-	return c:IsTrap() and (c:IsFaceup() or c:GetControler()==e:GetHandlerPlayer())
+	local tp=e:GetHandlerPlayer()
+	if not c:IsTrap() then return false end
+	if c:IsLocation(LOCATION_HAND) then return Duel.IsPlayerAffectedByEffect(tp,26066007) end
+	return (c:IsFaceup() or c:GetControler()==tp)
+end
+function c26066010.efilter(e,c)
+	return c:IsRace(RACE_FIEND) and c:IsAttribute(ATTRIBUTE_DARK)
 end
 function c26066010.sumtrcon(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():IsReason(REASON_RELEASE)
@@ -95,16 +102,16 @@ function c26066010.spdrain(e,tp,eg,ep,ev,re,r,rp)
 		Duel.BreakEffect()
 	elseif ep~=tp and not re:GetHandler():IsSetCard(0x666) then Duel.NegateEffect(ev) end
 end
-
 function c26066010.damcon(e,tp,eg,ep,ev,re,r,rp)
 	local dam=Duel.GetBattleDamage(1-tp)
 	local val=math.floor(dam/400)
-	return dam>=400 and Duel.IsPlayerCanDiscardDeck(1-tp,1)
+	return ep~=tp and dam>=400 and Duel.IsPlayerCanDiscardDeck(1-tp,1)
 end
 function c26066010.damop(e,tp,eg,ep,ev,re,r,rp)
 	local dam=Duel.GetBattleDamage(1-tp)
 	local val=math.floor(dam/400)
-	Duel.DiscardDeck(1-tp,val,REASON_EFFECT)
+	val=math.min(val,Duel.GetFieldGroupCount(tp,0,LOCATION_DECK))
+	Duel.DiscardDeck(1-tp,val,REASON_EFFECT+REASON_RELEASE)
 	local og=Duel.GetOperatedGroup()
 	for tc in aux.Next(og) do
 		tc:RegisterFlagEffect(26066007,RESET_EVENT+RESETS_STANDARD,0,1)

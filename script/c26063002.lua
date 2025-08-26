@@ -91,13 +91,12 @@ end
 function c26063002.xmcond(e,tp,eg,ep,ev,re,r,rp)
 	local c,tp=e:GetHandler(),e:GetHandlerPlayer()
 	if Duel.IsPlayerAffectedByEffect(tp,26068010) and c:IsType(TYPE_EFFECT) then return c==e:GetHandler() end
-	return c:IsGeminiStatus() and c.StelloyEff1~=nil 
+	return c.StelloyEff1~=nil 
 end
 function c26063002.xmtg(e,c)
 	local ec,tp=e:GetHandler(),e:GetHandlerPlayer()
 	if Duel.IsPlayerAffectedByEffect(tp,26068010) and c:IsType(TYPE_EFFECT) then return c==e:GetHandler() end
-	if ec.StelloyEff1~=nil and ec:IsGeminiStatus() then
-	return ec.ovmtg(e,c) end
+	return ec.StelloyEff1~=nil and ec.ovmtg(e,c)
 end
 function c26063002.protval(e,te)
 	local tc=te:GetHandler()
@@ -110,17 +109,18 @@ function c26063002.gemini(e)
 	local c=e:GetHandler()
 	return c:IsLocation(LOCATION_HAND) or not c:IsGeminiStatus()
 end
-function c26063002.gfilter(c)
-	return c:IsSummonable(true,nil) and c:IsType(TYPE_NORMAL)
+function c26063002.gfilter(c,tp)
+	return c:IsSummonable(true,nil)
+	and c:IsType(TYPE_NORMAL)
+	and (c:IsOnField() or Duel.GetLocationCount(tp,LOCATION_MZONE)>0)
 end
 function c26063002.gtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and Duel.IsExistingMatchingCard(c26063002.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26063002.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,0,0)
 end
 function c26063002.gop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SUMMON)
-	local g=Duel.SelectMatchingCard(tp,c26063002.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,c26063002.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,1,nil,tp)
 	local tc=g:GetFirst()
 	if tc then
 		Duel.Summon(tp,tc,true,nil)

@@ -16,7 +16,6 @@ function c26064012.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e2:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_DRAW)
-	e2:SetCost(c26064012.drcost)
 	e2:SetTarget(c26064012.drtg)
 	e2:SetOperation(c26064012.drop)
 	c:RegisterEffect(e2)
@@ -42,7 +41,7 @@ function c26064012.filter(c,e,tp)
 end
 function c26064012.fliptg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chkc then return chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) and c26064012.filter(chkc) end
-	if chk==0 or chk==2 then return Duel.IsExistingTarget(c26064012.filter,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
+	if chk==0 then return Duel.IsExistingTarget(c26064012.filter,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
 	local sg=Duel.SelectTarget(tp,c26064012.filter,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,sg,sg:GetCount(),0,0)
@@ -59,19 +58,12 @@ function c26064012.flipop(e,tp,eg,ep,ev,re,r,rp)
 			Duel.MoveToField(tc,tp,tp,LOCATION_SZONE,POS_FACEUP,true)
 		elseif tc:IsCode(26064007) then
 			Duel.ActivateFieldSpell(tc,e,tp,eg,ep,ev,re,r,rp)
-			tc:AddCounter(12,trn)
+			tc:AddCounter(0x1b,12,trn)
 		end
 	end
 end
 function c26064012.drfilter(c)
 	return c:IsSetCard(0x664) and c:IsAbleToHand()
-end
-function c26064012.drcost(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then 
-		if e:GetHandler():IsReason(REASON_RULE) then e:SetLabel(2)
-		else e:SetLabel(1) end
-		return true
-	end
 end
 function c26064012.rescon(sg,e,tp,mg)
 	return #sg:Filter(Card.IsLocation,nil,LOCATION_GRAVE)<2
@@ -80,7 +72,11 @@ end
 function c26064012.drtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsLocation(LOCATION_GRAVE) and c26064012.drfilter(chkc) end
 	local rg=Duel.GetMatchingGroup(c26064012.drfilter,tp,LOCATION_GRAVE+LOCATION_ONFIELD,0,nil)
-	if chk==0 then return aux.SelectUnselectGroup(rg,e,tp,1,2,c26064012.rescon,0) end
+	if chk==0 then 
+		if e:GetHandler():IsReason(REASON_RULE) then e:SetLabel(2)
+		else e:SetLabel(1) end
+		return aux.SelectUnselectGroup(rg,e,tp,1,1,c26064012.rescon,0)
+	end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_GRAVE)
 end
 function c26064012.drop(e,tp,eg,ep,ev,re,r,rp)

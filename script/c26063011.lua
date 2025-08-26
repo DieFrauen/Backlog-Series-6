@@ -27,6 +27,7 @@ function c26063011.initial_effect(c)
 	c:RegisterEffect(e2)
 	local e3=e2:Clone()
 	e3:SetDescription(aux.Stringid(26063011,1))
+	e3:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
 	e3:SetCategory(CATEGORY_DESTROY+CATEGORY_HANDES)
 	e3:SetTarget(c26063011.target2)
 	e3:SetOperation(c26063011.operation2)
@@ -34,6 +35,7 @@ function c26063011.initial_effect(c)
 	local e4=e2:Clone()
 	e4:SetDescription(aux.Stringid(26063011,2))
 	e4:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_LEAVE_GRAVE)
+	e4:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
 	e4:SetTarget(c26063011.target3)
 	e4:SetOperation(c26063011.operation3)
 	c:RegisterEffect(e4)
@@ -43,42 +45,27 @@ function c26063011.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	local b2=c26063011.target2(e,tp,eg,ep,ev,re,r,rp,0)
 	local b3=c26063011.target3(e,tp,eg,ep,ev,re,r,rp,0)
 	if chk==0 then return true end
-	local ops={}
-	local opval={}
-		off=1
-		if b1 then
-			ops[off]=aux.Stringid(26063011,0)
-			opval[off-1]=1
-			off=off+1
-		end
-		if b2 then
-			ops[off]=aux.Stringid(26063011,1)
-			opval[off-1]=2
-			off=off+1
-		end
-		if b3 then
-			ops[off]=aux.Stringid(26063011,2)
-			opval[off-1]=3
-			off=off+1
-		end
-	local op=0
 	if (b1 or b2 or b3) and Duel.SelectYesNo(tp,94) then
-		op=Duel.SelectOption(tp,table.unpack(ops))
-		if opval[op]==1 then
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SELECT)
+		local op=Duel.SelectEffect(tp,
+			{b1,aux.Stringid(26063011,0)},
+			{b2,aux.Stringid(26063011,1)},
+			{b3,aux.Stringid(26063011,2)})
+		if op==1 then
 			e:SetCategory(CATEGORY_TOGRAVE+CATEGORY_DECKDES)
 			e:SetProperty(0)
 			e:SetOperation(c26063011.operation1)
 			c26063011.target1(e,tp,eg,ep,ev,re,r,rp,1)
 		end
-		if opval[op]==2 then
+		if op==2 then
 			e:SetCategory(CATEGORY_DESTROY+CATEGORY_HANDES)
-			e:SetProperty(0)
+			e:SetProperty(EFFECT_FLAG_CARD_TARGET)
 			e:SetOperation(c26063011.operation2)
 			c26063011.target2(e,tp,eg,ep,ev,re,r,rp,1)
 		end
-		if opval[op]==3 then
+		if op==3 then
 			e:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_LEAVE_GRAVE)
-			e:SetProperty(0)
+			e:SetProperty(EFFECT_FLAG_CARD_TARGET)
 			e:SetOperation(c26063011.operation3)
 			c26063011.target3(e,tp,eg,ep,ev,re,r,rp,1)
 		end
@@ -89,7 +76,7 @@ function c26063011.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	end
 end
 function c26063011.actfilter(c)
-	return c:IsType(TYPE_MONSTER) and not c:IsType(TYPE_EFFECT) and c:IsFaceup() and c:IsSummonType(SUMMON_TYPE_NORMAL)
+	return c:IsType(TYPE_MONSTER) and not c:IsType(TYPE_EFFECT) and c:IsFaceup()
 end
 function c26063011.actcon(e,tp,eg,ep,ev,re,r,rp)
 	local cg=e:GetHandler():GetColumnGroup()
@@ -100,10 +87,10 @@ function c26063011.filter1(c)
 end
 function c26063011.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
-	if chk==0 then return Duel.IsExistingMatchingCard(c26063011.filter1,tp,LOCATION_DECK,0,1,nil) and c:GetFlagEffect(26063111)==0 and c:GetFlagEffect(26063211)==0 end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26063011.filter1,tp,LOCATION_DECK,0,1,nil) and c:GetFlagEffect(26063111)==0 and Duel.GetFlagEffect(tp,26063211)==0 end
 	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
 	c:RegisterFlagEffect(26063111,RESET_CHAIN,0,1)
-	c:RegisterFlagEffect(26063211,RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END,0,1)
+	Duel.RegisterFlagEffect(tp,26063211,RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END,0,1)
 end
 function c26063011.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.SelectMatchingCard(tp,c26063011.filter1,tp,LOCATION_DECK,0,1,1,nil)
@@ -120,14 +107,14 @@ function c26063011.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsOnField() and c26063011.filter2(chkc) and chkc~=c end
 	if chk==0 then return 
 		Duel.IsExistingTarget(c26063011.filter2,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,c) and
-		Duel.IsExistingMatchingCard(c26063011.cfilter2,tp,LOCATION_HAND,0,1,nil) and c:GetFlagEffect(26063111)==0  and c:GetFlagEffect(26063311)==0 end
+		Duel.IsExistingMatchingCard(c26063011.cfilter2,tp,LOCATION_HAND,0,1,nil) and c:GetFlagEffect(26063111)==0  and Duel.GetFlagEffect(tp,26063311)==0 end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 	local g=Duel.SelectTarget(tp,c26063011.filter2,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
 	Duel.SetChainLimit(c26063011.limit(g:GetFirst()))
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,0,tp,LOCATION_HAND)
 	c:RegisterFlagEffect(26063111,RESET_CHAIN,0,1)
-	c:RegisterFlagEffect(26063311,RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END,0,1)
+	Duel.RegisterFlagEffect(tp,26063311,RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END,0,1)
 end
 function c26063011.limit(c)
 	return  function (e,lp,tp)
@@ -154,12 +141,12 @@ function c26063011.filter3b(c)
 end
 function c26063011.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(c26063011.filter3a,tp,LOCATION_GRAVE,0,1,nil,e,tp) and Duel.IsExistingTarget(c26063011.filter3b,tp,LOCATION_MZONE,0,1,nil) and e:GetHandler():GetFlagEffect(26063111)==0 and e:GetHandler():GetFlagEffect(26063411)==0 end
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(c26063011.filter3a,tp,LOCATION_GRAVE,0,1,nil,e,tp) and Duel.IsExistingTarget(c26063011.filter3b,tp,LOCATION_MZONE,0,1,nil) and e:GetHandler():GetFlagEffect(26063111)==0 and Duel.GetFlagEffect(tp,26063411)==0 end
 	local g=Duel.SelectTarget(tp,c26063011.filter3b,tp,LOCATION_MZONE,0,1,99,nil)
 	Duel.SetPossibleOperationInfo(0,CATEGORY_TOGRAVE,g,#g,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,0,0)
 	c:RegisterFlagEffect(26063111,RESET_CHAIN,0,1)
-	c:RegisterFlagEffect(26063411,RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END,0,1)
+	Duel.RegisterFlagEffect(tp,26063411,RESET_EVENT|RESETS_STANDARD|RESET_PHASE|PHASE_END,0,1)
 end
 function c26063011.operation3(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS)

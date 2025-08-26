@@ -1,27 +1,18 @@
 --Astelloy Noble Guild
 function c26063009.initial_effect(c)
-	--Activate (no effect)
-	local e0=Effect.CreateEffect(c)
-	e0:SetType(EFFECT_TYPE_ACTIVATE)
-	e0:SetCode(EVENT_FREE_CHAIN)
-	e0:SetDescription(7)
-	c:RegisterEffect(e0)
 	--Activate
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(26063009,0))
-	e1:SetCategory(CATEGORY_HANDES+CATEGORY_DRAW)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetCountLimit(1,26063009,EFFECT_COUNT_CODE_OATH)
 	e1:SetTarget(c26063009.target)
-	e1:SetOperation(c26063009.activate)
 	c:RegisterEffect(e1)
 	--normal summon normal monster
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(26063009,1))
 	e2:SetCategory(CATEGORY_SUMMON)
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e2:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY+EFFECT_FLAG_BOTH_SIDE)
+	e2:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
 	e2:SetRange(LOCATION_FZONE)
 	e2:SetCode(EVENT_SUMMON_SUCCESS)
 	e2:SetCondition(c26063009.gcond)
@@ -34,6 +25,7 @@ function c26063009.initial_effect(c)
 	e3:SetDescription(aux.Stringid(26063009,2))
 	e3:SetType(EFFECT_TYPE_IGNITION)
 	e3:SetRange(LOCATION_GRAVE)
+	e3:SetCountLimit(1,26063009)
 	e3:SetCost(c26063009.tdcost)
 	e3:SetTarget(c26063009.tdtg)
 	e3:SetOperation(c26063009.tdop)
@@ -51,7 +43,8 @@ function c26063009.initial_effect(c)
 	local e4b=e4:Clone()
 	e4b:SetCode(EFFECT_CANNOT_DISABLE)
 	e4b:SetTargetRange(LOCATION_ONFIELD+LOCATION_GRAVE,LOCATION_ONFIELD+LOCATION_GRAVE)
-	e4b:SetValue(c26063009.effilter2)
+	e4b:SetTarget(c26063009.effilter2)
+	e4b:SetValue(1)
 	c:RegisterEffect(e4b)
 end
 function c26063009.dfilter(c)
@@ -59,10 +52,20 @@ function c26063009.dfilter(c)
 end
 function c26063009.target(e,tp,eg,ep,ev,re,r,rp,chk)
 	local cg=Duel.GetMatchingGroup(nil,tp,LOCATION_HAND,0,nil)
-	if chk==0 then return #cg>0 and Duel.IsPlayerCanDraw(tp,#cg) end
-	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,#cg)
+	if chk==0 then return true end
+	if #cg>0 and Duel.GetFlagEffect(tp,26063009)==0 and Duel.IsPlayerCanDraw(tp,#cg-1) then
+		Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,#cg-1)
+		e:SetOperation(c26063009.activate)
+		e:SetCategory(CATEGORY_DRAW+CATEGORY_HANDES)
+	else
+		e:SetOperation(nil)
+		e:SetCategory(0)
+	end
 end
 function c26063009.activate(e,tp,eg,ep,ev,re,r,rp)
+	if Duel.GetFlagEffect(tp,26063009)==0 and Duel.SelectYesNo(tp,aux.Stringid(26063009,0)) then
+		Duel.RegisterFlagEffect(tp,26063009,RESET_PHASE+PHASE_END,0,1)
+	else return end
 	local cg=Duel.GetMatchingGroup(Card.IsDiscardable,tp,LOCATION_HAND,0,nil)
 	if #cg<1 then return end
 	Duel.ConfirmCards(1-tp,cg)
@@ -79,32 +82,32 @@ end
 function c26063009.gcond(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(c26063009.cfilter,1,nil,tp)
 end
-function c26063009.filter(c,cd)
-	return c:IsSummonable(true,nil) and c:GetLevel()&cd:GetLevel()~=0
+function c26063009.sumfilter(c,tp,tc)
+	return c:IsSummonable(true,nil)
+	and (c:IsOnField() or Duel.GetLocationCount(tp,LOCATION_MZONE)>0)
+	and c:IsAttribute(tc:GetAttribute()) and c:IsRace(tc:GetRace())
 end
 function c26063009.gtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	e:SetLabelObject(eg:GetFirst())
-	local cd=e:GetLabelObject()
-	if chk==0 then return (Duel.GetLocationCount(ep,LOCATION_MZONE)>0 and 
-		Duel.IsExistingMatchingCard(c26063009.filter,ep,LOCATION_HAND+LOCATION_MZONE,0,1,nil,cd))
-	or 
-		Duel.IsExistingMatchingCard(c26063009.filter,ep,LOCATION_MZONE,0,1,nil,cd)
+	local tc=eg:GetFirst()
+	if chk==0 then return tc:IsCanBeEffectTarget(e) and Duel.IsExistingMatchingCard(c26063009.sumfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil,tp,tc)
 	end
+	Duel.SetTargetCard(tc)
 	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,0,0)
 end
 function c26063009.gop(e,tp,eg,ep,ev,re,r,rp)
-	local cd=e:GetLabelObject()
+	local tc=Duel.GetFirstTarget()
+	if not tc:IsRelateToEffect(e) then return end
 	Duel.Hint(HINT_SELECTMSG,ep,HINTMSG_SUMMON)
-	local g=Duel.SelectMatchingCard(ep,c26063009.filter,ep,LOCATION_HAND+LOCATION_MZONE,0,1,1,nil,cd)
-	local tc=g:GetFirst()
-	if tc then
-		Duel.Summon(ep,tc,true,nil)
+	local g=Duel.SelectMatchingCard(tp,c26063009.sumfilter,ep,LOCATION_HAND+LOCATION_MZONE,0,1,1,nil,tp,tc)
+	local sc=g:GetFirst()
+	if sc then
+		Duel.Summon(tp,sc,true,nil)
 	end
 end
 function c26063009.effilter(e,ct)
 	local te,tl=Duel.GetChainInfo(ct,CHAININFO_TRIGGERING_EFFECT,CHAININFO_TRIGGERING_LOCATION)
 	local tc=te:GetHandler()
-	return tc:IsSetCard(0x663) and tc:IsType(TYPE_MONSTER) and tl&(LOCATION_ONFIELD+LOCATION_GRAVE)~=0
+	return tc:IsSetCard(0x663) and te:IsActiveType(TYPE_MONSTER) and tl&(LOCATION_ONFIELD+LOCATION_GRAVE)~=0
 end
 function c26063009.effilter2(e,c)
 	return c:IsSetCard(0x663) and c:IsType(TYPE_MONSTER)

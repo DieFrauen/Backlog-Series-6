@@ -62,12 +62,13 @@ function c26067010.redir2(e,tp,eg,ep,ev,re,r,rp)
 	local tc=e:GetLabelObject()
 	local lab=e:GetLabel()
 	local dg=Duel.GetFieldGroup(tp,0,LOCATION_DECK)
-	local dc=Duel.GetFieldCard(1-tp,LOCATION_DECK,#dg-1)
+	local dc=Duel.GetDecktopGroup(1-tp,1):GetFirst()
 	if tc and dc~=tc and #dg~=lab and dg:IsContains(tc) then
 		Duel.Hint(HINT_CARD,1-tp,26067010)
-		Duel.MoveSequence(e:GetLabelObject(),#dg-1)
+		Duel.MoveToDeckTop(tc)
+		tc:ReverseInDeck()
 	else
-		nc=Duel.GetDecktopGroup(1-tp,1):GetFirst()
+		local nc=Duel.GetDecktopGroup(1-tp,1):GetFirst()
 		if nc and nc:IsSetCard(0x667) and nc:GetOwner()==tp and nc:IsFaceup() then
 			e:SetLabelObject(nc)
 			e:SetLabel(#dg)

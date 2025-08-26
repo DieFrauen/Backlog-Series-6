@@ -50,12 +50,6 @@ function c26063004.initial_effect(c)
 	e3:SetCondition(Gemini.EffectStatusCondition)
 	e3:SetValue(1)
 	c:RegisterEffect(e3)
-	local e4=e3:Clone()
-	e4:SetCode(EFFECT_CANNOT_REMOVE)
-	e4:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-	e4:SetTargetRange(1,1)
-	e4:SetTarget(c26063004.rmlimit)
-	--c:RegisterEffect(e4)
 	--material effects
 		local e3m=Effect.CreateEffect(c)
 		e3m:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_FIELD)
@@ -63,12 +57,8 @@ function c26063004.initial_effect(c)
 		e3m:SetCondition(c26063004.xmcond)
 		e3m:SetTargetRange(LOCATION_MZONE,0)
 		e3m:SetTarget(c26063004.xmtg)
+		e3m:SetValue(1)
 		c:RegisterEffect(e3m)
-		local e4m=e3m:Clone()
-		e4m:SetCode(EFFECT_CANNOT_REMOVE)
-		e4m:SetTargetRange(1,1)
-		e4m:SetTarget(c26063004.rmlimit)
-		--c:RegisterEffect(e4m)
 	--normal summon
 	local e5=Effect.CreateEffect(c)
 	e5:SetDescription(aux.Stringid(26063004,0))
@@ -84,7 +74,7 @@ function c26063004.initial_effect(c)
 	e6:SetDescription(aux.Stringid(26063004,1))
 	e6:SetCategory(CATEGORY_TOHAND+CATEGORY_TOGRAVE)
 	e6:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e6:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
+	e6:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
 	e6:SetCode(EVENT_SUMMON_SUCCESS)
 	e6:SetCountLimit(1,26063004)
 	e6:SetCondition(Gemini.EffectStatusCondition)
@@ -101,39 +91,36 @@ end
 function c26063004.xmcond(e,tp,eg,ep,ev,re,r,rp)
 	local c,tp=e:GetHandler(),e:GetHandlerPlayer()
 	if Duel.IsPlayerAffectedByEffect(tp,26068010) and c:IsType(TYPE_EFFECT) then return c==e:GetHandler() end
-	return c:IsGeminiStatus() and c.StelloyEff1~=nil 
+	return c.StelloyEff1~=nil 
 end
 function c26063004.xmtg(e,c)
 	local ec,tp=e:GetHandler(),e:GetHandlerPlayer()
 	if Duel.IsPlayerAffectedByEffect(tp,26068010) and c:IsType(TYPE_EFFECT) then return c==e:GetHandler() end
-	if ec:IsGeminiStatus() and ec.StelloyEff1~=nil then
-	return ec.ovmtg(e,c) end
-end
-function c26063004.rmlimit(e,c,tp,r)
-	return r==REASON_EFFECT 
+	return ec.StelloyEff1~=nil and ec.ovmtg(e,c)
 end
 function c26063004.gemini(e)
 	local c=e:GetHandler()
 	return c:IsLocation(LOCATION_HAND) or Gemini.NormalStatusCondition(e) 
 end
-function c26063004.gfilter(c)
-	return c:IsSummonable(true,nil) and c:IsType(TYPE_NORMAL)
+function c26063004.gfilter(c,tp)
+	return c:IsSummonable(true,nil)
+	and c:IsType(TYPE_NORMAL)
+	and (c:IsOnField() or Duel.GetLocationCount(tp,LOCATION_MZONE)>0)
 end
 function c26063004.gtg(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and Duel.IsExistingMatchingCard(c26063004.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c26063004.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_SUMMON,nil,1,0,0)
 end
 function c26063004.gop(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SUMMON)
-	local g=Duel.SelectMatchingCard(tp,c26063004.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,c26063004.gfilter,tp,LOCATION_HAND+LOCATION_MZONE,0,1,1,nil,tp)
 	local tc=g:GetFirst()
 	if tc then
 		Duel.Summon(tp,tc,true,nil)
 	end
 end
 function c26063004.filter(c)
-	return c:IsSetCard(0x663) and not c:IsCode(26063004) and c:IsAbleToHand()
+	return c:IsSetCard(0x663) and c:IsMonster() and c:IsAbleToHand()
 end
 function c26063004.target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsControler(tp) and chkc:IsLocation(LOCATION_GRAVE) and c26063004.filter(chkc) end
